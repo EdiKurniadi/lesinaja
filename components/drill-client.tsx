@@ -4,12 +4,12 @@ import { useEffect, useMemo, useState } from "react";
 import { ArrowLeft, ArrowRight, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select";
-import { Progress } from "@/components/ui/progress";
 import { DRILL_PACKAGES, categoryTopics, getDrillPackage, getQuestion } from "@/lib/content";
 import { bestScore, choiceScore } from "@/lib/scoring";
 import { updateLearningState } from "@/lib/storage";
-import type { ActiveSession, Category, DrillPackage } from "@/lib/types";
+import type { ActiveSession, Category, DrillPackage, Question } from "@/lib/types";
 import { useLearningState } from "@/hooks/use-learning-state";
+import { ExamShell, useExamKeyboard } from "./exam-shell";
 import { QuestionCard } from "./question-card";
 
 export function DrillClient() {
@@ -29,9 +29,10 @@ export function DrillClient() {
     setTopic(requestedTopic && topics.includes(requestedTopic) ? requestedTopic : topics[0]);
   }, []);
 
-  const questions = useMemo(() => session?.questionIds.map(getQuestion).filter(Boolean) ?? [], [session]) as ReturnType<typeof getQuestion>[];
+  const questions = useMemo(() => session?.questionIds.map(getQuestion).filter((question): question is Question => Boolean(question)) ?? [], [session]);
   const current = session ? questions[session.currentIndex] : undefined;
   const answered = session ? Object.keys(session.answers).length : 0;
+  const selectedId = session && current ? session.answers[current.id] : undefined;
 
   function start(drillPackage: DrillPackage) {
     const next: ActiveSession = {
@@ -67,7 +68,7 @@ export function DrillClient() {
   }
 
   function move(index: number) {
-    updateLearningState((learning) => learning.activeDrill ? { ...learning, activeDrill: { ...learning.activeDrill, currentIndex: index } } : learning);
+    updateLearningState((learning) => learning.activeDrill ? { ...learning, activeDrill: { ...learning.activeDrill, currentIndex: Math.min(Math.max(index, 0), questions.length - 1) } } : learning);
   }
 
   function finish() {
@@ -77,6 +78,14 @@ export function DrillClient() {
     setSummary({ earned, possible, total: questions.length, packageTitle: session.packageId ? getDrillPackage(session.packageId)?.title ?? "Paket drill" : "Paket drill" });
     updateLearningState((learning) => ({ ...learning, activeDrill: null }));
   }
+
+  useExamKeyboard({
+    currentIndex: session?.currentIndex ?? 0,
+    questions,
+    onMove: move,
+    onSelect: select,
+    canMoveNext: Boolean(selectedId),
+  });
 
   if (summary && !session) {
     const percentage = summary.possible ? Math.round((summary.earned / summary.possible) * 100) : 0;
@@ -144,26 +153,31 @@ export function DrillClient() {
     );
   }
 
-  const selectedId = session.answers[current.id];
   return (
-    <section className="border-b border-black">
-      <div className="flex flex-wrap items-center justify-between gap-4 border-b border-black bg-white p-4 sm:px-7">
-        <div className="min-w-[180px] flex-1"><Progress value={(answered / questions.length) * 100} className="h-2 rounded-none border border-black bg-white" /></div>
-        <span className="font-mono text-xs font-bold">{answered}/{questions.length} DIJAWAB</span>
-      </div>
-      <div className="mx-auto max-w-4xl p-5 sm:p-8 lg:p-12">
-        <p className="mb-2 font-bold uppercase">{session.packageId ? getDrillPackage(session.packageId)?.title : current.topic}</p>
-        <p className="mb-6 font-mono text-xs uppercase tracking-[.14em]">Soal {session.currentIndex + 1} / {questions.length}</p>
-        <QuestionCard question={current} selectedId={selectedId} onSelect={select} reveal={Boolean(selectedId)} />
-        <div className="mt-8 flex items-center justify-between gap-3 border-t border-black pt-6">
-          <Button variant="outline" className="h-11 rounded-none border-black" disabled={session.currentIndex === 0} onClick={() => move(session.currentIndex - 1)}><ArrowLeft /> Sebelumnya</Button>
+    <ExamShell
+      eyebrow="Mode drill"
+      title={session.packageId ? getDrillPackage(session.packageId)?.title ?? current.topic : current.topic}
+      session={session}
+      questions={questions}
+      answered={answered}
+      onMove={move}
+      footer={
+        <div className="mx-auto flex max-w-5xl items-center justify-between gap-2">
+          <Button variant="outline" className="h-11 rounded-none border-black px-3 sm:px-5" aria-keyshortcuts="ArrowLeft" disabled={session.currentIndex === 0} onClick={() => move(session.currentIndex - 1)}><ArrowLeft /><span className="hidden min-[380px]:inline">Sebelumnya</span></Button>
+          <span className="font-mono text-xs font-bold">{session.currentIndex + 1} / {questions.length}</span>
           {session.currentIndex === questions.length - 1 ? (
-            <Button className="h-11 rounded-none" disabled={answered < questions.length} onClick={finish}>Selesai</Button>
+            <Button className="h-11 rounded-none px-3 sm:px-5" disabled={answered < questions.length} onClick={finish}>Selesaikan paket</Button>
           ) : (
-            <Button className="h-11 rounded-none" disabled={!selectedId} onClick={() => move(session.currentIndex + 1)}>Berikutnya <ArrowRight /></Button>
+            <Button className="h-11 rounded-none px-3 sm:px-5" aria-keyshortcuts="ArrowRight" disabled={!selectedId} onClick={() => move(session.currentIndex + 1)}><span className="hidden min-[380px]:inline">Berikutnya</span><ArrowRight /></Button>
           )}
         </div>
+      }
+    >
+      <div className="mb-4 flex items-center justify-between gap-3">
+        <p className="font-mono text-xs font-bold uppercase tracking-[.14em]">Soal {session.currentIndex + 1} / {questions.length}</p>
+        <p className="hidden font-mono text-[10px] uppercase text-muted-foreground sm:block">Pilih A–E · ← → navigasi</p>
       </div>
-    </section>
+        <QuestionCard question={current} selectedId={selectedId} onSelect={select} reveal={Boolean(selectedId)} />
+    </ExamShell>
   );
 }

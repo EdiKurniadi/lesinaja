@@ -19,13 +19,13 @@ export function QuestionCard({
   const selectedScore = choiceScore(question, selectedId);
   const maximum = bestScore(question);
   return (
-    <article>
-      <div className="mb-5 flex flex-wrap items-center gap-2 font-mono text-xs font-bold uppercase tracking-[.12em]">
+    <article className="mx-auto max-w-3xl">
+      <div className="mb-3 flex flex-wrap items-center gap-2 font-mono text-[11px] font-bold uppercase tracking-[.12em] sm:mb-4 sm:text-xs">
         <span className="bg-black px-2 py-1 text-white">{question.category}</span>
         <span>{question.topic}</span>
       </div>
-      <h2 className="text-xl font-bold leading-snug sm:text-2xl">{question.prompt}</h2>
-      <div className="mt-7 grid gap-3" role="radiogroup" aria-label="Pilihan jawaban">
+      <h2 tabIndex={-1} data-exam-question-heading className="text-lg font-bold leading-snug outline-none sm:text-xl lg:text-2xl">{question.prompt}</h2>
+      <div className="mt-4 grid gap-2 sm:mt-5 sm:gap-3" role="radiogroup" aria-label="Pilihan jawaban">
         {question.choices.map((choice, index) => {
           const selected = selectedId === choice.id;
           const best = choice.score === maximum;
@@ -38,9 +38,10 @@ export function QuestionCard({
               variant="outline"
               role="radio"
               aria-checked={selected}
+              aria-keyshortcuts={String.fromCharCode(65 + index)}
               onClick={() => onSelect(choice.id)}
               disabled={reveal}
-              className={`h-auto min-h-14 justify-start whitespace-normal rounded-none border-black px-4 py-3 text-left text-base shadow-none disabled:pointer-events-none disabled:opacity-100 ${selected ? "bg-black text-white" : "bg-white"} ${showBest ? "bg-signal text-black" : ""}`}
+              className={`h-auto min-h-12 justify-start whitespace-normal rounded-none border-black px-3 py-2.5 text-left text-base leading-snug shadow-none disabled:pointer-events-none disabled:opacity-100 sm:px-4 ${selected ? "bg-black text-white" : "bg-white"} ${showBest ? "bg-signal text-black" : ""}`}
             >
               <span className={`flex h-7 w-7 shrink-0 items-center justify-center border ${selected || showBest ? "border-current" : "border-black"}`}>{String.fromCharCode(65 + index)}</span>
               <span className="flex-1">{choice.label}</span>
@@ -51,7 +52,7 @@ export function QuestionCard({
         })}
       </div>
       {reveal && selectedId && (
-        <div className="mt-6 border border-black bg-secondary p-5" aria-live="polite">
+        <div className="mt-4 border border-black bg-secondary p-4 sm:mt-5" aria-live="polite">
           <p className="font-mono text-xs font-bold uppercase tracking-[.14em]">Skor {selectedScore}/{maximum}</p>
           <p className="mt-2 leading-relaxed">{question.explanation}</p>
         </div>
