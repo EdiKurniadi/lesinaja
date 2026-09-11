@@ -7,6 +7,7 @@ const nav = [
   ["/drill", "Drill"],
   ["/tryout", "Try out"],
   ["/materi", "Materi"],
+  ["/les-privat", "Les Privat"],
   ["/progres", "Progres"],
 ] as const;
 

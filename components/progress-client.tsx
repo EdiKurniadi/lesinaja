@@ -26,7 +26,7 @@ export function ProgressClient() {
       </div>
 
       <div className="grid border-b border-black lg:grid-cols-[240px_1fr]">
-        <div className="border-b border-black bg-signal p-5 lg:border-b-0 lg:border-r sm:p-7"><p className="font-mono text-xs uppercase tracking-[.14em]">Drill</p><h2 className="mt-3 text-3xl font-black">PER KATEGORI</h2></div>
+        <div className="border-b border-black bg-brand-blue p-5 text-white lg:border-b-0 lg:border-r sm:p-7"><p className="font-mono text-xs uppercase tracking-[.14em]">Drill</p><h2 className="mt-3 text-3xl font-black">PER KATEGORI</h2></div>
         <div className="grid md:grid-cols-3">
           {CATEGORIES.map((category) => {
             const categoryQuestions = DRILL_QUESTIONS.filter((question) => question.category === category);

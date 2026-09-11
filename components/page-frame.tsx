@@ -7,7 +7,7 @@ export function PageFrame({ eyebrow, title, description, children }: { eyebrow: 
       <SiteHeader />
       <div className="page-shell border-x border-black">
         <header className="grid border-b border-black lg:grid-cols-[220px_1fr]">
-          <div className="flex items-end border-b border-black bg-signal p-5 lg:border-b-0 lg:border-r lg:p-7">
+          <div className="flex items-end border-b border-black bg-brand-red p-5 text-white lg:border-b-0 lg:border-r lg:p-7">
             <p className="font-mono text-xs font-bold uppercase tracking-[.16em]">{eyebrow}</p>
           </div>
           <div className="p-5 sm:p-8 lg:p-10">

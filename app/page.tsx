@@ -13,7 +13,7 @@ export default function Home() {
         <div className="grid min-h-[520px] lg:grid-cols-[1.35fr_.65fr]">
           <div className="flex flex-col justify-between border-b border-black p-5 sm:p-8 lg:border-b-0 lg:border-r lg:p-12">
             <div className="flex items-center gap-3 text-sm font-bold uppercase tracking-[.16em]">
-              <span className="inline-block h-3 w-3 bg-signal" />
+              <span className="inline-block h-3 w-3 bg-brand-red" />
               Persiapan SKD CPNS
             </div>
             <div className="py-16 lg:py-24">
@@ -27,7 +27,7 @@ export default function Home() {
             </p>
           </div>
 
-          <aside className="flex flex-col bg-signal">
+          <aside className="flex flex-col bg-brand-blue text-white">
             <div className="border-b border-black p-5 sm:p-8">
               <p className="font-mono text-xs uppercase tracking-[.18em]">Mulai dari sini</p>
               <h2 className="mt-5 text-4xl font-black leading-none tracking-[-.045em] sm:text-5xl">PILIH<br />MODEMU.</h2>
