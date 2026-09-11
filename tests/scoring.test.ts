@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { EXAM_PACKAGES, validateContent } from "../lib/content";
+import { DRILL_PACKAGES, EXAM_PACKAGES, validateContent } from "../lib/content";
 import { EXAM_RULES } from "../lib/exam-rules";
 import { scoreAttempt } from "../lib/scoring";
 
@@ -16,6 +16,20 @@ test("seluruh bank soal memenuhi kontrak konten", () => {
     assert.equal(examPackage.questions.filter((question) => question.category === "TIU").length, 35);
     assert.equal(examPackage.questions.filter((question) => question.category === "TKP").length, 45);
   }
+});
+
+test("setiap topik drill memiliki dua paket tetap berisi 10 soal", () => {
+  assert.equal(DRILL_PACKAGES.length, 24);
+  const groups = new Map<string, typeof DRILL_PACKAGES>();
+  for (const drillPackage of DRILL_PACKAGES) {
+    assert.equal(drillPackage.questions.length, 10);
+    assert.ok(drillPackage.questions.every((question) => question.category === drillPackage.category && question.topic === drillPackage.topic));
+    const key = `${drillPackage.category}:${drillPackage.topic}`;
+    groups.set(key, [...(groups.get(key) ?? []), drillPackage]);
+  }
+  assert.equal(groups.size, 12);
+  assert.ok([...groups.values()].every((packages) => packages.length === 2));
+  assert.equal(new Set(DRILL_PACKAGES.flatMap((item) => item.questions.map((question) => question.id))).size, 240);
 });
 
 test("jawaban sempurna menghasilkan skor maksimum 550", () => {

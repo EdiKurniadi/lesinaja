@@ -1,9 +1,9 @@
 "use client";
 
 import { useEffect } from "react";
-import { DRILL_QUESTIONS, getPackage } from "@/lib/content";
+import { DRILL_PACKAGES, getDrillPackage, getPackage } from "@/lib/content";
 import { readLearningState, updateLearningState } from "@/lib/storage";
-import type { ActiveSession, Category } from "@/lib/types";
+import type { ActiveSession } from "@/lib/types";
 
 type ToolDefinition = {
   name: string;
@@ -30,18 +30,17 @@ export function WebMcpBridge() {
     void register({
       name: "start_drill",
       title: "Mulai drill SKD",
-      description: "Memulai sesi drill baru dan membuka halaman drill.",
-      inputSchema: { type: "object", properties: { category: { type: "string", enum: ["TWK", "TIU", "TKP"] }, topic: { type: "string" }, count: { type: "integer", enum: [10, 20] } }, required: ["category", "count"], additionalProperties: false },
+      description: "Memulai paket drill bertopik yang berisi 10 soal tetap dan membuka halaman drill.",
+      inputSchema: { type: "object", properties: { packageId: { type: "string", enum: DRILL_PACKAGES.map((item) => item.id) } }, required: ["packageId"], additionalProperties: false },
       annotations: { readOnlyHint: false, untrustedContentHint: false },
       execute(input) {
-        const value = input as { category?: Category; topic?: string; count?: number };
-        if (!value || !["TWK", "TIU", "TKP"].includes(value.category ?? "") || ![10, 20].includes(value.count ?? 0)) throw new Error("Kategori atau jumlah soal tidak valid.");
-        const pool = DRILL_QUESTIONS.filter((question) => question.category === value.category && (!value.topic || question.topic === value.topic));
-        if (!pool.length) throw new Error("Topik tidak ditemukan.");
-        const session: ActiveSession = { id: `drill-${Date.now()}`, kind: "drill", questionIds: pool.slice(0, Math.min(value.count!, pool.length)).map((question) => question.id), answers: {}, flagged: [], currentIndex: 0, startedAt: Date.now() };
+        const packageId = (input as { packageId?: string })?.packageId;
+        const drillPackage = packageId ? getDrillPackage(packageId) : undefined;
+        if (!drillPackage) throw new Error("Paket drill tidak valid.");
+        const session: ActiveSession = { id: `drill-${drillPackage.id}-${Date.now()}`, kind: "drill", packageId: drillPackage.id, questionIds: drillPackage.questions.map((question) => question.id), answers: {}, flagged: [], currentIndex: 0, startedAt: Date.now() };
         updateLearningState((state) => ({ ...state, activeDrill: session }));
         window.location.assign("/drill");
-        return { status: "started", sessionId: session.id, questionCount: session.questionIds.length };
+        return { status: "started", sessionId: session.id, packageId: drillPackage.id, title: drillPackage.title, questionCount: session.questionIds.length };
       },
     });
 

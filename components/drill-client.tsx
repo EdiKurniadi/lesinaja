@@ -5,44 +5,40 @@ import { ArrowLeft, ArrowRight, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select";
 import { Progress } from "@/components/ui/progress";
-import { DRILL_QUESTIONS, categoryTopics, getQuestion } from "@/lib/content";
+import { DRILL_PACKAGES, categoryTopics, getDrillPackage, getQuestion } from "@/lib/content";
 import { bestScore, choiceScore } from "@/lib/scoring";
 import { updateLearningState } from "@/lib/storage";
-import type { ActiveSession, Category } from "@/lib/types";
+import type { ActiveSession, Category, DrillPackage } from "@/lib/types";
 import { useLearningState } from "@/hooks/use-learning-state";
 import { QuestionCard } from "./question-card";
-
-function shuffled<T>(items: T[]): T[] {
-  return [...items].sort(() => Math.random() - 0.5);
-}
 
 export function DrillClient() {
   const state = useLearningState();
   const [category, setCategory] = useState<Category>("TWK");
-  const [topic, setTopic] = useState("all");
-  const [count, setCount] = useState(10);
-  const [summary, setSummary] = useState<{ earned: number; possible: number; total: number } | null>(null);
+  const [topic, setTopic] = useState("Pancasila");
+  const [summary, setSummary] = useState<{ earned: number; possible: number; total: number; packageTitle: string } | null>(null);
   const session = state.activeDrill;
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const requestedCategory = params.get("category");
-    if (["TWK", "TIU", "TKP"].includes(requestedCategory ?? "")) setCategory(requestedCategory as Category);
+    const nextCategory = ["TWK", "TIU", "TKP"].includes(requestedCategory ?? "") ? requestedCategory as Category : "TWK";
+    setCategory(nextCategory);
     const requestedTopic = params.get("topic");
-    if (requestedTopic) setTopic(requestedTopic);
+    const topics = categoryTopics(nextCategory);
+    setTopic(requestedTopic && topics.includes(requestedTopic) ? requestedTopic : topics[0]);
   }, []);
 
   const questions = useMemo(() => session?.questionIds.map(getQuestion).filter(Boolean) ?? [], [session]) as ReturnType<typeof getQuestion>[];
   const current = session ? questions[session.currentIndex] : undefined;
   const answered = session ? Object.keys(session.answers).length : 0;
 
-  function start() {
-    const pool = DRILL_QUESTIONS.filter((question) => question.category === category && (topic === "all" || question.topic === topic));
-    const selected = shuffled(pool).slice(0, Math.min(count, pool.length));
+  function start(drillPackage: DrillPackage) {
     const next: ActiveSession = {
-      id: `drill-${Date.now()}`,
+      id: `drill-${drillPackage.id}-${Date.now()}`,
       kind: "drill",
-      questionIds: selected.map((question) => question.id),
+      packageId: drillPackage.id,
+      questionIds: drillPackage.questions.map((question) => question.id),
       answers: {},
       flagged: [],
       currentIndex: 0,
@@ -78,7 +74,7 @@ export function DrillClient() {
     if (!session) return;
     const earned = questions.reduce((sum, question) => question ? sum + choiceScore(question, session.answers[question.id]) : sum, 0);
     const possible = questions.reduce((sum, question) => question ? sum + bestScore(question) : sum, 0);
-    setSummary({ earned, possible, total: questions.length });
+    setSummary({ earned, possible, total: questions.length, packageTitle: session.packageId ? getDrillPackage(session.packageId)?.title ?? "Paket drill" : "Paket drill" });
     updateLearningState((learning) => ({ ...learning, activeDrill: null }));
   }
 
@@ -88,6 +84,7 @@ export function DrillClient() {
       <section className="grid border-b border-black lg:grid-cols-[1fr_.65fr]">
         <div className="border-b border-black p-5 sm:p-8 lg:border-b-0 lg:border-r lg:p-10">
           <p className="font-mono text-xs uppercase tracking-[.14em]">Drill selesai</p>
+          <p className="mt-3 font-bold uppercase">{summary.packageTitle}</p>
           <p className="mt-5 text-7xl font-black tracking-[-.07em]">{percentage}%</p>
           <h2 className="mt-4 text-2xl font-bold">{summary.earned} dari {summary.possible} poin</h2>
           <p className="mt-2">Jawabanmu sudah masuk ke peta progres per topik.</p>
@@ -102,34 +99,46 @@ export function DrillClient() {
 
   if (!session || !current) {
     const topics = categoryTopics(category);
+    const packages = DRILL_PACKAGES.filter((item) => item.category === category && item.topic === topic);
     return (
       <section className="grid border-b border-black lg:grid-cols-[.7fr_1.3fr]">
         <div className="border-b border-black bg-black p-5 text-white sm:p-8 lg:border-b-0 lg:border-r lg:p-10">
           <p className="font-mono text-xs uppercase tracking-[.14em] text-signal">Atur sesi</p>
           <h2 className="mt-5 text-4xl font-black leading-none tracking-[-.05em]">KECIL.<br />FOKUS.<br />BERULANG.</h2>
-          <p className="mt-8 max-w-md leading-relaxed text-white/75">Setiap jawaban langsung diberi skor dan pembahasan. Hasilnya tersimpan otomatis di perangkat ini.</p>
+          <p className="mt-8 max-w-md leading-relaxed text-white/75">Setiap topik memiliki paket berisi 10 soal tetap. Pilih paket untuk mengulang set yang sama dan mengukur peningkatanmu.</p>
         </div>
         <div className="grid gap-6 p-5 sm:p-8 lg:p-10">
           <label className="grid gap-2 font-bold">Kategori
-            <NativeSelect value={category} onChange={(event) => { setCategory(event.target.value as Category); setTopic("all"); }} className="h-12 w-full rounded-none border-black bg-white text-base">
+            <NativeSelect value={category} onChange={(event) => { const next = event.target.value as Category; setCategory(next); setTopic(categoryTopics(next)[0]); }} className="h-12 w-full rounded-none border-black bg-white text-base">
               <NativeSelectOption value="TWK">TWK — Wawasan Kebangsaan</NativeSelectOption>
               <NativeSelectOption value="TIU">TIU — Intelegensia Umum</NativeSelectOption>
               <NativeSelectOption value="TKP">TKP — Karakteristik Pribadi</NativeSelectOption>
             </NativeSelect>
           </label>
           <label className="grid gap-2 font-bold">Topik
-            <NativeSelect value={topics.includes(topic) ? topic : "all"} onChange={(event) => setTopic(event.target.value)} className="h-12 w-full rounded-none border-black bg-white text-base">
-              <NativeSelectOption value="all">Semua topik</NativeSelectOption>
+            <NativeSelect value={topics.includes(topic) ? topic : topics[0]} onChange={(event) => setTopic(event.target.value)} className="h-12 w-full rounded-none border-black bg-white text-base">
               {topics.map((item) => <NativeSelectOption key={item} value={item}>{item}</NativeSelectOption>)}
             </NativeSelect>
           </label>
-          <fieldset>
-            <legend className="mb-2 font-bold">Jumlah soal</legend>
-            <div className="grid grid-cols-2 gap-3">
-              {[10, 20].map((value) => <Button key={value} type="button" variant="outline" aria-pressed={count === value} onClick={() => setCount(value)} className={`h-12 rounded-none border-black ${count === value ? "bg-signal" : "bg-white"}`}>{value} soal</Button>)}
+          <div>
+            <p className="mb-3 font-bold">Pilih paket</p>
+            <div className="grid gap-3 sm:grid-cols-2">
+              {packages.map((drillPackage) => {
+                const stats = drillPackage.questions.map((question) => state.drillStats[question.id]).filter(Boolean);
+                const earned = stats.reduce((sum, item) => sum + item.earned, 0);
+                const possible = stats.reduce((sum, item) => sum + item.possible, 0);
+                const percentage = possible ? Math.round((earned / possible) * 100) : 0;
+                return (
+                  <article key={drillPackage.id} className="border border-black bg-white p-5">
+                    <div className="flex items-start justify-between gap-4"><span className="font-mono text-xs">/{String(drillPackage.sequence).padStart(2, "0")}</span><span className="bg-secondary px-2 py-1 font-mono text-[10px] font-bold">10 SOAL</span></div>
+                    <h3 className="mt-7 text-2xl font-black tracking-[-.04em]">{drillPackage.title}</h3>
+                    <p className="mt-2 font-mono text-[11px] uppercase tracking-wider">{stats.length ? `${stats.length}/10 dicoba · ${percentage}%` : "Belum dikerjakan"}</p>
+                    <Button type="button" onClick={() => start(drillPackage)} className="mt-5 h-11 w-full rounded-none">Mulai paket <ArrowRight /></Button>
+                  </article>
+                );
+              })}
             </div>
-          </fieldset>
-          <Button onClick={start} className="mt-2 h-14 rounded-none text-base">Mulai drill <ArrowRight /></Button>
+          </div>
         </div>
       </section>
     );
@@ -143,6 +152,7 @@ export function DrillClient() {
         <span className="font-mono text-xs font-bold">{answered}/{questions.length} DIJAWAB</span>
       </div>
       <div className="mx-auto max-w-4xl p-5 sm:p-8 lg:p-12">
+        <p className="mb-2 font-bold uppercase">{session.packageId ? getDrillPackage(session.packageId)?.title : current.topic}</p>
         <p className="mb-6 font-mono text-xs uppercase tracking-[.14em]">Soal {session.currentIndex + 1} / {questions.length}</p>
         <QuestionCard question={current} selectedId={selectedId} onSelect={select} reveal={Boolean(selectedId)} />
         <div className="mt-8 flex items-center justify-between gap-3 border-t border-black pt-6">

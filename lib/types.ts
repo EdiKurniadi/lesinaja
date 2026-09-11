@@ -31,6 +31,15 @@ export interface ExamPackage {
   durationMinutes: number;
 }
 
+export interface DrillPackage {
+  id: string;
+  title: string;
+  category: Category;
+  topic: string;
+  sequence: number;
+  questions: Question[];
+}
+
 export interface ActiveSession {
   id: string;
   kind: "drill" | "tryout";

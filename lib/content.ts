@@ -1,5 +1,5 @@
 import { EXAM_RULES } from "./exam-rules";
-import type { Category, Choice, ExamPackage, Question } from "./types";
+import type { Category, Choice, DrillPackage, ExamPackage, Question } from "./types";
 
 type TwkSeed = [string, string, string[], string, string];
 
@@ -188,11 +188,37 @@ export const EXAM_PACKAGES: ExamPackage[] = [
   { id: "paket-b", title: "Paket B — Pemantapan", description: "Simulasi kedua dengan variasi konteks dan angka baru.", questions: packageB, durationMinutes: EXAM_RULES.durationMinutes },
 ];
 
-export const DRILL_QUESTIONS: Question[] = [
-  ...makeTwk("d", 3, 15),
-  ...makeTiu("d", 3).slice(0, 15).map((question, index) => ({ ...question, id: `d-tiu-${String(index + 1).padStart(2, "0")}` })),
-  ...makeTkp("d", 3).slice(0, 15).map((question, index) => ({ ...question, id: `d-tkp-${String(index + 1).padStart(2, "0")}` })),
+const DRILL_TOPICS: Record<Category, string[]> = {
+  TWK: ["Pancasila", "UUD 1945", "NKRI & Bhinneka", "Integritas & Bela Negara"],
+  TIU: ["Kemampuan Verbal", "Kemampuan Numerik", "Deret & Pola", "Logika Analitis"],
+  TKP: ["Pelayanan Publik", "Kerja Sama", "Teknologi Informasi", "Sosial Budaya"],
+};
+
+const drillSource: Question[] = [
+  ...[3, 4, 5].flatMap((variant) => makeTwk(`d${variant}`, variant)),
+  ...[3, 4, 5, 6].flatMap((variant) => makeTiu(`d${variant}`, variant)),
+  ...[3, 4, 5, 6, 7, 8, 9].flatMap((variant) => makeTkp(`d${variant}`, variant)),
 ];
+
+function topicSlug(topic: string): string {
+  return topic.toLowerCase().replace(/&/g, "dan").replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+}
+
+export const DRILL_PACKAGES: DrillPackage[] = (Object.entries(DRILL_TOPICS) as [Category, string[]][]).flatMap(
+  ([category, topics]) => topics.flatMap((topic) => {
+    const questions = drillSource.filter((question) => question.category === category && question.topic === topic).slice(0, 20);
+    return [1, 2].map((sequence) => ({
+      id: `${category.toLowerCase()}-${topicSlug(topic)}-${sequence}`,
+      title: `${topic} ${sequence}`,
+      category,
+      topic,
+      sequence,
+      questions: questions.slice((sequence - 1) * 10, sequence * 10),
+    }));
+  }),
+);
+
+export const DRILL_QUESTIONS: Question[] = DRILL_PACKAGES.flatMap((drillPackage) => drillPackage.questions);
 
 export const ALL_QUESTIONS = [...DRILL_QUESTIONS, ...packageA, ...packageB];
 const questionMap = new Map(ALL_QUESTIONS.map((question) => [question.id, question]));
@@ -205,8 +231,12 @@ export function getPackage(packageId: string): ExamPackage | undefined {
   return EXAM_PACKAGES.find((item) => item.id === packageId);
 }
 
+export function getDrillPackage(packageId: string): DrillPackage | undefined {
+  return DRILL_PACKAGES.find((item) => item.id === packageId);
+}
+
 export function categoryTopics(category: Category): string[] {
-  return [...new Set(DRILL_QUESTIONS.filter((question) => question.category === category).map((question) => question.topic))];
+  return DRILL_TOPICS[category];
 }
 
 export function validateContent(): string[] {
@@ -227,6 +257,10 @@ export function validateContent(): string[] {
       const count = item.questions.filter((question) => question.category === category).length;
       if (count !== EXAM_RULES.composition[category]) errors.push(`${item.id} ${category} berisi ${count} soal`);
     });
+  }
+  for (const item of DRILL_PACKAGES) {
+    if (item.questions.length !== 10) errors.push(`${item.id} berisi ${item.questions.length} soal`);
+    if (item.questions.some((question) => question.category !== item.category || question.topic !== item.topic)) errors.push(`${item.id} memiliki soal di luar topik`);
   }
   return errors;
 }
