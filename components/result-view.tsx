@@ -15,7 +15,7 @@ function duration(seconds: number) {
 export function ResultView({ result, questions, onClose }: { result: AttemptResult; questions: Question[]; onClose?: () => void }) {
   return (
     <section className="border-t border-black">
-      <div className={`grid gap-6 border-b border-black p-5 sm:p-8 lg:grid-cols-[1fr_auto] lg:p-10 ${result.passed ? "bg-signal" : "bg-white"}`}>
+      <div className={`grid gap-6 border-b border-black p-5 sm:p-8 lg:grid-cols-[1fr_auto] lg:p-10 ${result.passed ? "bg-signal" : "bg-brand-red-soft"}`}>
         <div>
           <p className="font-mono text-xs font-bold uppercase tracking-[.14em]">Hasil try out</p>
           <h2 className="mt-4 text-5xl font-black tracking-[-.06em] sm:text-7xl">{result.totalScore}<span className="text-2xl">/550</span></h2>
@@ -70,9 +70,9 @@ export function ResultView({ result, questions, onClose }: { result: AttemptResu
             const selectedLabel = question.choices.find((choice) => choice.id === selected)?.label ?? "Tidak dijawab";
             const best = Math.max(...question.choices.map((choice) => choice.score));
             return (
-              <details key={question.id} className="border border-black bg-white">
+              <details key={question.id} className="border border-black bg-warm-white">
                 <summary className="flex cursor-pointer list-none items-center gap-4 p-4 font-bold">
-                  <span className={`flex h-9 w-9 shrink-0 items-center justify-center border border-black ${earned === best ? "bg-signal" : "bg-white"}`}>{index + 1}</span>
+                  <span className={`flex h-9 w-9 shrink-0 items-center justify-center border border-black ${earned === best ? "bg-signal" : "bg-brand-red-soft text-brand-red"}`}>{index + 1}</span>
                   <span className="flex-1 line-clamp-2">{question.prompt}</span><span className="font-mono text-xs">{earned}/{best}</span>
                 </summary>
                 <div className="border-t border-black p-4 leading-relaxed">

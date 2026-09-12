@@ -118,14 +118,14 @@ export function DrillClient() {
         </div>
         <div className="grid gap-6 p-5 sm:p-8 lg:p-10">
           <label className="grid gap-2 font-bold">Kategori
-            <NativeSelect value={category} onChange={(event) => { const next = event.target.value as Category; setCategory(next); setTopic(categoryTopics(next)[0]); }} className="h-12 w-full rounded-none border-black bg-white text-base">
+            <NativeSelect value={category} onChange={(event) => { const next = event.target.value as Category; setCategory(next); setTopic(categoryTopics(next)[0]); }} className="h-12 w-full rounded-none border-black bg-warm-white text-base">
               <NativeSelectOption value="TWK">TWK — Wawasan Kebangsaan</NativeSelectOption>
               <NativeSelectOption value="TIU">TIU — Intelegensia Umum</NativeSelectOption>
               <NativeSelectOption value="TKP">TKP — Karakteristik Pribadi</NativeSelectOption>
             </NativeSelect>
           </label>
           <label className="grid gap-2 font-bold">Topik
-            <NativeSelect value={topics.includes(topic) ? topic : topics[0]} onChange={(event) => setTopic(event.target.value)} className="h-12 w-full rounded-none border-black bg-white text-base">
+            <NativeSelect value={topics.includes(topic) ? topic : topics[0]} onChange={(event) => setTopic(event.target.value)} className="h-12 w-full rounded-none border-black bg-warm-white text-base">
               {topics.map((item) => <NativeSelectOption key={item} value={item}>{item}</NativeSelectOption>)}
             </NativeSelect>
           </label>
@@ -138,7 +138,7 @@ export function DrillClient() {
                 const possible = stats.reduce((sum, item) => sum + item.possible, 0);
                 const percentage = possible ? Math.round((earned / possible) * 100) : 0;
                 return (
-                  <article key={drillPackage.id} className="border border-black bg-white p-5">
+                  <article key={drillPackage.id} className="border border-black bg-warm-white p-5">
                     <div className="flex items-start justify-between gap-4"><span className="font-mono text-xs">/{String(drillPackage.sequence).padStart(2, "0")}</span><span className="bg-secondary px-2 py-1 font-mono text-[10px] font-bold">10 SOAL</span></div>
                     <h3 className="mt-7 text-2xl font-black tracking-[-.04em]">{drillPackage.title}</h3>
                     <p className="mt-2 font-mono text-[11px] uppercase tracking-wider">{stats.length ? `${stats.length}/10 dicoba · ${percentage}%` : "Belum dikerjakan"}</p>

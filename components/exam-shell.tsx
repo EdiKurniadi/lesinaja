@@ -29,10 +29,10 @@ function PaletteButton({ session, question, index, onMove, compact = false }: Om
       onClick={() => onMove(index)}
       aria-current={active ? "step" : undefined}
       aria-label={`Buka soal ${index + 1}, ${answered ? "sudah dijawab" : "belum dijawab"}${flagged ? ", ditandai ragu-ragu" : ""}`}
-      className={`relative shrink-0 rounded-none border-black p-0 font-mono text-xs font-bold shadow-none ${compact ? "size-8" : "size-10"} ${answered ? "bg-black text-white hover:bg-black/85 hover:text-white" : "bg-white"} ${active ? "outline-2 outline-offset-2 outline-black" : ""}`}
+      className={`relative shrink-0 rounded-none border-black p-0 font-mono text-xs font-bold shadow-none ${compact ? "size-8" : "size-10"} ${answered ? "bg-brand-blue text-white hover:bg-brand-blue-hover hover:text-white" : "bg-warm-white"} ${active ? "outline-[3px] outline-offset-2 outline-brand-red" : ""}`}
     >
       {index + 1}
-      {answered && <Check aria-hidden="true" className="absolute -bottom-1 -right-1 size-3 border border-black bg-white text-black" />}
+      {answered && <Check aria-hidden="true" className="absolute -bottom-1 -right-1 size-3 border border-black bg-warm-white text-brand-blue" />}
       {flagged && <Bookmark aria-hidden="true" className="absolute -right-1 -top-1 size-3 fill-signal text-black" />}
     </Button>
   );
@@ -61,10 +61,10 @@ export function QuestionPalette({ session, questions, onMove, grouped = false, c
 function StatusLegend() {
   return (
     <div className="grid grid-cols-2 gap-x-3 gap-y-2 border-t border-black pt-4 font-mono text-[10px] uppercase">
-      <span className="flex items-center gap-2"><i className="size-3 border border-black bg-white" /> Kosong</span>
-      <span className="flex items-center gap-2"><i className="flex size-3 items-center justify-center bg-black text-white"><Check className="size-2" /></i> Dijawab</span>
+      <span className="flex items-center gap-2"><i className="size-3 border border-black bg-warm-white" /> Kosong</span>
+      <span className="flex items-center gap-2"><i className="flex size-3 items-center justify-center bg-brand-blue text-white"><Check className="size-2" /></i> Dijawab</span>
       <span className="flex items-center gap-2"><Bookmark className="size-3 fill-signal" /> Ragu-ragu</span>
-      <span className="flex items-center gap-2"><i className="size-3 border-2 border-black bg-white" /> Aktif</span>
+      <span className="flex items-center gap-2"><i className="size-3 border-2 border-brand-red bg-warm-white" /> Aktif</span>
     </div>
   );
 }
@@ -193,7 +193,7 @@ export function ExamShell({
 
   return (
     <section className="fixed inset-0 z-[60] flex h-dvh min-h-0 w-screen flex-col overflow-hidden bg-background text-foreground">
-      <header className="shrink-0 border-b border-black bg-white">
+      <header className="shrink-0 border-b border-black bg-warm-white">
         <div className="flex min-h-14 items-center gap-2 px-2 sm:gap-4 sm:px-4 lg:px-6">
           <Button asChild variant="outline" size="icon" className="size-10 rounded-none border-black sm:w-auto sm:px-3">
             <Link href="/" aria-label="Keluar sementara; sesi tetap tersimpan"><LogOut /><span className="hidden sm:inline">Keluar sementara</span></Link>
@@ -228,7 +228,7 @@ export function ExamShell({
       </header>
 
       <div className="flex min-h-0 flex-1 overflow-hidden">
-        <div ref={contentRef} className="min-h-0 min-w-0 flex-1 overflow-y-auto overscroll-contain bg-white" data-exam-scroll-region>
+        <div ref={contentRef} className="min-h-0 min-w-0 flex-1 overflow-y-auto overscroll-contain bg-warm-white" data-exam-scroll-region>
           <div className="mx-auto w-full max-w-4xl p-4 sm:p-6 lg:p-8 xl:p-10">{children}</div>
         </div>
         <aside className="hidden w-[310px] shrink-0 flex-col border-l border-black bg-background lg:flex xl:w-[340px]">

@@ -21,7 +21,7 @@ export function QuestionCard({
   return (
     <article className="mx-auto max-w-3xl">
       <div className="mb-3 flex flex-wrap items-center gap-2 font-mono text-[11px] font-bold uppercase tracking-[.12em] sm:mb-4 sm:text-xs">
-        <span className="bg-black px-2 py-1 text-white">{question.category}</span>
+        <span className="bg-brand-blue px-2 py-1 text-white">{question.category}</span>
         <span>{question.topic}</span>
       </div>
       <h2 tabIndex={-1} data-exam-question-heading className="text-lg font-bold leading-snug outline-none sm:text-xl lg:text-2xl">{question.prompt}</h2>
@@ -31,6 +31,13 @@ export function QuestionCard({
           const best = choice.score === maximum;
           const showBest = reveal && best;
           const showWrong = reveal && selected && !best;
+          const stateClass = showBest
+            ? "bg-signal text-black hover:bg-signal"
+            : showWrong
+              ? "bg-brand-red text-white hover:bg-brand-red"
+              : selected
+                ? "bg-brand-blue text-white hover:bg-brand-blue-hover"
+                : "bg-warm-white";
           return (
             <Button
               key={choice.id}
@@ -41,7 +48,7 @@ export function QuestionCard({
               aria-keyshortcuts={String.fromCharCode(65 + index)}
               onClick={() => onSelect(choice.id)}
               disabled={reveal}
-              className={`h-auto min-h-12 justify-start whitespace-normal rounded-none border-black px-3 py-2.5 text-left text-base leading-snug shadow-none disabled:pointer-events-none disabled:opacity-100 sm:px-4 ${selected ? "bg-black text-white" : "bg-white"} ${showBest ? "bg-signal text-black" : ""}`}
+              className={`h-auto min-h-12 justify-start whitespace-normal rounded-none border-black px-3 py-2.5 text-left text-base leading-snug shadow-none disabled:pointer-events-none disabled:opacity-100 sm:px-4 ${stateClass}`}
             >
               <span className={`flex h-7 w-7 shrink-0 items-center justify-center border ${selected || showBest ? "border-current" : "border-black"}`}>{String.fromCharCode(65 + index)}</span>
               <span className="flex-1">{choice.label}</span>

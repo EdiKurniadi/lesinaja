@@ -45,7 +45,7 @@ export function MaterialsClient() {
               {MATERIALS.filter((material) => material.category === category).map((material, index) => {
                 const progress = state.topicProgress[material.id];
                 return (
-                  <AccordionItem key={material.id} value={material.id} className="border-black bg-white">
+                  <AccordionItem key={material.id} value={material.id} className="border-black bg-warm-white">
                     <AccordionTrigger className="rounded-none px-5 py-6 hover:no-underline sm:px-7">
                       <span className="flex min-w-0 items-center gap-5 text-left"><span className="font-mono text-xs">/{String(index + 1).padStart(2, "0")}</span><span><strong className="block text-xl sm:text-2xl">{material.title}</strong><span className="mt-1 block text-sm font-normal text-muted-foreground">{material.summary}</span></span></span>
                       {progress?.completed && <span className="ml-auto mr-3 flex items-center gap-1 bg-signal px-2 py-1 font-mono text-[10px] uppercase"><Check className="size-3" /> Selesai</span>}

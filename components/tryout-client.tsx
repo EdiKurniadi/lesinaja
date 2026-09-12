@@ -145,7 +145,7 @@ export function TryoutClient() {
       flagged={session.flagged.length}
       onMove={move}
       groupedPalette
-      headerMetric={<div className="flex h-10 items-center gap-1.5 bg-black px-2 font-mono text-xs font-bold text-white sm:px-3 sm:text-sm"><Clock3 className="size-4 text-signal" /><span aria-label={`Sisa waktu ${timeLabel(remaining)}`}>{timeLabel(remaining)}</span></div>}
+      headerMetric={<div className="flex h-10 items-center gap-1.5 bg-brand-blue px-2 font-mono text-xs font-bold text-white sm:px-3 sm:text-sm"><Clock3 className="size-4 text-signal" /><span aria-label={`Sisa waktu ${timeLabel(remaining)}`}>{timeLabel(remaining)}</span></div>}
       headerAction={
         <AlertDialog>
           <AlertDialogTrigger asChild><Button className="h-10 rounded-none bg-signal px-2 text-black hover:bg-signal/80 sm:px-3"><Check /><span className="hidden sm:inline">Kumpulkan</span></Button></AlertDialogTrigger>
