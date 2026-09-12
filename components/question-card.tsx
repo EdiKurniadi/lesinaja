@@ -9,11 +9,13 @@ export function QuestionCard({
   question,
   selectedId,
   onSelect,
+  locked = false,
   reveal = false,
 }: {
   question: Question;
   selectedId?: string;
   onSelect: (choiceId: string) => void;
+  locked?: boolean;
   reveal?: boolean;
 }) {
   const selectedScore = choiceScore(question, selectedId);
@@ -47,7 +49,7 @@ export function QuestionCard({
               aria-checked={selected}
               aria-keyshortcuts={String.fromCharCode(65 + index)}
               onClick={() => onSelect(choice.id)}
-              disabled={reveal}
+              disabled={locked || reveal}
               className={`h-auto min-h-12 justify-start whitespace-normal rounded-none border-black px-3 py-2.5 text-left text-base leading-snug shadow-none disabled:pointer-events-none disabled:opacity-100 sm:px-4 ${stateClass}`}
             >
               <span className={`flex h-7 w-7 shrink-0 items-center justify-center border ${selected || showBest ? "border-current" : "border-black"}`}>{String.fromCharCode(65 + index)}</span>

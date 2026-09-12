@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import { DRILL_PACKAGES, getDrillPackage, getPackage } from "@/lib/content";
+import { clearSessionOpen, markSessionOpen } from "@/lib/session-navigation";
 import { readLearningState, updateLearningState } from "@/lib/storage";
 import type { ActiveSession } from "@/lib/types";
 
@@ -38,7 +39,8 @@ export function WebMcpBridge() {
         const drillPackage = packageId ? getDrillPackage(packageId) : undefined;
         if (!drillPackage) throw new Error("Paket drill tidak valid.");
         const session: ActiveSession = { id: `drill-${drillPackage.id}-${Date.now()}`, kind: "drill", packageId: drillPackage.id, questionIds: drillPackage.questions.map((question) => question.id), answers: {}, flagged: [], currentIndex: 0, startedAt: Date.now() };
-        updateLearningState((state) => ({ ...state, activeDrill: session }));
+        markSessionOpen("drill");
+        updateLearningState((state) => ({ ...state, activeDrill: session, activeTryout: null }));
         window.location.assign("/drill");
         return { status: "started", sessionId: session.id, packageId: drillPackage.id, title: drillPackage.title, questionCount: session.questionIds.length };
       },
@@ -47,18 +49,16 @@ export function WebMcpBridge() {
     void register({
       name: "start_tryout",
       title: "Mulai try out SKD",
-      description: "Memulai salah satu paket try out 110 soal dengan timer 100 menit dan membuka halaman ujian.",
+      description: "Membuka konfirmasi paket try out 110 soal sebelum timer 100 menit dimulai.",
       inputSchema: { type: "object", properties: { packageId: { type: "string", enum: ["paket-a", "paket-b"] } }, required: ["packageId"], additionalProperties: false },
       annotations: { readOnlyHint: false, untrustedContentHint: false },
       execute(input) {
         const packageId = (input as { packageId?: string })?.packageId;
         const examPackage = packageId ? getPackage(packageId) : undefined;
         if (!examPackage) throw new Error("Paket try out tidak valid.");
-        const startedAt = Date.now();
-        const session: ActiveSession = { id: `tryout-${startedAt}`, kind: "tryout", packageId, questionIds: examPackage.questions.map((question) => question.id), answers: {}, flagged: [], currentIndex: 0, startedAt, deadlineAt: startedAt + examPackage.durationMinutes * 60_000 };
-        updateLearningState((state) => ({ ...state, activeTryout: session }));
-        window.location.assign("/tryout");
-        return { status: "started", sessionId: session.id, packageId, deadlineAt: session.deadlineAt };
+        clearSessionOpen();
+        window.location.assign(`/tryout?package=${encodeURIComponent(examPackage.id)}`);
+        return { status: "confirmation_required", packageId: examPackage.id, title: examPackage.title, durationMinutes: examPackage.durationMinutes };
       },
     });
 
@@ -72,6 +72,7 @@ export function WebMcpBridge() {
         const state = readLearningState();
         const session = state.activeTryout ?? state.activeDrill;
         if (!session) return { status: "empty" };
+        markSessionOpen(session.kind);
         window.location.assign(session.kind === "tryout" ? "/tryout" : "/drill");
         return { status: "continued", sessionId: session.id, kind: session.kind };
       },

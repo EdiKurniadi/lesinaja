@@ -39,7 +39,7 @@ export function PrivateLessonsClient() {
   const [scrollProgress, setScrollProgress] = useState(0);
 
   useEffect(() => {
-    setReady(true);
+    const readyTimer = window.setTimeout(() => setReady(true), 0);
     const revealItems = document.querySelectorAll<HTMLElement>(".private-landing [data-reveal]");
     const observer = new IntersectionObserver((entries) => {
       entries.forEach((entry) => {
@@ -57,6 +57,7 @@ export function PrivateLessonsClient() {
     updateProgress();
     window.addEventListener("scroll", updateProgress, { passive: true });
     return () => {
+      window.clearTimeout(readyTimer);
       observer.disconnect();
       window.removeEventListener("scroll", updateProgress);
     };
