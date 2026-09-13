@@ -32,7 +32,11 @@ export function SiteHeader() {
     <header className="sticky top-0 z-40 border-b border-black bg-background/95 backdrop-blur">
       <div className="page-shell flex h-16 items-center border-x border-black">
         <Link href="/" aria-label="LESINAJA — Beranda" className="flex h-full shrink-0 items-center border-r border-black px-3 sm:px-5">
-          <BrandLogo className="text-xl sm:text-2xl" />
+          <BrandLogo
+            className="w-[52px] flex-col items-center justify-center gap-0.5 md:w-auto md:flex-row md:gap-2"
+            markClassName="h-[38px] w-[52px] md:h-[50px] md:w-[68px]"
+            wordmarkClassName="block w-[90%] text-center text-[10px] tracking-[.015em] md:w-auto md:text-[15px]"
+          />
         </Link>
         <nav className="hidden h-full min-w-0 flex-1 items-stretch md:flex" aria-label="Navigasi utama">
           {nav.map(([href, label]) => (

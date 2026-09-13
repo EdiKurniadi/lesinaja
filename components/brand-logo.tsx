@@ -2,14 +2,18 @@ import Image from "next/image";
 
 export function BrandLogo({
   className = "",
+  markClassName = "",
+  wordmarkClassName = "",
   inverted = false,
 }: {
   className?: string;
+  markClassName?: string;
+  wordmarkClassName?: string;
   inverted?: boolean;
 }) {
   return (
-    <span className={`inline-flex items-center gap-[.18em] font-black leading-none tracking-[-.055em] ${className}`}>
-      <span className="relative block h-[.82em] w-[1.11em] shrink-0 overflow-hidden" aria-hidden="true">
+    <span className={`inline-flex font-black leading-none tracking-[-.055em] ${className}`}>
+      <span className={`relative block shrink-0 overflow-hidden ${markClassName}`} aria-hidden="true">
         <Image
           src="/les-privat/lesinaja-logo.png"
           width={1555}
@@ -18,7 +22,7 @@ export function BrandLogo({
           className={`h-full w-auto max-w-none ${inverted ? "brightness-0 invert" : ""}`}
         />
       </span>
-      <span>LESINAJA</span>
+      <span className={wordmarkClassName}>LESINAJA</span>
     </span>
   );
 }

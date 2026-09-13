@@ -12,8 +12,13 @@ export function BrandFooter({
       <div className={containerClassName}>
         <div className="grid gap-[18px] border-t border-white/35 pt-5 text-xs uppercase tracking-[.05em] md:grid-cols-[1fr_auto_auto] md:gap-10">
           <div>
-            <Link href="/" aria-label="LESINAJA — Beranda" className="mb-3 inline-block text-[1.7rem] focus-visible:outline-signal">
-              <BrandLogo inverted />
+            <Link href="/" aria-label="LESINAJA — Beranda" className="mb-3 inline-block focus-visible:outline-signal">
+              <BrandLogo
+                inverted
+                className="w-[68px] flex-col items-center gap-1 md:w-auto md:flex-row md:gap-2.5"
+                markClassName="h-[50px] w-[68px] md:h-[56px] md:w-[76px]"
+                wordmarkClassName="block w-[90%] text-center text-[12px] tracking-[.015em] md:w-auto md:text-base"
+              />
             </Link>
             <span className="block text-white/65">Bimbel SKD CPNS · Pontianak</span>
           </div>
