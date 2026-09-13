@@ -12,6 +12,14 @@ export const MATERIALS: MaterialTopic[] = [
     summary: "Kenali struktur konstitusi, lembaga negara, hak warga, serta pembagian kekuasaan.",
     points: ["UUD 1945 merupakan hukum dasar tertulis.", "MPR berwenang mengubah dan menetapkan UUD.", "Mahkamah Konstitusi menguji undang-undang terhadap UUD 1945."],
     example: "Jika sebuah undang-undang diduga bertentangan dengan UUD 1945, pengujiannya diajukan ke Mahkamah Konstitusi.",
+    chapters: [
+      { title: "Latar Belakang & Sejarah", intro: "Sejarah pembentukan konstitusi.", sections: [{ heading: "Sejarah", body: "Latar belakang perumusan UUD 1945." }] },
+      { title: "Struktur & Sistematika", intro: "Pembukaan dan pasal-pasal.", sections: [{ heading: "Sistematika", body: "Struktur naskah resmi UUD 1945." }] },
+      { title: "Lembaga Negara", intro: "MPR, DPR, DPD, Presiden, BPK, MA, MK, KY.", sections: [{ heading: "Wewenang", body: "Tugas dan fungsi lembaga." }] },
+      { title: "Hak & Kewajiban Warga", intro: "Pasal 27 hingga Pasal 34.", sections: [{ heading: "Pasal Kunci", body: "Hak asasi dan kewajiban bela negara." }] },
+      { title: "Sistem Pemerintahan", intro: "Presidensial dan pembagian kekuasaan.", sections: [{ heading: "Sistem", body: "Karakteristik sistem presidensial." }] },
+      { title: "Amandemen & Pengujian", intro: "Perubahan I sampai IV dan peran MK.", sections: [{ heading: "Pengujian UU", body: "Mekanisme judicial review di MK." }] },
+    ],
   },
   {
     id: "twk-nkri", category: "TWK", title: "NKRI & Bhinneka",

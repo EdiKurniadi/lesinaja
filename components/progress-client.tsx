@@ -51,18 +51,108 @@ export function ProgressClient() {
         {state.attempts.length === 0 ? (
           <div className="mt-7 border border-black bg-warm-white p-8 text-center"><p className="text-xl font-bold">Belum ada hasil try out.</p><p className="mt-2">Selesaikan satu paket untuk melihat perkembanganmu.</p></div>
         ) : (
-          <div className="mt-7 overflow-x-auto border border-black bg-warm-white">
-            <table className="w-full min-w-[680px] border-collapse text-left">
-              <thead><tr className="bg-brand-blue text-white"><th className="p-4">Paket</th><th className="p-4">Tanggal</th>{CATEGORIES.map((category) => <th key={category} className="p-4">{category}</th>)}<th className="p-4">Total</th><th className="p-4">Status</th></tr></thead>
-              <tbody>{state.attempts.map((attempt) => {
+          <>
+            {/* Mobile View: Cards */}
+            <div className="mt-7 grid gap-3 sm:hidden">
+              {state.attempts.map((attempt) => {
                 const examPackage = getPackage(attempt.packageId);
-                const activeCategories = new Set(examPackage?.questions.map((question) => question.category) ?? CATEGORIES);
                 const maximum = examPackage?.questions.reduce((sum, question) => sum + bestScore(question), 0) ?? 550;
                 const isMini = examPackage?.kind === "mini";
-                return <tr key={attempt.id} className="border-t border-black"><td className="p-4 font-bold">{examPackage?.title ?? attempt.packageId}</td><td className="p-4 text-sm">{dateLabel(attempt.completedAt)}</td>{CATEGORIES.map((category) => <td key={category} className="p-4">{activeCategories.has(category) ? <span className={attempt.scores[category].score >= EXAM_RULES.passingScores[category] ? "font-bold" : "text-destructive"}>{attempt.scores[category].score}</span> : "—"}</td>)}<td className="p-4 font-black">{attempt.totalScore}/{maximum}</td><td className="p-4"><span className={`px-2 py-1 text-xs font-bold ${attempt.passed ? "bg-signal" : "border border-black"}`}>{attempt.passed ? (isMini ? "TARGET" : "MEMENUHI") : "BELUM"}</span></td></tr>;
-              })}</tbody>
-            </table>
-          </div>
+                return (
+                  <article key={attempt.id} className="border-2 border-black bg-warm-white p-4 shadow-[3px_3px_0_0_#000]">
+                    <div className="flex items-start justify-between gap-2">
+                      <div>
+                        <h3 className="text-base font-black tracking-tight">{examPackage?.title ?? attempt.packageId}</h3>
+                        <p className="mt-0.5 font-mono text-[11px] text-muted-foreground">{dateLabel(attempt.completedAt)}</p>
+                      </div>
+                      <span className={`px-2 py-0.5 font-mono text-[10px] font-bold shrink-0 ${attempt.passed ? "bg-signal" : "border border-black"}`}>
+                        {attempt.passed ? (isMini ? "TARGET" : "MEMENUHI") : "BELUM"}
+                      </span>
+                    </div>
+
+                    <div className="mt-3 flex items-center justify-between border-y border-black/20 py-2 font-mono text-xs">
+                      <div className="flex gap-3">
+                        {CATEGORIES.map((cat) => (
+                          <span key={cat}>
+                            <strong className="text-muted-foreground">{cat}:</strong>{" "}
+                            <span className={attempt.scores[cat]?.score >= EXAM_RULES.passingScores[cat] ? "font-bold" : "text-destructive"}>
+                              {attempt.scores[cat]?.score ?? "—"}
+                            </span>
+                          </span>
+                        ))}
+                      </div>
+                      <span className="font-black text-sm">{attempt.totalScore}/{maximum}</span>
+                    </div>
+
+                    <Button
+                      asChild
+                      className="mt-3 h-9 w-full rounded-none border-2 border-black bg-signal font-mono text-xs font-bold uppercase text-black shadow-[2px_2px_0_0_#000] hover:bg-black hover:text-white hover:shadow-none"
+                    >
+                      <Link href={`/tryout?review=${attempt.id}&from=progres`}>
+                        Lihat Pembahasan <ArrowUpRight className="ml-1 size-3.5" />
+                      </Link>
+                    </Button>
+                  </article>
+                );
+              })}
+            </div>
+
+            {/* Desktop / Tablet View: Table */}
+            <div className="mt-7 hidden sm:block overflow-x-auto border border-black bg-warm-white">
+              <table className="w-full min-w-[760px] border-collapse text-left">
+                <thead>
+                  <tr className="bg-brand-blue text-white">
+                    <th className="p-4">Paket</th>
+                    <th className="p-4">Tanggal</th>
+                    {CATEGORIES.map((category) => <th key={category} className="p-4">{category}</th>)}
+                    <th className="p-4">Total</th>
+                    <th className="p-4">Status</th>
+                    <th className="p-4 text-right">Pembahasan</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {state.attempts.map((attempt) => {
+                    const examPackage = getPackage(attempt.packageId);
+                    const activeCategories = new Set(examPackage?.questions.map((question) => question.category) ?? CATEGORIES);
+                    const maximum = examPackage?.questions.reduce((sum, question) => sum + bestScore(question), 0) ?? 550;
+                    const isMini = examPackage?.kind === "mini";
+                    return (
+                      <tr key={attempt.id} className="border-t border-black hover:bg-secondary/40 transition-colors">
+                        <td className="p-4 font-bold">{examPackage?.title ?? attempt.packageId}</td>
+                        <td className="p-4 text-sm whitespace-nowrap">{dateLabel(attempt.completedAt)}</td>
+                        {CATEGORIES.map((category) => (
+                          <td key={category} className="p-4">
+                            {activeCategories.has(category) ? (
+                              <span className={attempt.scores[category].score >= EXAM_RULES.passingScores[category] ? "font-bold" : "text-destructive"}>
+                                {attempt.scores[category].score}
+                              </span>
+                            ) : "—"}
+                          </td>
+                        ))}
+                        <td className="p-4 font-black whitespace-nowrap">{attempt.totalScore}/{maximum}</td>
+                        <td className="p-4">
+                          <span className={`px-2 py-1 text-xs font-bold ${attempt.passed ? "bg-signal" : "border border-black"}`}>
+                            {attempt.passed ? (isMini ? "TARGET" : "MEMENUHI") : "BELUM"}
+                          </span>
+                        </td>
+                        <td className="p-4 text-right whitespace-nowrap">
+                          <Button
+                            asChild
+                            size="sm"
+                            className="h-8 rounded-none border-2 border-black bg-warm-white font-mono text-xs font-bold uppercase text-black shadow-[2px_2px_0_0_#000] hover:bg-signal hover:shadow-none hover:translate-x-[1px] hover:translate-y-[1px]"
+                          >
+                            <Link href={`/tryout?review=${attempt.id}&from=progres`}>
+                              Pembahasan <ArrowUpRight className="ml-1 size-3.5" />
+                            </Link>
+                          </Button>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </>
         )}
       </div>
     </section>

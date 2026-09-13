@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { ArrowLeft, ArrowUpRight, Check, CheckCircle2, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -11,7 +11,7 @@ import { updateLearningState } from "@/lib/storage";
 import type { MaterialTopic } from "@/lib/types";
 import { useLearningState } from "@/hooks/use-learning-state";
 
-const numerals = ["I", "II", "III", "IV", "V", "VI"];
+const numerals = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII"];
 
 function chapterLabel(index: number) {
   return `BAB ${numerals[index] ?? index + 1}`;
@@ -23,6 +23,15 @@ export function MaterialReaderClient({ material }: { material: MaterialTopic }) 
   const [activeChapter, setActiveChapter] = useState("chapter-0");
   const progress = state.topicProgress[material.id];
   const drillPackage = DRILL_PACKAGES.find((item) => item.category === material.category && item.topic === material.title);
+  const isInitialMount = useRef(true);
+
+  useEffect(() => {
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      return;
+    }
+    window.scrollTo({ top: 0, behavior: "instant" });
+  }, [activeChapter]);
 
   useEffect(() => {
     updateLearningState((learning) => ({
@@ -38,27 +47,36 @@ export function MaterialReaderClient({ material }: { material: MaterialTopic }) 
     }));
   }
 
+  const isLastChapter = activeChapter === `chapter-${chapters.length - 1}`;
+
   return (
     <section className="border-b border-black">
-      <div className="border-b-2 border-black bg-warm-white px-5 py-6 sm:px-8 lg:px-10 lg:py-9">
-        <Link href="/materi" className="inline-flex items-center gap-2 font-mono text-xs font-bold uppercase tracking-[.12em] underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-signal"><ArrowLeft className="size-4" /> Semua materi</Link>
-        <div className="mt-9 grid gap-6 lg:grid-cols-[1fr_220px] lg:items-end">
-          <div>
-            <p className="font-mono text-xs font-bold uppercase tracking-[.15em] text-brand-red">Materi {material.category}</p>
-            <h1 className="mt-3 max-w-4xl break-words text-[2.65rem] font-black leading-[.9] tracking-[-.07em] min-[390px]:text-5xl sm:text-7xl">{material.title.toUpperCase()}</h1>
-            <p className="mt-5 max-w-2xl text-base leading-relaxed text-muted-foreground sm:text-lg">{material.summary}</p>
-          </div>
-          <div className="border-2 border-black bg-signal p-4 font-mono text-xs font-bold uppercase leading-relaxed">
-            <span className="block text-brand-red">Rute belajar</span><span className="mt-1 block text-2xl text-black">{chapters.length} BAB</span><span className="mt-1 block text-black">Baca → pahami → drill</span>
-          </div>
-        </div>
-      </div>
-
       <Tabs value={activeChapter} onValueChange={setActiveChapter}>
         <div className="sticky top-0 z-20 border-b-2 border-black bg-brand-blue px-5 py-3 sm:px-8 lg:px-10">
           <TabsList className="material-chapter-tabs">
-            {chapters.map((chapter, index) => <TabsTrigger key={chapter.title} value={`chapter-${index}`} className="shrink-0 rounded-none font-mono text-xs font-bold tracking-[.12em]">{chapterLabel(index)}</TabsTrigger>)}
+            {chapters.map((chapter, index) => (
+              <TabsTrigger
+                key={chapter.title}
+                value={`chapter-${index}`}
+                className="shrink-0 rounded-none font-mono text-xs font-bold tracking-[.12em]"
+              >
+                <span className={chapters.length > 3 ? "hidden sm:inline" : "inline"}>BAB </span>
+                <span>{numerals[index] ?? index + 1}</span>
+              </TabsTrigger>
+            ))}
           </TabsList>
+        </div>
+
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b-2 border-black bg-warm-white px-5 py-3 sm:px-8 lg:px-10">
+          <Link
+            href="/materi"
+            className="inline-flex items-center gap-2 font-mono text-xs font-bold uppercase tracking-[.12em] text-foreground underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-signal"
+          >
+            <ArrowLeft className="size-4" /> Semua materi
+          </Link>
+          <span className="font-mono text-xs font-bold uppercase tracking-[.14em] text-brand-red">
+            {material.category} · {material.title}
+          </span>
         </div>
 
         {chapters.map((chapter, index) => (
@@ -99,12 +117,19 @@ export function MaterialReaderClient({ material }: { material: MaterialTopic }) 
         ))}
       </Tabs>
 
-      <div className="border-t-2 border-black bg-warm-white p-5 sm:p-8 lg:p-10">
-        <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-4">
-          <div><p className="font-mono text-xs font-bold uppercase tracking-[.14em] text-brand-red">Langkah berikutnya</p><h2 className="mt-2 text-3xl font-black">UJI PEMAHAMANMU</h2></div>
-          {drillPackage ? <Button asChild className="h-12 rounded-none"><Link href={`/drill?category=${material.category}&topic=${encodeURIComponent(material.title)}`}>Drill {material.title} <ArrowUpRight /></Link></Button> : <Button asChild variant="outline" className="h-12 rounded-none border-black"><Link href="/materi">Pilih materi lain <ArrowUpRight /></Link></Button>}
+      {isLastChapter && (
+        <div className="border-t-2 border-black bg-warm-white p-5 sm:p-8 lg:p-10">
+          <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-4">
+            <div><p className="font-mono text-xs font-bold uppercase tracking-[.14em] text-brand-red">Langkah berikutnya</p><h2 className="mt-2 text-3xl font-black">UJI PEMAHAMANMU</h2></div>
+            {drillPackage ? <Button asChild className="h-12 rounded-none"><Link href={`/drill?category=${material.category}&topic=${encodeURIComponent(material.title)}`}>Drill {material.title} <ArrowUpRight /></Link></Button> : <Button asChild variant="outline" className="h-12 rounded-none border-black"><Link href="/materi">Pilih materi lain <ArrowUpRight /></Link></Button>}
+          </div>
         </div>
-      </div>
+      )}
+
+      <footer className="flex flex-col gap-2 border-t-2 border-black p-5 font-mono text-[11px] uppercase tracking-[.1em] text-muted-foreground sm:flex-row sm:justify-between sm:p-7">
+        <p>© {new Date().getFullYear()} LesinAja™. All rights reserved.</p>
+        <p>Platform belajar mandiri & bimbingan belajar SKD CPNS.</p>
+      </footer>
     </section>
   );
 }

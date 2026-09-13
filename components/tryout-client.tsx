@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
+import Link from "next/link";
 import { ArrowLeft, ArrowRight, Bookmark, Check, Clock3, Play } from "lucide-react";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
@@ -8,10 +9,11 @@ import { EXAM_PACKAGES, MINI_TRYOUT_PACKAGES, getPackage, getQuestion } from "@/
 import { CATEGORIES, EXAM_RULES } from "@/lib/exam-rules";
 import { bestScore, scoreAttempt } from "@/lib/scoring";
 import { clearSessionOpen, markSessionOpen, shouldOpenSession } from "@/lib/session-navigation";
-import { updateLearningState } from "@/lib/storage";
+import { readLearningState, updateLearningState } from "@/lib/storage";
 import type { ActiveSession, AttemptResult, Question } from "@/lib/types";
 import { useLearningState } from "@/hooks/use-learning-state";
 import { ExamShell, useExamKeyboard } from "./exam-shell";
+import { PageFrame } from "./page-frame";
 import { QuestionCard } from "./question-card";
 import { ResultView } from "./result-view";
 
@@ -46,12 +48,24 @@ export function TryoutClient() {
   const current = session ? questions[session.currentIndex] : undefined;
 
   useEffect(() => {
-    const initialize = window.setTimeout(() => {
+    const syncFromUrl = () => {
       setSessionOpen(shouldOpenSession("tryout"));
-      const requestedPackage = new URLSearchParams(window.location.search).get("package");
+      const params = new URLSearchParams(window.location.search);
+      const requestedPackage = params.get("package");
       if (requestedPackage && getPackage(requestedPackage)) setPendingPackageId(requestedPackage);
-    }, 0);
-    return () => window.clearTimeout(initialize);
+      const requestedReview = params.get("review");
+      if (requestedReview) {
+        const saved = readLearningState();
+        const found = saved.attempts.find((item) => item.id === requestedReview);
+        if (found) setResult(found);
+      }
+    };
+    const initialize = window.setTimeout(syncFromUrl, 0);
+    window.addEventListener("popstate", syncFromUrl);
+    return () => {
+      window.clearTimeout(initialize);
+      window.removeEventListener("popstate", syncFromUrl);
+    };
   }, []);
 
   const finish = useCallback(() => {
@@ -137,14 +151,55 @@ export function TryoutClient() {
 
   if (result) {
     const source = getPackage(result.packageId)?.questions ?? [];
-    return <ResultView result={result} questions={source} onClose={() => setResult(null)} />;
+    const pkg = getPackage(result.packageId);
+    return (
+      <PageFrame
+        eyebrow="02 / Try out"
+        title="UKUR KESIAPANMU."
+        description="Simulasi 110 soal dalam 100 menit. Pembahasan muncul setelah ujian dikumpulkan."
+        showHeader={false}
+      >
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b-2 border-black bg-brand-blue px-4 py-3 text-white sm:px-8">
+          <div className="flex items-center gap-2 font-mono text-xs font-bold uppercase tracking-wider">
+            <span className="text-signal">Pembahasan:</span>
+            <span className="truncate max-w-[200px] sm:max-w-none">{pkg?.title ?? result.packageId}</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <Button
+              asChild
+              variant="outline"
+              size="sm"
+              className="h-8 rounded-none border border-black bg-warm-white text-black font-mono text-xs font-bold uppercase shadow-[2px_2px_0_0_#000] hover:bg-signal hover:text-black"
+            >
+              <Link href="/progres">
+                <ArrowLeft className="mr-1 size-3.5" /> Riwayat Progres
+              </Link>
+            </Button>
+            <Button
+              type="button"
+              size="sm"
+              onClick={() => setResult(null)}
+              className="h-8 rounded-none border border-black bg-black text-white font-mono text-xs font-bold uppercase shadow-[2px_2px_0_0_#000] hover:bg-neutral-800"
+            >
+              Daftar Paket
+            </Button>
+          </div>
+        </div>
+        <ResultView result={result} questions={source} onClose={() => setResult(null)} />
+      </PageFrame>
+    );
   }
 
   if (!sessionOpen || !session || !examPackage || !current) {
     return (
-      <>
+      <PageFrame
+        eyebrow="02 / Try out"
+        title="UKUR KESIAPANMU."
+        description="Simulasi 110 soal dalam 100 menit. Pembahasan muncul setelah ujian dikumpulkan."
+        showHeader={true}
+      >
         <section className="border-b border-black">
-          <div className="grid border-b border-black md:grid-cols-3">
+          <div className="hidden border-b border-black md:grid md:grid-cols-3">
             {CATEGORIES.map((category) => (
               <div key={category} className="border-b border-black p-5 last:border-b-0 md:border-b-0 md:border-r md:last:border-r-0 sm:p-7">
                 <p className="font-mono text-xs uppercase tracking-[.14em]">{EXAM_RULES.composition[category]} soal</p>
@@ -172,7 +227,20 @@ export function TryoutClient() {
                   <h2 className="mt-12 text-4xl font-black tracking-[-.05em]">{item.title}</h2>
                   <p className="mt-3 max-w-lg leading-relaxed">{item.description}</p>
                   <ul className="mt-7 space-y-2 text-sm"><li>✓ 110 soal sesuai komposisi SKD</li><li>✓ Timer tetap berjalan setelah halaman ditutup</li><li>✓ Pembahasan muncul setelah selesai</li></ul>
-                  {attempts[0] && <p className="mt-6 border-l-4 border-signal pl-3 text-sm">Skor terakhir: <strong>{attempts[0].totalScore}/550</strong></p>}
+                  {attempts[0] && (
+                    <div className="mt-6 flex flex-col gap-2">
+                      <p className="border-l-4 border-signal pl-3 text-sm">
+                        Skor terakhir: <strong>{attempts[0].totalScore}/550</strong>
+                      </p>
+                      <Button
+                        variant="outline"
+                        onClick={() => setResult(attempts[0])}
+                        className="rounded-none border-2 border-black font-mono text-xs font-bold uppercase hover:bg-black hover:text-white"
+                      >
+                        Lihat Pembahasan Terakhir
+                      </Button>
+                    </div>
+                  )}
                   <Button onClick={() => setPendingPackageId(item.id)} className="mt-8 h-12 w-full rounded-none text-base"><Play /> Mulai {item.title.split(" — ")[0]}</Button>
                 </article>
               );
@@ -193,7 +261,20 @@ export function TryoutClient() {
                     <h3 className="mt-8 text-3xl font-black tracking-[-.05em]">{item.title}</h3>
                     <p className="mt-3 max-w-lg leading-relaxed">{item.description}</p>
                     <ul className="mt-6 space-y-2 text-sm"><li>✓ 30 soal TIU: verbal dan numerik</li><li>✓ Nilai maksimum {maximum} · target latihan TIU 80</li><li>✓ Pembahasan muncul setelah selesai</li></ul>
-                    {attempts[0] && <p className="mt-6 border-l-4 border-signal pl-3 text-sm">Skor terakhir: <strong>{attempts[0].totalScore}/{maximum}</strong></p>}
+                    {attempts[0] && (
+                      <div className="mt-6 flex flex-col gap-2">
+                        <p className="border-l-4 border-signal pl-3 text-sm">
+                          Skor terakhir: <strong>{attempts[0].totalScore}/{maximum}</strong>
+                        </p>
+                        <Button
+                          variant="outline"
+                          onClick={() => setResult(attempts[0])}
+                          className="rounded-none border-2 border-black font-mono text-xs font-bold uppercase hover:bg-black hover:text-white"
+                        >
+                          Lihat Pembahasan Terakhir
+                        </Button>
+                      </div>
+                    )}
                     <Button onClick={() => setPendingPackageId(item.id)} className="mt-8 h-12 w-full rounded-none text-base"><Play /> Mulai Mini TO</Button>
                   </article>
                 );
@@ -262,7 +343,7 @@ export function TryoutClient() {
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
-      </>
+      </PageFrame>
     );
   }
 

@@ -20,7 +20,29 @@ export default function Home() {
             <div className="py-16 lg:py-24">
               <p className="mb-4 font-mono text-xs uppercase tracking-[.18em]">Belajar / Drill / Try out</p>
               <h1 className="max-w-4xl text-[clamp(3.6rem,10vw,8.8rem)] font-black leading-[.82] tracking-[-.075em]">
-                SIAP<br />LEBIH<br /><span className="text-stroke">TERUKUR.</span>
+                SIAP<br />LEBIH<br />
+                <span className="sr-only">TERUKUR.</span>
+                <svg
+                  viewBox="0 0 550 86"
+                  className="block h-[.86em] w-auto max-w-full overflow-visible text-foreground"
+                  aria-hidden="true"
+                >
+                  <text
+                    x="2"
+                    y="70"
+                    fill="var(--background)"
+                    stroke="currentColor"
+                    strokeWidth="3"
+                    strokeLinejoin="round"
+                    style={{ paintOrder: "stroke fill" }}
+                    fontSize="84"
+                    fontWeight="900"
+                    fontFamily="Arial, Helvetica, sans-serif"
+                    letterSpacing="3"
+                  >
+                    TERUKUR.
+                  </text>
+                </svg>
               </h1>
             </div>
             <p className="max-w-xl text-lg leading-relaxed">
@@ -62,8 +84,16 @@ export default function Home() {
           </div>
 
           <div className="bg-warm-white p-5 sm:p-8 lg:p-10">
-            <p className="max-w-2xl text-xl font-bold leading-snug sm:text-2xl">Belajar langsung bersama pengajar untuk memahami konsep, membedah kesalahan, dan menentukan fokus latihan berikutnya.</p>
-            <div className="mt-9 grid border border-black sm:grid-cols-3">
+            <div>
+              <h3 className="max-w-xl text-2xl font-bold leading-snug tracking-tight text-foreground sm:text-3xl lg:text-[2.2rem]">
+                Bimbingan langsung bersama{" "}
+                <mark className="bg-signal px-1.5 py-0.5 text-black">pengajar berpengalaman</mark>
+              </h3>
+              <p className="mt-3 max-w-lg text-base leading-relaxed text-muted-foreground sm:text-lg">
+                Pahami konsep inti, bedah kelemahan soal, dan tentukan strategi latihan berikutnya secara terarah.
+              </p>
+            </div>
+            <div className="mt-11 grid border border-black sm:grid-cols-3 lg:mt-12">
               {[
                 ["01", "TWK", "Pahami konsep kebangsaan."],
                 ["02", "TIU", "Urai cara kerja setiap soal."],
@@ -86,7 +116,7 @@ export default function Home() {
           </div>
         </section>
       </section>
-      <BrandFooter showDisclaimer />
+      <BrandFooter />
     </main>
   );
 }
