@@ -1,8 +1,8 @@
 "use client";
 
-import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { ArrowUpRight, Menu, X } from "lucide-react";
+import { BrandLogo } from "@/components/brand-logo";
 import { StaticLink as Link } from "@/components/static-link";
 import {
   Sheet,
@@ -31,15 +31,8 @@ export function SiteHeader() {
   return (
     <header className="sticky top-0 z-40 border-b border-black bg-background/95 backdrop-blur">
       <div className="page-shell flex h-16 items-center border-x border-black">
-        <Link href="/" aria-label="LesinAja — Beranda" className="flex h-full shrink-0 items-center border-r border-black px-3 sm:px-5">
-          <Image
-            src="/les-privat/lesinaja-logo.png"
-            alt="LesinAja"
-            width={1555}
-            height={384}
-            priority
-            className="h-auto w-[128px] sm:w-[150px]"
-          />
+        <Link href="/" aria-label="LESINAJA — Beranda" className="flex h-full shrink-0 items-center border-r border-black px-3 sm:px-5">
+          <BrandLogo className="text-xl sm:text-2xl" />
         </Link>
         <nav className="hidden h-full min-w-0 flex-1 items-stretch md:flex" aria-label="Navigasi utama">
           {nav.map(([href, label]) => (
@@ -69,7 +62,7 @@ export function SiteHeader() {
           >
             <SheetHeader className="grid min-h-20 grid-cols-[1fr_4rem] items-stretch gap-0 border-b-2 border-black bg-brand-blue p-0 text-white">
               <div className="flex min-w-0 flex-col justify-center px-5">
-                <span className="font-mono text-[11px] uppercase tracking-[.18em] text-signal">LesinAja</span>
+                <span className="font-mono text-[11px] uppercase tracking-[.18em] text-signal">LESINAJA</span>
                 <SheetTitle className="mt-1 text-xl font-black uppercase tracking-[-.03em] text-white">Menu utama</SheetTitle>
               </div>
               <SheetClose asChild>

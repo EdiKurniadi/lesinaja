@@ -1,6 +1,6 @@
-import Image from "next/image";
+import { BrandLogo } from "@/components/brand-logo";
 import { StaticLink as Link } from "@/components/static-link";
-import { LESINAJA_INSTAGRAM_URL, LESINAJA_WHATSAPP_URL } from "@/lib/contact";
+import { LESINAJA_INSTAGRAM_HANDLE, LESINAJA_INSTAGRAM_URL, LESINAJA_WHATSAPP_URL } from "@/lib/contact";
 
 export function BrandFooter({
   containerClassName = "page-shell",
@@ -12,14 +12,8 @@ export function BrandFooter({
       <div className={containerClassName}>
         <div className="grid gap-[18px] border-t border-white/35 pt-5 text-xs uppercase tracking-[.05em] md:grid-cols-[1fr_auto_auto] md:gap-10">
           <div>
-            <Link href="/" aria-label="LesinAja — Beranda" className="inline-block focus-visible:outline-signal">
-              <Image
-                src="/les-privat/lesinaja-logo.png"
-                width={1555}
-                height={401}
-                alt="LesinAja"
-                className="mb-3 h-auto w-[180px] brightness-0 invert"
-              />
+            <Link href="/" aria-label="LESINAJA — Beranda" className="mb-3 inline-block text-[1.7rem] focus-visible:outline-signal">
+              <BrandLogo inverted />
             </Link>
             <span className="block text-white/65">Bimbel SKD CPNS · Pontianak</span>
           </div>
@@ -29,7 +23,7 @@ export function BrandFooter({
           </div>
           <div>
             <span className="text-white/60">Instagram</span><br />
-            <a className="border-b border-white/55 transition-colors hover:text-signal" href={LESINAJA_INSTAGRAM_URL} target="_blank" rel="noopener noreferrer">@lesinaja</a>
+            <a className="border-b border-white/55 transition-colors hover:text-signal" href={LESINAJA_INSTAGRAM_URL} target="_blank" rel="noopener noreferrer">{LESINAJA_INSTAGRAM_HANDLE}</a>
           </div>
         </div>
 
