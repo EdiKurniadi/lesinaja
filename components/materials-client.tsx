@@ -1,9 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowUpRight, Check } from "lucide-react";
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { Button } from "@/components/ui/button";
+import { ArrowUpRight, Check, ChevronRight, Clock3 } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CATEGORIES } from "@/lib/exam-rules";
 import { MATERIALS } from "@/lib/materials";
@@ -16,65 +14,59 @@ export function MaterialsClient() {
   function markOpened(id: string) {
     updateLearningState((learning) => ({
       ...learning,
-      topicProgress: {
-        ...learning.topicProgress,
-        [id]: { opened: true, completed: learning.topicProgress[id]?.completed ?? false, updatedAt: Date.now() },
-      },
-    }));
-  }
-
-  function toggleComplete(id: string) {
-    updateLearningState((learning) => ({
-      ...learning,
-      topicProgress: {
-        ...learning.topicProgress,
-        [id]: { opened: true, completed: !learning.topicProgress[id]?.completed, updatedAt: Date.now() },
-      },
+      topicProgress: { ...learning.topicProgress, [id]: { opened: true, completed: learning.topicProgress[id]?.completed ?? false, updatedAt: Date.now() } },
     }));
   }
 
   return (
     <section className="border-b border-black p-5 sm:p-8 lg:p-10">
       <Tabs defaultValue="TWK">
-        <TabsList variant="line" className="mb-8 grid h-auto w-full grid-cols-3 border border-black p-0">
-          {CATEGORIES.map((category) => <TabsTrigger key={category} value={category} className="h-14 rounded-none border-r border-black text-base font-black last:border-r-0 data-[state=active]:bg-signal">{category}</TabsTrigger>)}
+        <TabsList className="material-category-tabs mb-8">
+          {CATEGORIES.map((category) => (
+            <TabsTrigger key={category} value={category} className="rounded-none font-mono text-sm font-black tracking-[.14em]">
+              {category}
+            </TabsTrigger>
+          ))}
         </TabsList>
-        {CATEGORIES.map((category) => (
-          <TabsContent key={category} value={category}>
-            <Accordion type="single" collapsible onValueChange={(value) => value && markOpened(value)} className="border-x border-t border-black">
-              {MATERIALS.filter((material) => material.category === category).map((material, index) => {
-                const progress = state.topicProgress[material.id];
-                return (
-                  <AccordionItem key={material.id} value={material.id} className="border-black bg-warm-white">
-                    <AccordionTrigger className="rounded-none px-5 py-6 hover:no-underline sm:px-7">
-                      <span className="flex min-w-0 items-center gap-5 text-left"><span className="font-mono text-xs">/{String(index + 1).padStart(2, "0")}</span><span><strong className="block text-xl sm:text-2xl">{material.title}</strong><span className="mt-1 block text-sm font-normal text-muted-foreground">{material.summary}</span></span></span>
-                      {progress?.completed && <span className="ml-auto mr-3 flex items-center gap-1 bg-signal px-2 py-1 font-mono text-[10px] uppercase"><Check className="size-3" /> Selesai</span>}
-                    </AccordionTrigger>
-                    <AccordionContent className="border-t border-black p-5 sm:p-7">
-                      <div className="grid gap-8 lg:grid-cols-[1fr_.7fr]">
-                        <div>
-                          <h3 className="font-mono text-xs font-bold uppercase tracking-[.14em]">Yang perlu diingat</h3>
-                          <ul className="mt-4 grid gap-3">
-                            {material.points.map((point) => <li key={point} className="flex gap-3 leading-relaxed"><span aria-hidden="true">→</span><span>{point}</span></li>)}
-                          </ul>
-                        </div>
-                        <aside className="border border-black bg-secondary p-5">
-                          <p className="font-mono text-xs font-bold uppercase tracking-[.14em]">Contoh</p>
-                          <p className="mt-3 leading-relaxed">{material.example}</p>
-                        </aside>
+
+        {CATEGORIES.map((category) => {
+          const categoryMaterials = MATERIALS.filter((material) => material.category === category);
+          return (
+            <TabsContent key={category} value={category} className="mt-0">
+              <div className="mb-5 flex items-end justify-between gap-4 border-b-2 border-black pb-4">
+                <div>
+                  <p className="font-mono text-xs font-bold uppercase tracking-[.14em] text-brand-red">Jalur baca {category}</p>
+                  <h2 className="mt-2 text-3xl font-black tracking-[-.04em] sm:text-4xl">{categoryMaterials.length} TOPIK UNTUK DIKUASAI</h2>
+                </div>
+                <p className="hidden max-w-52 text-right text-sm leading-relaxed text-muted-foreground md:block">Pilih satu topik untuk membuka materi lengkap per bab.</p>
+              </div>
+              <div className="grid gap-4 lg:grid-cols-2">
+                {categoryMaterials.map((material, index) => {
+                  const progress = state.topicProgress[material.id];
+                  return (
+                    <Link key={material.id} href={`/materi/${material.id}`} onClick={() => markOpened(material.id)} className="group relative block border-2 border-black bg-warm-white p-5 transition-[transform,background-color] hover:-translate-y-1 hover:bg-brand-blue focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-signal sm:p-7">
+                      <div className="flex items-start justify-between gap-4">
+                        <span className="flex size-10 shrink-0 items-center justify-center border-2 border-black bg-signal font-mono text-xs font-bold">/{String(index + 1).padStart(2, "0")}</span>
+                        {progress?.completed ? <span className="flex items-center gap-1 border border-black bg-signal px-2 py-1 font-mono text-[10px] font-bold uppercase text-black"><Check className="size-3" /> Selesai</span> : <span className="font-mono text-[10px] font-bold uppercase text-muted-foreground group-hover:text-white">Baca per bab</span>}
                       </div>
-                      <div className="mt-7 flex flex-wrap gap-3 border-t border-black pt-5">
-                        <Button type="button" variant={progress?.completed ? "outline" : "default"} className="rounded-none border-black" onClick={() => toggleComplete(material.id)}>{progress?.completed ? "Tandai belum selesai" : "Tandai selesai"}</Button>
-                        <Button asChild variant="outline" className="rounded-none border-black"><Link href={`/drill?category=${category}&topic=${encodeURIComponent(material.title)}`}>Drill topik ini <ArrowUpRight /></Link></Button>
+                      <h3 className="mt-10 text-3xl font-black tracking-[-.05em] group-hover:text-white">{material.title}</h3>
+                      <p className="mt-3 max-w-xl leading-relaxed text-muted-foreground group-hover:text-white/85">{material.summary}</p>
+                      <div className="mt-7 flex items-center justify-between border-t border-black pt-4 font-mono text-xs font-bold uppercase group-hover:text-white">
+                        <span className="flex items-center gap-2"><Clock3 className="size-4" /> {material.chapters?.length ?? 3} bab</span>
+                        <span className="flex items-center gap-1">Mulai baca <ChevronRight className="size-4 transition-transform group-hover:translate-x-1" /></span>
                       </div>
-                    </AccordionContent>
-                  </AccordionItem>
-                );
-              })}
-            </Accordion>
-          </TabsContent>
-        ))}
+                    </Link>
+                  );
+                })}
+              </div>
+            </TabsContent>
+          );
+        })}
       </Tabs>
+      <div className="mt-8 flex items-center gap-2 border-l-4 border-brand-red bg-brand-red-soft p-4 text-sm leading-relaxed">
+        <ArrowUpRight className="size-4 shrink-0" />
+        Materi dirancang sebagai ringkasan belajar. Setelah membaca, gunakan drill untuk menguji pemahamanmu.
+      </div>
     </section>
   );
 }

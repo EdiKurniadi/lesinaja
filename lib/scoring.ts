@@ -1,5 +1,5 @@
 import { CATEGORIES, EXAM_RULES } from "./exam-rules";
-import type { AttemptResult, Category, Question, TopicBreakdown } from "./types";
+import type { AttemptResult, Category, DrillStat, Question, TopicBreakdown } from "./types";
 
 export function choiceScore(question: Question, choiceId?: string): number {
   if (!choiceId) return 0;
@@ -8,6 +8,30 @@ export function choiceScore(question: Question, choiceId?: string): number {
 
 export function bestScore(question: Question): number {
   return Math.max(...question.choices.map((choice) => choice.score));
+}
+
+export function updateDrillStat(
+  previous: DrillStat | undefined,
+  question: Question,
+  choiceId: string,
+  replacedChoiceId?: string,
+  answeredAt = Date.now(),
+): DrillStat {
+  if (previous && replacedChoiceId) {
+    return {
+      ...previous,
+      earned: Math.max(0, previous.earned - choiceScore(question, replacedChoiceId) + choiceScore(question, choiceId)),
+      lastAnsweredAt: answeredAt,
+    };
+  }
+
+  const current = previous ?? { attempts: 0, earned: 0, possible: 0, lastAnsweredAt: 0 };
+  return {
+    attempts: current.attempts + 1,
+    earned: current.earned + choiceScore(question, choiceId),
+    possible: current.possible + bestScore(question),
+    lastAnsweredAt: answeredAt,
+  };
 }
 
 export function scoreAttempt(
@@ -21,10 +45,10 @@ export function scoreAttempt(
       const score = categoryQuestions.reduce((sum, question) => sum + choiceScore(question, answers[question.id]), 0);
       return [category, {
         score,
-        maximum: EXAM_RULES.maximumScores[category],
+        maximum: categoryQuestions.reduce((sum, question) => sum + bestScore(question), 0),
         answered: categoryQuestions.filter((question) => Boolean(answers[question.id])).length,
         total: categoryQuestions.length,
-        passed: score >= EXAM_RULES.passingScores[category],
+        passed: categoryQuestions.length > 0 && score >= EXAM_RULES.passingScores[category],
       }];
     }),
   ) as AttemptResult["scores"];
@@ -49,7 +73,7 @@ export function scoreAttempt(
     answers,
     scores,
     totalScore,
-    passed: CATEGORIES.every((category) => scores[category].passed),
+    passed: CATEGORIES.filter((category) => scores[category].total > 0).every((category) => scores[category].passed),
     topicBreakdown,
   };
 }

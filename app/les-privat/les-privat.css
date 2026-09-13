@@ -170,12 +170,6 @@
 .private-final .private-button { color: var(--private-ink); border-color: var(--private-white); background: var(--private-white); }
 .private-final .private-button:hover { border-color: var(--private-acid); background: var(--private-acid); }
 
-.private-footer { padding: 34px 0 80px; color: var(--private-white); background: var(--private-ink); }
-.private-footer-grid { display: grid; grid-template-columns: 1fr auto auto auto; gap: 40px; align-items: start; padding-top: 22px; border-top: 1px solid rgba(255, 255, 255, .35); font-size: .75rem; letter-spacing: .05em; text-transform: uppercase; }
-.private-footer-grid a { border-bottom: 1px solid rgba(255, 255, 255, .55); }
-.private-footer-grid a:hover { color: var(--private-acid); }
-.private-footer-brand img { width: 180px; height: auto; margin-bottom: 12px; filter: brightness(0) invert(1); }
-.private-footer-brand span { color: rgba(255, 255, 255, .62); }
 .private-mobile-action { display: none; }
 
 .private-ready [data-reveal] { opacity: 0; transform: translateY(28px); transition: opacity .75s, transform .75s cubic-bezier(.2, .7, .2, 1); }
@@ -211,12 +205,8 @@
   .private-landing { padding-bottom: 72px; }
   .private-shell { width: calc(100% - 28px); }
   .private-section { padding: 88px 0; }
-  .private-subnav-inner { min-height: 48px; overflow-x: auto; scrollbar-width: none; }
-  .private-subnav-inner::-webkit-scrollbar { display: none; }
-  .private-subnav-inner > span,
-  .private-subnav-cta { display: none; }
-  .private-subnav-inner > div { gap: 22px; margin: 0; white-space: nowrap; }
-  .private-hero { padding-top: 64px; }
+  .private-subnav { display: none; }
+  .private-hero { min-height: calc(100svh - 64px); padding-top: 64px; }
   .private-hero h1 { font-size: clamp(3.75rem, 18vw, 7rem); line-height: .82; }
   .private-hero-grid { gap: 60px; }
   .private-hero-foot { grid-template-columns: 1fr; gap: 10px; }
@@ -238,7 +228,6 @@
   .private-format-layout { grid-template-columns: 1fr; }
   .private-format-layout ul { grid-template-columns: 1fr; }
   .private-faq-list article > div p { padding-left: 0; }
-  .private-footer-grid { grid-template-columns: 1fr; gap: 18px; }
   .private-mobile-action { position: fixed; right: 12px; bottom: 12px; left: 12px; z-index: 70; min-height: 50px; display: flex; align-items: center; justify-content: center; gap: 12px; border: 1px solid var(--private-ink); color: var(--private-ink); background: var(--private-acid); font-size: .8rem; font-weight: 700; letter-spacing: .055em; text-transform: uppercase; box-shadow: 6px 6px 0 var(--private-ink); }
 }
 

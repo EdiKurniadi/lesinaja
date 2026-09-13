@@ -5,7 +5,7 @@ import { ArrowRight, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select";
 import { DRILL_PACKAGES, categoryTopics, getDrillPackage, getQuestion } from "@/lib/content";
-import { bestScore, choiceScore } from "@/lib/scoring";
+import { bestScore, choiceScore, updateDrillStat } from "@/lib/scoring";
 import { clearSessionOpen, markSessionOpen, shouldOpenSession } from "@/lib/session-navigation";
 import { updateLearningState } from "@/lib/storage";
 import type { ActiveSession, Category, DrillPackage, Question } from "@/lib/types";
@@ -78,18 +78,16 @@ export function DrillClient() {
   }
 
   function select(choiceId: string) {
-    if (!session || !current || session.answers[current.id]) return;
-    const earned = choiceScore(current, choiceId);
-    const possible = bestScore(current);
+    if (!session || !current) return;
+    const previousChoiceId = session.answers[current.id];
     updateLearningState((learning) => {
       if (!learning.activeDrill) return learning;
-      const previous = learning.drillStats[current.id] ?? { attempts: 0, earned: 0, possible: 0, lastAnsweredAt: 0 };
       return {
         ...learning,
         activeDrill: { ...learning.activeDrill, answers: { ...learning.activeDrill.answers, [current.id]: choiceId } },
         drillStats: {
           ...learning.drillStats,
-          [current.id]: { attempts: previous.attempts + 1, earned: previous.earned + earned, possible: previous.possible + possible, lastAnsweredAt: Date.now() },
+          [current.id]: updateDrillStat(learning.drillStats[current.id], current, choiceId, previousChoiceId),
         },
       };
     });
@@ -256,7 +254,7 @@ export function DrillClient() {
         <p className="font-mono text-xs font-bold uppercase tracking-[.14em]">Soal {session.currentIndex + 1} / {questions.length}</p>
         <p className="hidden font-mono text-[10px] uppercase text-muted-foreground sm:block">Pilih A–E · → lanjut setelah menjawab</p>
       </div>
-      <QuestionCard question={current} selectedId={selectedId} onSelect={select} locked={Boolean(selectedId)} />
+      <QuestionCard question={current} selectedId={selectedId} onSelect={select} />
     </ExamShell>
   );
 }

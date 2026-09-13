@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { ArrowUpRight, Clock3, Target } from "lucide-react";
+import { ArrowUpRight, Clock3, MapPin, Target } from "lucide-react";
+import { BrandFooter } from "@/components/brand-footer";
 import { SiteHeader } from "@/components/site-header";
 import { HomeProgress } from "@/components/home-progress";
 
@@ -51,11 +52,41 @@ export default function Home() {
 
         <HomeProgress />
 
-        <footer className="flex flex-col gap-3 border-t border-black p-5 text-xs sm:flex-row sm:items-center sm:justify-between sm:p-7">
-          <p>Latihan mandiri — bukan situs resmi BKN.</p>
-          <p className="font-mono uppercase tracking-wider">Acuan SKD CPNS TA 2024</p>
-        </footer>
+        <section className="grid border-t border-black lg:grid-cols-[.78fr_1.22fr]" aria-labelledby="home-private-lessons-title">
+          <div className="flex flex-col justify-between border-b border-black bg-brand-red p-5 text-white sm:p-8 lg:border-b-0 lg:border-r lg:p-10">
+            <p className="font-mono text-xs font-bold uppercase tracking-[.16em]">04 / Les Privat</p>
+            <div className="py-12 sm:py-16">
+              <h2 id="home-private-lessons-title" className="text-4xl font-black leading-[.92] tracking-[-.055em] sm:text-6xl">BELAJAR<br />LEBIH<br />TERARAH.</h2>
+            </div>
+            <p className="flex items-center gap-2 font-bold"><MapPin className="size-5" aria-hidden="true" /> Offline di Pontianak · Online tersedia</p>
+          </div>
+
+          <div className="bg-warm-white p-5 sm:p-8 lg:p-10">
+            <p className="max-w-2xl text-xl font-bold leading-snug sm:text-2xl">Belajar langsung bersama pengajar untuk memahami konsep, membedah kesalahan, dan menentukan fokus latihan berikutnya.</p>
+            <div className="mt-9 grid border border-black sm:grid-cols-3">
+              {[
+                ["01", "TWK", "Pahami konsep kebangsaan."],
+                ["02", "TIU", "Urai cara kerja setiap soal."],
+                ["03", "TKP", "Bedah pilihan dan alasannya."],
+              ].map(([number, category, description]) => (
+                <div key={category} className="border-b border-black p-4 last:border-b-0 sm:border-b-0 sm:border-r sm:last:border-r-0">
+                  <span className="font-mono text-[11px] font-bold text-brand-red">/{number}</span>
+                  <h3 className="mt-5 text-2xl font-black">{category}</h3>
+                  <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{description}</p>
+                </div>
+              ))}
+            </div>
+            <div className="mt-8 flex flex-wrap items-center justify-between gap-5">
+              <p className="max-w-md text-sm leading-relaxed text-muted-foreground">Kelas disesuaikan dengan kebutuhan belajar dan dievaluasi melalui latihan serta try out.</p>
+              <Link href="/les-privat" className="group inline-flex min-h-12 items-center gap-3 border border-black bg-brand-blue px-5 font-bold text-white transition-colors hover:bg-brand-blue-hover focus-visible:outline-signal">
+                Lihat Les Privat
+                <ArrowUpRight className="size-5 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" aria-hidden="true" />
+              </Link>
+            </div>
+          </div>
+        </section>
       </section>
+      <BrandFooter showDisclaimer />
     </main>
   );
 }

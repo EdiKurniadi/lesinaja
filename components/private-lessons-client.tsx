@@ -2,9 +2,10 @@
 
 import Image from "next/image";
 import { useEffect, useState } from "react";
+import { BrandFooter } from "@/components/brand-footer";
+import { LESINAJA_WHATSAPP_URL } from "@/lib/contact";
 
-const whatsappMessage = encodeURIComponent("Halo Lesinaja, saya sedang persiapan SKD CPNS dan ingin tanya soal kelasnya. Bisa kirim info jadwal dan format belajar yang tersedia?");
-const whatsappUrl = `https://wa.me/6281263699885?text=${whatsappMessage}`;
+const whatsappUrl = LESINAJA_WHATSAPP_URL;
 
 const issues = [
   ["Bingung mulai dari mana.", "Semua terasa penting. Akhirnya belajarnya loncat-loncat."],
@@ -191,9 +192,7 @@ export function PrivateLessonsClient() {
         <div className="private-shell"><h2 data-reveal>Nggak perlu nebak lagi harus belajar apa.</h2><div data-reveal><p>Ceritakan target dan bagian tersulit. Kami bantu pilih fokus dan kelasnya.</p><a className="private-button" href={whatsappUrl} target="_blank" rel="noopener noreferrer">Konsultasi via WhatsApp</a></div></div>
       </section>
 
-      <footer className="private-footer">
-        <div className="private-shell private-footer-grid"><div className="private-footer-brand"><Image src="/les-privat/lesinaja-logo.png" width={1555} height={401} alt="Lesinaja" /><span>Bimbel SKD CPNS · Pontianak</span></div><div>WhatsApp<br /><a href={whatsappUrl} target="_blank" rel="noopener noreferrer">0812 6369 9885</a></div><div>Instagram<br /><a href="https://instagram.com/lesinaja" target="_blank" rel="noopener noreferrer">@lesinaja</a></div><div>© {new Date().getFullYear()}</div></div>
-      </footer>
+      <BrandFooter containerClassName="private-shell" />
 
       <a className="private-mobile-action" href={whatsappUrl} target="_blank" rel="noopener noreferrer">Tanya kelas <span aria-hidden="true">↗</span></a>
     </div>

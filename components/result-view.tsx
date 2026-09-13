@@ -3,7 +3,7 @@
 import { CheckCircle2, XCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { CATEGORIES, EXAM_RULES } from "@/lib/exam-rules";
-import { choiceScore } from "@/lib/scoring";
+import { bestScore, choiceScore } from "@/lib/scoring";
 import type { AttemptResult, Question } from "@/lib/types";
 
 function duration(seconds: number) {
@@ -13,15 +13,18 @@ function duration(seconds: number) {
 }
 
 export function ResultView({ result, questions, onClose }: { result: AttemptResult; questions: Question[]; onClose?: () => void }) {
+  const activeCategories = CATEGORIES.filter((category) => questions.some((question) => question.category === category));
+  const isMiniTiu = activeCategories.length === 1 && activeCategories[0] === "TIU";
+  const maximum = questions.reduce((sum, question) => sum + bestScore(question), 0);
   return (
     <section className="border-t border-black">
       <div className={`grid gap-6 border-b border-black p-5 sm:p-8 lg:grid-cols-[1fr_auto] lg:p-10 ${result.passed ? "bg-signal" : "bg-brand-red-soft"}`}>
         <div>
           <p className="font-mono text-xs font-bold uppercase tracking-[.14em]">Hasil try out</p>
-          <h2 className="mt-4 text-5xl font-black tracking-[-.06em] sm:text-7xl">{result.totalScore}<span className="text-2xl">/550</span></h2>
+          <h2 className="mt-4 text-5xl font-black tracking-[-.06em] sm:text-7xl">{result.totalScore}<span className="text-2xl">/{maximum}</span></h2>
           <p className="mt-3 flex items-center gap-2 text-lg font-bold">
             {result.passed ? <CheckCircle2 /> : <XCircle />}
-            {result.passed ? "Memenuhi seluruh ambang batas" : "Belum memenuhi seluruh ambang batas"}
+            {result.passed ? (isMiniTiu ? "Memenuhi target latihan TIU" : "Memenuhi seluruh ambang batas") : (isMiniTiu ? "Belum mencapai target latihan TIU" : "Belum memenuhi seluruh ambang batas")}
           </p>
         </div>
         <div className="self-end font-mono text-xs uppercase leading-relaxed">
@@ -30,14 +33,14 @@ export function ResultView({ result, questions, onClose }: { result: AttemptResu
         </div>
       </div>
 
-      <div className="grid border-b border-black md:grid-cols-3">
-        {CATEGORIES.map((category) => {
+      <div className={`grid border-b border-black ${activeCategories.length > 1 ? "md:grid-cols-3" : ""}`}>
+        {activeCategories.map((category) => {
           const score = result.scores[category];
           return (
             <article key={category} className="border-b border-black p-5 last:border-b-0 md:border-b-0 md:border-r md:last:border-r-0 sm:p-7">
               <div className="flex items-center justify-between"><h3 className="text-3xl font-black">{category}</h3><span>{score.passed ? "Lolos" : "Belum"}</span></div>
               <p className="mt-8 text-5xl font-black tracking-[-.05em]">{score.score}</p>
-              <p className="mt-1 font-mono text-xs">Ambang {EXAM_RULES.passingScores[category]} · Maks {score.maximum}</p>
+              <p className="mt-1 font-mono text-xs">{isMiniTiu ? "Target latihan" : "Ambang"} {EXAM_RULES.passingScores[category]} · Maks {score.maximum}</p>
             </article>
           );
         })}
@@ -68,7 +71,7 @@ export function ResultView({ result, questions, onClose }: { result: AttemptResu
             const selected = result.answers[question.id];
             const earned = choiceScore(question, selected);
             const selectedLabel = question.choices.find((choice) => choice.id === selected)?.label ?? "Tidak dijawab";
-            const best = Math.max(...question.choices.map((choice) => choice.score));
+            const best = bestScore(question);
             return (
               <details key={question.id} className="border border-black bg-warm-white">
                 <summary className="flex cursor-pointer list-none items-center gap-4 p-4 font-bold">

@@ -31,7 +31,7 @@ function PaletteButton({ session, question, index, onMove, compact = false }: Om
       onClick={() => onMove(index)}
       aria-current={active ? "step" : undefined}
       aria-label={`Buka soal ${index + 1}, ${answered ? "sudah dijawab" : "belum dijawab"}${flagged ? ", ditandai ragu-ragu" : ""}`}
-      className={`relative shrink-0 rounded-none border-black p-0 font-mono text-xs font-bold shadow-none ${compact ? "size-8" : "size-10"} ${answered ? "bg-brand-blue text-white hover:bg-brand-blue-hover hover:text-white" : "bg-warm-white"} ${active ? "outline-[3px] outline-offset-2 outline-brand-red" : ""}`}
+      className={`relative shrink-0 rounded-none p-0 font-mono text-xs font-bold shadow-none ${compact ? "size-9" : "size-10"} ${answered ? "bg-brand-blue text-white hover:bg-brand-blue-hover hover:text-white" : "bg-warm-white"} ${active ? "border-[3px] border-brand-red" : "border-black"}`}
     >
       {index + 1}
       {answered && <Check aria-hidden="true" className="absolute -bottom-1 -right-1 size-3 border border-black bg-warm-white text-brand-blue" />}
@@ -231,8 +231,8 @@ export function ExamShell({
               {quickIndexes.map((index) => <PaletteButton key={questions[index].id} session={session} question={questions[index]} index={index} onMove={onMove} compact />)}
             </div>
             <Sheet open={paletteOpen} onOpenChange={setPaletteOpen}>
-              <SheetTrigger asChild><Button type="button" variant="outline" size="icon" className="size-9 rounded-none border-black" aria-label="Buka semua nomor"><Grid3X3 /></Button></SheetTrigger>
-              <SheetContent side="right" showCloseButton={false} className="h-dvh w-full max-w-none gap-0 rounded-none border-black bg-background p-0 sm:max-w-md">
+              <SheetTrigger asChild><Button type="button" variant="outline" size="icon" className="size-11 rounded-none border-black" aria-label="Buka semua nomor"><Grid3X3 /></Button></SheetTrigger>
+              <SheetContent side="right" showCloseButton={false} overlayClassName="z-[80]" className="z-[81] h-dvh w-full max-w-none gap-0 rounded-none border-l-2 border-black bg-background p-0 sm:max-w-md">
                 <SheetHeader className="flex-row items-start justify-between border-b border-black p-5 text-left">
                   <div><SheetTitle className="text-2xl font-black">SEMUA NOMOR</SheetTitle><SheetDescription>{answered} dijawab · {unanswered} belum dijawab{flagged ? ` · ${flagged} ragu-ragu` : ""}</SheetDescription></div>
                   <SheetClose asChild><Button type="button" variant="outline" size="icon" className="rounded-none border-black" aria-label="Tutup daftar soal"><X /></Button></SheetClose>

@@ -29,6 +29,7 @@ export interface ExamPackage {
   description: string;
   questions: Question[];
   durationMinutes: number;
+  kind?: "full" | "mini";
 }
 
 export interface DrillPackage {
@@ -111,4 +112,16 @@ export interface MaterialTopic {
   summary: string;
   points: string[];
   example: string;
+  chapters?: MaterialChapter[];
+}
+
+export interface MaterialChapter {
+  title: string;
+  intro: string;
+  sections: Array<{
+    heading: string;
+    body: string;
+    bullets?: string[];
+  }>;
+  callout?: string;
 }

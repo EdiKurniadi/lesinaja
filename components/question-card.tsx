@@ -36,9 +36,9 @@ export function QuestionCard({
           const stateClass = showBest
             ? "bg-signal text-black hover:bg-signal"
             : showWrong
-              ? "bg-brand-red text-white hover:bg-brand-red"
+              ? "bg-brand-red text-white hover:bg-brand-red hover:text-white focus-visible:text-white active:text-white"
               : selected
-                ? "bg-brand-blue text-white hover:bg-brand-blue-hover"
+                ? "bg-brand-blue text-white hover:bg-brand-blue-hover hover:text-white focus-visible:text-white active:text-white"
                 : "bg-warm-white";
           return (
             <Button

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { DRILL_PACKAGES, getDrillPackage, getPackage } from "@/lib/content";
+import { ALL_TRYOUT_PACKAGES, DRILL_PACKAGES, getDrillPackage, getPackage } from "@/lib/content";
 import { clearSessionOpen, markSessionOpen } from "@/lib/session-navigation";
 import { readLearningState, updateLearningState } from "@/lib/storage";
 import type { ActiveSession } from "@/lib/types";
@@ -49,8 +49,8 @@ export function WebMcpBridge() {
     void register({
       name: "start_tryout",
       title: "Mulai try out SKD",
-      description: "Membuka konfirmasi paket try out 110 soal sebelum timer 100 menit dimulai.",
-      inputSchema: { type: "object", properties: { packageId: { type: "string", enum: ["paket-a", "paket-b"] } }, required: ["packageId"], additionalProperties: false },
+      description: "Membuka konfirmasi paket try out sebelum timer paket terpilih dimulai.",
+      inputSchema: { type: "object", properties: { packageId: { type: "string", enum: ALL_TRYOUT_PACKAGES.map((item) => item.id) } }, required: ["packageId"], additionalProperties: false },
       annotations: { readOnlyHint: false, untrustedContentHint: false },
       execute(input) {
         const packageId = (input as { packageId?: string })?.packageId;

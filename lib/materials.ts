@@ -73,4 +73,63 @@ export const MATERIALS: MaterialTopic[] = [
     points: ["Hindari asumsi berdasarkan identitas seseorang.", "Cari kebutuhan aksesibilitas secara langsung dan sopan.", "Gunakan perbedaan perspektif untuk memperbaiki keputusan."],
     example: "Dalam rapat lintas daerah, beri ruang yang setara dan pastikan istilah lokal dijelaskan kepada semua peserta.",
   },
+  {
+    id: "tkp-anti-radikalisme", category: "TKP", title: "Anti Radikalisme",
+    summary: "Kenali respons ASN yang tenang, inklusif, berbasis fakta, dan mengikuti prosedur ketika menghadapi intoleransi atau provokasi.",
+    points: ["Bedakan kritik konstruktif dari ajakan kebencian, intimidasi, atau kekerasan.", "Dahulukan verifikasi informasi, dialog yang aman, dan jalur pelaporan resmi.", "Jawaban TKP terbaik bersifat proporsional: tegas pada ancaman, tanpa melabeli atau menghakimi kelompok."],
+    example: "Saat menerima pesan provokatif tanpa sumber jelas, jangan meneruskan pesan. Periksa sumber resmi, luruskan secara santun bila perlu, dan laporkan melalui jalur yang tepat jika ada ancaman serius.",
+    chapters: [
+      {
+        title: "Memahami spektrum sikap",
+        intro: "Soal anti radikalisme meminta kamu membaca situasi secara jernih. Tidak semua kritik atau perbedaan pandangan merupakan ancaman.",
+        sections: [
+          { heading: "Kritik, perubahan sah, dan ekstremisme", body: "Kritik yang berbasis data dan disampaikan untuk memperbaiki layanan adalah bagian dari ruang demokrasi. Perubahan sosial yang dilakukan melalui hukum, edukasi, dan partisipasi juga sah. Yang perlu diwaspadai adalah ajakan memaksakan kehendak, menolak toleransi, atau memakai intimidasi dan kekerasan.", bullets: ["Jangan samakan kritik dengan radikalisme.", "Jangan memberi label kepada orang atau kelompok hanya karena identitas atau perbedaan pendapat.", "Fokus pada perilaku, bukti, risiko, dan langkah yang proporsional."] },
+          { heading: "Rantai yang perlu dicegah", body: "Intoleransi dapat berkembang menjadi polarisasi dan tindakan yang membahayakan bila dibiarkan. Dalam soal, cari pilihan yang mencegah eskalasi sejak awal tanpa menciptakan konflik baru." },
+        ],
+        callout: "Pegang prinsip ini: perbedaan pendapat tidak otomatis salah; ancaman, diskriminasi, dan kekerasan harus ditangani secara aman dan prosedural.",
+      },
+      {
+        title: "Nilai kebangsaan dalam tindakan",
+        intro: "Pancasila, UUD 1945, NKRI, dan Bhinneka Tunggal Ika hadir dalam TKP sebagai arah tindakan, bukan sekadar hafalan.",
+        sections: [
+          { heading: "Kompas respons ASN", body: "Pilih tindakan yang menjaga persatuan, melayani warga secara setara, menghormati hukum, dan melindungi ruang kerja yang aman.", bullets: ["Inklusif: tidak membeda-bedakan layanan berdasarkan latar belakang.", "Tenang: tidak membalas provokasi dengan provokasi.", "Konstitusional: gunakan SOP, atasan, dan pihak berwenang sesuai tingkat risiko."] },
+          { heading: "Tujuan yang dicari soal", body: "Respons terbaik membantu menjaga ketertiban, mencegah disinformasi, dan membuka jalan dialog atau penanganan resmi. Respons itu tidak mengorbankan hak warga atau profesionalisme ASN." },
+        ],
+      },
+      {
+        title: "Membaca pola jawaban skor tinggi",
+        intro: "Pilihan bernilai tinggi biasanya memadukan ketenangan, verifikasi fakta, kepedulian, dan tindakan yang jelas.",
+        sections: [
+          { heading: "Ciri respons yang kuat", body: "Saat opsi terlihat sama-sama baik, pilih yang paling lengkap dan proporsional: memeriksa fakta, meredam risiko, memberi respons yang pantas, lalu memakai prosedur bila diperlukan.", bullets: ["Tegas terhadap kekerasan dan diskriminasi.", "Santun saat mengingatkan atau berdialog.", "Tidak pasif ketika risiko dapat meluas.", "Tidak mengambil tindakan berlebihan atau main hakim sendiri."] },
+          { heading: "Waspadai jebakan", body: "Opsi yang emosional, mempermalukan orang di ruang publik, menyebarkan ulang konten provokatif, atau langsung memberi sanksi tanpa dasar yang cukup biasanya kurang tepat. Pilihan diam total juga dapat kurang kuat ketika masalah membutuhkan tindak lanjut." },
+        ],
+        callout: "Urutkan pilihan dari yang paling menjaga keselamatan, persatuan, dan prosedur; bukan dari yang terdengar paling keras.",
+      },
+      {
+        title: "Verifikasi dan literasi digital",
+        intro: "Banyak skenario TKP memakai pesan berantai, unggahan media sosial, atau informasi yang belum jelas sumbernya.",
+        sections: [
+          { heading: "Sebelum merespons", body: "Periksa asal informasi, tanggal, konteks, dan sumber resmi. Jangan memperkuat jangkauan konten bermasalah dengan meneruskannya atau membalas secara emosional.", bullets: ["Tahan diri sebelum membagikan.", "Gunakan rujukan resmi atau kanal pemeriksa fakta.", "Luruskan secara santun bila situasinya aman dan perlu.", "Simpan informasi seperlunya untuk pelaporan, bukan untuk disebarluaskan."] },
+          { heading: "Kelola ruang komunikasi", body: "Dalam ruang kerja, arahkan percakapan kembali ke tujuan grup dan SOP. Moderasi konten yang melanggar aturan melalui mekanisme yang berlaku, lalu hadirkan informasi yang akurat dan menenangkan." },
+        ],
+      },
+      {
+        title: "Dialog, keamanan, dan pelaporan",
+        intro: "Tingkat respons harus mengikuti risiko. Dialog cocok untuk ketegangan awal; ancaman nyata memerlukan koordinasi resmi.",
+        sections: [
+          { heading: "Gunakan tangga respons", body: "Mulailah dari langkah yang paling aman dan efektif: klarifikasi fakta, dialog personal atau mediasi bila tepat, lalu eskalasi ke atasan atau pihak berwenang ketika terdapat ancaman serius.", bullets: ["Konflik pendapat: tenangkan suasana dan kembalikan pada tujuan bersama.", "Konten intoleran: ingatkan dengan pantas, catat sesuai kebutuhan, dan ikuti SOP.", "Ajakan kekerasan atau bahaya langsung: utamakan keselamatan, amankan informasi, dan laporkan melalui jalur resmi."] },
+          { heading: "Hindari dua ekstrem", body: "Jangan membiarkan risiko nyata tanpa tindakan, tetapi jangan pula mengonfrontasi sendirian, memviralkan temuan, atau melakukan tindakan di luar kewenangan." },
+        ],
+      },
+      {
+        title: "Ringkasan strategi ujian",
+        intro: "Gunakan daftar cek ini saat menghadapi soal situasional anti radikalisme.",
+        sections: [
+          { heading: "Lima pertanyaan cepat", body: "Baca situasi, lalu uji setiap opsi dengan lima pertanyaan:", bullets: ["Apakah tindakan ini menjaga kemanusiaan dan persatuan?", "Apakah informasi sudah diverifikasi?", "Apakah responsnya tenang dan tidak diskriminatif?", "Apakah tindakan ini cukup proaktif tanpa berlebihan?", "Apakah jalur dan kewenangannya tepat?"] },
+          { heading: "Kalimat kunci", body: "Pilih respons yang tenang, verifikatif, inklusif, dialogis, dan prosedural. Kelima unsur ini membantu membedakan opsi yang sekadar reaktif dari opsi yang matang secara profesional." },
+        ],
+        callout: "Setelah memahami pola ini, lanjutkan dengan latihan situasional TKP untuk membiasakan diri membandingkan kualitas setiap opsi.",
+      },
+    ],
+  },
 ];

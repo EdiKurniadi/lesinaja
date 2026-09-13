@@ -1,4 +1,5 @@
 import { EXAM_RULES } from "./exam-rules";
+import { MINI_TIU_QUESTIONS } from "./mini-tiu-content";
 import type { Category, Choice, DrillPackage, ExamPackage, Question } from "./types";
 
 type TwkSeed = [string, string, string[], string, string];
@@ -184,9 +185,22 @@ const packageA = [...makeTwk("a", 1), ...makeTiu("a", 1), ...makeTkp("a", 1)];
 const packageB = [...makeTwk("b", 2), ...makeTiu("b", 2), ...makeTkp("b", 2)];
 
 export const EXAM_PACKAGES: ExamPackage[] = [
-  { id: "paket-a", title: "Paket A — Fondasi", description: "Simulasi lengkap untuk mengukur titik awalmu.", questions: packageA, durationMinutes: EXAM_RULES.durationMinutes },
-  { id: "paket-b", title: "Paket B — Pemantapan", description: "Simulasi kedua dengan variasi konteks dan angka baru.", questions: packageB, durationMinutes: EXAM_RULES.durationMinutes },
+  { id: "paket-a", kind: "full", title: "Paket A — Fondasi", description: "Simulasi lengkap untuk mengukur titik awalmu.", questions: packageA, durationMinutes: EXAM_RULES.durationMinutes },
+  { id: "paket-b", kind: "full", title: "Paket B — Pemantapan", description: "Simulasi kedua dengan variasi konteks dan angka baru.", questions: packageB, durationMinutes: EXAM_RULES.durationMinutes },
 ];
+
+export const MINI_TRYOUT_PACKAGES: ExamPackage[] = [
+  {
+    id: "mini-tiu-kedinasan",
+    kind: "mini",
+    title: "Mini TO TIU — Kedinasan",
+    description: "30 soal verbal dan numerik untuk melatih kecepatan dan ketelitian TIU.",
+    questions: MINI_TIU_QUESTIONS,
+    durationMinutes: 35,
+  },
+];
+
+export const ALL_TRYOUT_PACKAGES = [...EXAM_PACKAGES, ...MINI_TRYOUT_PACKAGES];
 
 const DRILL_TOPICS: Record<Category, string[]> = {
   TWK: ["Pancasila", "UUD 1945", "NKRI & Bhinneka", "Integritas & Bela Negara"],
@@ -220,7 +234,7 @@ export const DRILL_PACKAGES: DrillPackage[] = (Object.entries(DRILL_TOPICS) as [
 
 export const DRILL_QUESTIONS: Question[] = DRILL_PACKAGES.flatMap((drillPackage) => drillPackage.questions);
 
-export const ALL_QUESTIONS = [...DRILL_QUESTIONS, ...packageA, ...packageB];
+export const ALL_QUESTIONS = [...DRILL_QUESTIONS, ...packageA, ...packageB, ...MINI_TIU_QUESTIONS];
 const questionMap = new Map(ALL_QUESTIONS.map((question) => [question.id, question]));
 
 export function getQuestion(questionId: string): Question | undefined {
@@ -228,7 +242,7 @@ export function getQuestion(questionId: string): Question | undefined {
 }
 
 export function getPackage(packageId: string): ExamPackage | undefined {
-  return EXAM_PACKAGES.find((item) => item.id === packageId);
+  return ALL_TRYOUT_PACKAGES.find((item) => item.id === packageId);
 }
 
 export function getDrillPackage(packageId: string): DrillPackage | undefined {
@@ -257,6 +271,11 @@ export function validateContent(): string[] {
       const count = item.questions.filter((question) => question.category === category).length;
       if (count !== EXAM_RULES.composition[category]) errors.push(`${item.id} ${category} berisi ${count} soal`);
     });
+  }
+  for (const item of MINI_TRYOUT_PACKAGES) {
+    if (item.durationMinutes !== 35) errors.push(`${item.id} harus berdurasi 35 menit`);
+    if (item.questions.length !== 30) errors.push(`${item.id} berisi ${item.questions.length} soal`);
+    if (item.questions.some((question) => question.category !== "TIU")) errors.push(`${item.id} harus hanya berisi soal TIU`);
   }
   for (const item of DRILL_PACKAGES) {
     if (item.questions.length !== 10) errors.push(`${item.id} berisi ${item.questions.length} soal`);

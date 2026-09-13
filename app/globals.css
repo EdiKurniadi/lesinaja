@@ -76,9 +76,96 @@ button, a { -webkit-tap-highlight-color: transparent; }
 .action-row > span { display: flex; align-items: center; gap: .75rem; }
 .action-row:hover { background: var(--brand-red); color: var(--warm-white); }
 
+/* Material navigation overrides the compact height from the shared tabs
+   primitive. Both tab bars grow with their content and never scroll inside. */
+.material-category-tabs {
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  width: 100% !important;
+  height: 4rem !important;
+  min-height: 4rem;
+  align-items: stretch !important;
+  gap: .25rem !important;
+  overflow: visible !important;
+  border: 2px solid var(--foreground);
+  border-radius: 0 !important;
+  padding: .25rem !important;
+  background: var(--brand-blue) !important;
+}
+
+.material-category-tabs [data-slot="tabs-trigger"] {
+  width: 100%;
+  height: 100% !important;
+  min-height: 0;
+  padding: .75rem 1rem !important;
+  border: 2px solid transparent !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  color: var(--warm-white) !important;
+  font-size: .875rem;
+  line-height: 1.25rem;
+}
+
+.material-chapter-tabs {
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  width: 100% !important;
+  height: auto !important;
+  min-height: 3rem;
+  align-items: stretch !important;
+  gap: .375rem !important;
+  overflow: visible !important;
+  border-radius: 0 !important;
+  padding: 0 !important;
+  background: transparent !important;
+}
+
+.material-chapter-tabs [data-slot="tabs-trigger"] {
+  width: 100%;
+  height: 3rem !important;
+  min-height: 3rem;
+  min-width: 0;
+  padding: .625rem .75rem !important;
+  border: 2px solid color-mix(in srgb, var(--warm-white) 75%, transparent) !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  color: var(--warm-white) !important;
+  font-size: .75rem;
+  line-height: 1rem;
+}
+
+.material-category-tabs [data-slot="tabs-trigger"]::after,
+.material-chapter-tabs [data-slot="tabs-trigger"]::after {
+  display: none !important;
+}
+
+.material-category-tabs [data-slot="tabs-trigger"]:hover,
+.material-chapter-tabs [data-slot="tabs-trigger"]:hover {
+  background: color-mix(in srgb, var(--warm-white) 16%, transparent) !important;
+  color: var(--warm-white) !important;
+}
+
+.material-category-tabs [data-slot="tabs-trigger"][data-state="active"],
+.material-chapter-tabs [data-slot="tabs-trigger"][data-state="active"] {
+  border-color: var(--foreground) !important;
+  background: var(--signal) !important;
+  color: var(--foreground) !important;
+}
+
+.material-category-tabs [data-slot="tabs-trigger"]:focus-visible,
+.material-chapter-tabs [data-slot="tabs-trigger"]:focus-visible {
+  outline: 3px solid var(--warm-white) !important;
+  outline-offset: -5px;
+}
+
+@media (min-width: 640px) {
+  .material-chapter-tabs {
+    grid-template-columns: repeat(auto-fit, minmax(5.5rem, 1fr));
+  }
+}
+
 @media (max-width: 640px) {
   .page-shell { width: calc(100% - 16px); }
-  .nav-link { min-width: 82px; padding-inline: .75rem; font-size: .68rem; }
   .text-stroke { -webkit-text-stroke-width: 1.5px; }
 }
 

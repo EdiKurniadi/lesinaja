@@ -1,8 +1,8 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { DRILL_PACKAGES, EXAM_PACKAGES, validateContent } from "../lib/content";
+import { DRILL_PACKAGES, EXAM_PACKAGES, MINI_TRYOUT_PACKAGES, validateContent } from "../lib/content";
 import { EXAM_RULES } from "../lib/exam-rules";
-import { scoreAttempt } from "../lib/scoring";
+import { scoreAttempt, updateDrillStat } from "../lib/scoring";
 
 function answerWithScore(question: (typeof EXAM_PACKAGES)[number]["questions"][number], score: number) {
   return question.choices.find((choice) => choice.score === score)?.id;
@@ -67,4 +67,29 @@ test("soal kosong bernilai nol", () => {
   const result = scoreAttempt(EXAM_PACKAGES[0].questions, {}, { id: "empty", packageId: "paket-a", startedAt: 0, completedAt: 1000 });
   assert.equal(result.totalScore, 0);
   assert.equal(result.passed, false);
+});
+
+test("mengganti jawaban drill memperbarui skor tanpa menambah percobaan", () => {
+  const question = DRILL_PACKAGES[0].questions[0];
+  const correct = answerWithScore(question, 5)!;
+  const wrong = answerWithScore(question, 0)!;
+  const first = updateDrillStat(undefined, question, correct, undefined, 1000);
+  const replaced = updateDrillStat(first, question, wrong, correct, 2000);
+
+  assert.deepEqual(first, { attempts: 1, earned: 5, possible: 5, lastAnsweredAt: 1000 });
+  assert.deepEqual(replaced, { attempts: 1, earned: 0, possible: 5, lastAnsweredAt: 2000 });
+});
+
+test("mini TO TIU Kedinasan terdiri dari 30 soal dan target latihan 80", () => {
+  const mini = MINI_TRYOUT_PACKAGES[0];
+  assert.equal(mini.durationMinutes, 35);
+  assert.equal(mini.questions.length, 30);
+  assert.ok(mini.questions.every((question) => question.category === "TIU"));
+
+  const answers = Object.fromEntries(mini.questions.slice(0, 16).map((question) => [question.id, answerWithScore(question, 5)!]));
+  const result = scoreAttempt(mini.questions, answers, { id: "mini-target", packageId: mini.id, startedAt: 0, completedAt: 1000 });
+  assert.equal(result.scores.TIU.score, 80);
+  assert.equal(result.scores.TIU.maximum, 150);
+  assert.equal(result.totalScore, 80);
+  assert.equal(result.passed, true);
 });

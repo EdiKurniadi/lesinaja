@@ -4,9 +4,9 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { ArrowLeft, ArrowRight, Bookmark, Check, Clock3, Play } from "lucide-react";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
-import { EXAM_PACKAGES, getPackage, getQuestion } from "@/lib/content";
+import { EXAM_PACKAGES, MINI_TRYOUT_PACKAGES, getPackage, getQuestion } from "@/lib/content";
 import { CATEGORIES, EXAM_RULES } from "@/lib/exam-rules";
-import { scoreAttempt } from "@/lib/scoring";
+import { bestScore, scoreAttempt } from "@/lib/scoring";
 import { clearSessionOpen, markSessionOpen, shouldOpenSession } from "@/lib/session-navigation";
 import { updateLearningState } from "@/lib/storage";
 import type { ActiveSession, AttemptResult, Question } from "@/lib/types";
@@ -27,6 +27,10 @@ function currentTime() {
   return Date.now();
 }
 
+function packageMaximum(item: { questions: Question[] }) {
+  return item.questions.reduce((sum, question) => sum + bestScore(question), 0);
+}
+
 export function TryoutClient() {
   const state = useLearningState();
   const [now, setNow] = useState(currentTime);
@@ -36,6 +40,8 @@ export function TryoutClient() {
   const session = state.activeTryout;
   const examPackage = session?.packageId ? getPackage(session.packageId) : undefined;
   const pendingPackage = pendingPackageId ? getPackage(pendingPackageId) : undefined;
+  const pendingIsMini = pendingPackage?.kind === "mini";
+  const pendingMaximum = pendingPackage ? packageMaximum(pendingPackage) : 0;
   const questions = useMemo(() => session?.questionIds.map(getQuestion).filter((question): question is Question => Boolean(question)) ?? [], [session]);
   const current = session ? questions[session.currentIndex] : undefined;
 
@@ -172,31 +178,61 @@ export function TryoutClient() {
               );
             })}
           </div>
+          <div className="border-t border-black bg-secondary p-5 sm:p-8 lg:p-10">
+            <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
+              <div><p className="font-mono text-xs font-bold uppercase tracking-[.14em] text-brand-red">Paket singkat</p><h2 className="mt-2 text-3xl font-black">MINI TRY OUT</h2></div>
+              <p className="font-mono text-xs uppercase">Fokus satu kemampuan</p>
+            </div>
+            <div className="grid gap-4 lg:grid-cols-2">
+              {MINI_TRYOUT_PACKAGES.map((item) => {
+                const attempts = state.attempts.filter((attempt) => attempt.packageId === item.id);
+                const maximum = packageMaximum(item);
+                return (
+                  <article key={item.id} className="border border-black bg-warm-white p-5 sm:p-7">
+                    <div className="flex items-start justify-between gap-4"><span className="font-mono text-xs">/MINI</span><span className="border border-black px-2 py-1 font-mono text-xs">{item.durationMinutes} MENIT</span></div>
+                    <h3 className="mt-8 text-3xl font-black tracking-[-.05em]">{item.title}</h3>
+                    <p className="mt-3 max-w-lg leading-relaxed">{item.description}</p>
+                    <ul className="mt-6 space-y-2 text-sm"><li>✓ 30 soal TIU: verbal dan numerik</li><li>✓ Nilai maksimum {maximum} · target latihan TIU 80</li><li>✓ Pembahasan muncul setelah selesai</li></ul>
+                    {attempts[0] && <p className="mt-6 border-l-4 border-signal pl-3 text-sm">Skor terakhir: <strong>{attempts[0].totalScore}/{maximum}</strong></p>}
+                    <Button onClick={() => setPendingPackageId(item.id)} className="mt-8 h-12 w-full rounded-none text-base"><Play /> Mulai Mini TO</Button>
+                  </article>
+                );
+              })}
+            </div>
+          </div>
         </section>
 
         <AlertDialog open={Boolean(pendingPackage)} onOpenChange={(open) => { if (!open) setPendingPackageId(null); }}>
           <AlertDialogContent className="max-h-[calc(100dvh-2rem)] overflow-y-auto rounded-none border-black sm:!max-w-2xl">
             <AlertDialogHeader>
-              <p className="font-mono text-[11px] font-bold uppercase tracking-[.14em] text-brand-red">Simulasi CAT SKD CPNS</p>
+              <p className="font-mono text-[11px] font-bold uppercase tracking-[.14em] text-brand-red">{pendingIsMini ? "Simulasi TIU Kedinasan" : "Simulasi CAT SKD CPNS"}</p>
               <AlertDialogTitle className="text-2xl font-black sm:text-3xl">KONFIRMASI MULAI UJIAN</AlertDialogTitle>
               <AlertDialogDescription>{pendingPackage?.title}. Pastikan kamu sudah siap sebelum waktu ujian dimulai.</AlertDialogDescription>
             </AlertDialogHeader>
 
             <div className="grid border border-black sm:grid-cols-3">
-              <div className="border-b border-black p-3 sm:border-b-0 sm:border-r"><span className="block font-mono text-[10px] uppercase">Jumlah soal</span><strong className="mt-1 block text-xl">110</strong></div>
-              <div className="border-b border-black p-3 sm:border-b-0 sm:border-r"><span className="block font-mono text-[10px] uppercase">Waktu</span><strong className="mt-1 block text-xl">100 menit</strong></div>
-              <div className="p-3"><span className="block font-mono text-[10px] uppercase">Nilai maksimum</span><strong className="mt-1 block text-xl">550</strong></div>
+              <div className="border-b border-black p-3 sm:border-b-0 sm:border-r"><span className="block font-mono text-[10px] uppercase">Jumlah soal</span><strong className="mt-1 block text-xl">{pendingPackage?.questions.length ?? 0}</strong></div>
+              <div className="border-b border-black p-3 sm:border-b-0 sm:border-r"><span className="block font-mono text-[10px] uppercase">Waktu</span><strong className="mt-1 block text-xl">{pendingPackage?.durationMinutes ?? 0} menit</strong></div>
+              <div className="p-3"><span className="block font-mono text-[10px] uppercase">Nilai maksimum</span><strong className="mt-1 block text-xl">{pendingMaximum}</strong></div>
             </div>
 
             <div className="grid gap-4 text-sm leading-relaxed sm:grid-cols-2">
               <section>
                 <h3 className="font-bold uppercase">Komposisi dan skor</h3>
-                <ul className="mt-2 list-disc space-y-1 pl-5">
-                  <li>TWK: 30 soal, benar 5 dan salah/kosong 0.</li>
-                  <li>TIU: 35 soal, benar 5 dan salah/kosong 0.</li>
-                  <li>TKP: 45 soal, setiap pilihan bernilai 1–5 dan kosong 0.</li>
-                  <li>Ambang umum: TWK 65, TIU 80, dan TKP 166.</li>
-                </ul>
+                {pendingIsMini ? (
+                  <ul className="mt-2 list-disc space-y-1 pl-5">
+                    <li>TIU: 30 soal verbal dan numerik.</li>
+                    <li>Jawaban benar bernilai 5; salah atau kosong bernilai 0.</li>
+                    <li>Nilai maksimum 150; target latihan TIU adalah 80.</li>
+                  </ul>
+                ) : (
+                  <ul className="mt-2 list-disc space-y-1 pl-5">
+                    <li>TWK: 30 soal, benar 5 dan salah/kosong 0.</li>
+                    <li>TIU: 35 soal, benar 5 dan salah/kosong 0.</li>
+                    <li>TKP: 45 soal, setiap pilihan bernilai 1–5 dan kosong 0.</li>
+                    <li>Ambang umum: TWK 65, TIU 80, dan TKP 166.</li>
+                  </ul>
+                )}
               </section>
               <section>
                 <h3 className="font-bold uppercase">Petunjuk pengerjaan</h3>
@@ -214,7 +250,7 @@ export function TryoutClient() {
             )}
 
             <p className="border-l-4 border-brand-blue bg-secondary p-3 text-xs leading-relaxed">
-              Acuan pelamar umum CPNS TA 2024. LesinAja adalah simulasi latihan mandiri, tidak berafiliasi dengan BKN, dan tidak memuat soal resmi.
+              {pendingIsMini ? "Mini TO ini adalah latihan mandiri TIU. Target 80 digunakan untuk evaluasi latihan, bukan ambang kelulusan resmi." : "Acuan pelamar umum CPNS TA 2024."} LesinAja tidak berafiliasi dengan BKN dan tidak memuat soal resmi.
             </p>
             <p className="text-xs leading-relaxed text-muted-foreground">
               Acuan: <a className="font-bold underline" href="https://jdih.menpan.go.id/dokumen-hukum/keputusan-menteri-pendayagunaan-aparatur-negara-dan-reformasi-birokrasi-nomor-321-tahun-2024-tentang-1851" target="_blank" rel="noopener noreferrer">Kepmen PANRB 321/2024</a> dan <a className="font-bold underline" href="https://www.bkn.go.id/storage/2024/08/Peraturan-BKN-Nomor-5-Tahun-2024-tentang-Pedoman-CAT.pdf" target="_blank" rel="noopener noreferrer">Peraturan BKN 5/2024</a>.
