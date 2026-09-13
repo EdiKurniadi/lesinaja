@@ -1,8 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import Link from "next/link";
 import { ArrowLeft, ArrowRight, Bookmark, Check, Clock3, Play } from "lucide-react";
+import { StaticLink as Link } from "@/components/static-link";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { EXAM_PACKAGES, MINI_TRYOUT_PACKAGES, getPackage, getQuestion } from "@/lib/content";

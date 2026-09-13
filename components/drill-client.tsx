@@ -95,7 +95,6 @@ export function DrillClient() {
       currentIndex: 0,
       deadlineAt: currentTime() + 10 * 60 * 1000,
       startedAt: currentTime(),
-      updatedAt: currentTime(),
     };
     updateLearningState((learning) => ({ ...learning, activeDrill: nextSession, activeTryout: null }));
     markSessionOpen("drill");

@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { ALL_TRYOUT_PACKAGES, DRILL_PACKAGES, getDrillPackage, getPackage } from "@/lib/content";
 import { clearSessionOpen, markSessionOpen } from "@/lib/session-navigation";
 import { readLearningState, updateLearningState } from "@/lib/storage";
+import { toStaticPath } from "@/lib/static-path";
 import type { ActiveSession } from "@/lib/types";
 
 type ToolDefinition = {
@@ -41,7 +42,7 @@ export function WebMcpBridge() {
         const session: ActiveSession = { id: `drill-${drillPackage.id}-${Date.now()}`, kind: "drill", packageId: drillPackage.id, questionIds: drillPackage.questions.map((question) => question.id), answers: {}, flagged: [], currentIndex: 0, startedAt: Date.now() };
         markSessionOpen("drill");
         updateLearningState((state) => ({ ...state, activeDrill: session, activeTryout: null }));
-        window.location.assign("/drill");
+        window.location.assign(toStaticPath("/drill"));
         return { status: "started", sessionId: session.id, packageId: drillPackage.id, title: drillPackage.title, questionCount: session.questionIds.length };
       },
     });
@@ -57,7 +58,7 @@ export function WebMcpBridge() {
         const examPackage = packageId ? getPackage(packageId) : undefined;
         if (!examPackage) throw new Error("Paket try out tidak valid.");
         clearSessionOpen();
-        window.location.assign(`/tryout?package=${encodeURIComponent(examPackage.id)}`);
+        window.location.assign(toStaticPath(`/tryout?package=${encodeURIComponent(examPackage.id)}`));
         return { status: "confirmation_required", packageId: examPackage.id, title: examPackage.title, durationMinutes: examPackage.durationMinutes };
       },
     });
@@ -73,7 +74,7 @@ export function WebMcpBridge() {
         const session = state.activeTryout ?? state.activeDrill;
         if (!session) return { status: "empty" };
         markSessionOpen(session.kind);
-        window.location.assign(session.kind === "tryout" ? "/tryout" : "/drill");
+        window.location.assign(toStaticPath(session.kind === "tryout" ? "/tryout" : "/drill"));
         return { status: "continued", sessionId: session.id, kind: session.kind };
       },
     });

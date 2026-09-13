@@ -1,7 +1,7 @@
 "use client";
 
-import Link from "next/link";
 import { ArrowUpRight, BookOpen, Clock3, Target } from "lucide-react";
+import { StaticLink as Link } from "@/components/static-link";
 import { Button } from "@/components/ui/button";
 import { CATEGORIES, EXAM_RULES } from "@/lib/exam-rules";
 import { DRILL_QUESTIONS, getPackage } from "@/lib/content";

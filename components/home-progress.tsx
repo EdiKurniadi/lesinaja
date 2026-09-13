@@ -1,7 +1,7 @@
 "use client";
 
-import Link from "next/link";
 import { ArrowRight } from "lucide-react";
+import { StaticLink as Link } from "@/components/static-link";
 import { useLearningState } from "@/hooks/use-learning-state";
 
 export function HomeProgress() {

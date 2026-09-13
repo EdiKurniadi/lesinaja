@@ -1,5 +1,5 @@
 import Image from "next/image";
-import Link from "next/link";
+import { StaticLink as Link } from "@/components/static-link";
 import { LESINAJA_INSTAGRAM_URL, LESINAJA_WHATSAPP_URL } from "@/lib/contact";
 
 export function BrandFooter({

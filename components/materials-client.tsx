@@ -1,7 +1,7 @@
 "use client";
 
-import Link from "next/link";
 import { ArrowUpRight, Check, ChevronRight, Clock3 } from "lucide-react";
+import { StaticLink as Link } from "@/components/static-link";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CATEGORIES } from "@/lib/exam-rules";
 import { MATERIALS } from "@/lib/materials";

@@ -1,7 +1,6 @@
 "use client";
 
 import { Bookmark, Check, Grid3X3, LogOut, X } from "lucide-react";
-import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
@@ -145,7 +144,6 @@ export function ExamShell({
   footer: ReactNode;
   children: ReactNode;
 }) {
-  const router = useRouter();
   const [paletteOpen, setPaletteOpen] = useState(false);
   const contentRef = useRef<HTMLDivElement>(null);
   const unanswered = questions.length - answered;
@@ -213,7 +211,7 @@ export function ExamShell({
               </AlertDialogHeader>
               <AlertDialogFooter>
                 <AlertDialogCancel className="rounded-none border-black">Tetap di sini</AlertDialogCancel>
-                <AlertDialogAction className="rounded-none" onClick={() => { clearSessionOpen(); router.push("/"); }}>Ya, keluar</AlertDialogAction>
+                <AlertDialogAction className="rounded-none" onClick={() => { clearSessionOpen(); window.location.assign("/"); }}>Ya, keluar</AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialog>

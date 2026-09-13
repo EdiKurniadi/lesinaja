@@ -1,8 +1,8 @@
-import Link from "next/link";
 import { ArrowUpRight, Clock3, MapPin, Target } from "lucide-react";
 import { BrandFooter } from "@/components/brand-footer";
 import { SiteHeader } from "@/components/site-header";
 import { HomeProgress } from "@/components/home-progress";
+import { StaticLink as Link } from "@/components/static-link";
 
 export const dynamic = "force-static";
 
