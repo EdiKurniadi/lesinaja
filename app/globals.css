@@ -167,6 +167,10 @@ button, a { -webkit-tap-highlight-color: transparent; }
 @media (max-width: 640px) {
   .page-shell { width: calc(100% - 16px); }
   .text-stroke { -webkit-text-stroke-width: 1.5px; }
+  .material-chapter-tabs [data-slot="tabs-trigger"] {
+    flex: 1 0 3.5rem !important;
+    min-width: 3.5rem !important;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

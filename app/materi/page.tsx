@@ -6,5 +6,5 @@ export const metadata: Metadata = { title: "Materi", description: "Ringkasan mat
 export const dynamic = "force-static";
 
 export default function MateriPage() {
-  return <PageFrame eyebrow="03 / Materi" title="BACA YANG PENTING." description="Dua belas ringkasan bertopik untuk menguatkan konsep sebelum kamu masuk ke sesi latihan."><MaterialsClient /></PageFrame>;
+  return <PageFrame eyebrow="03 / Materi" title="BACA YANG PENTING." description="Delapan belas ringkasan bertopik untuk menguatkan konsep sebelum kamu masuk ke sesi latihan."><MaterialsClient /></PageFrame>;
 }

@@ -4,17 +4,119 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { ArrowLeft, ArrowUpRight, Check, CheckCircle2, ChevronRight } from "lucide-react";
 import { StaticLink as Link } from "@/components/static-link";
 import { Button } from "@/components/ui/button";
+import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { DRILL_PACKAGES } from "@/lib/content";
 import { getMaterialChapters } from "@/lib/material-lessons";
 import { updateLearningState } from "@/lib/storage";
-import type { MaterialTopic } from "@/lib/types";
+import type { MaterialAnalysis, MaterialChoice, MaterialTable, MaterialTopic } from "@/lib/types";
 import { useLearningState } from "@/hooks/use-learning-state";
 
-const numerals = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII"];
+const numerals = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII", "XIII", "XIV", "XV", "XVI", "XVII", "XVIII", "XIX", "XX"];
 
 function chapterLabel(index: number) {
   return `BAB ${numerals[index] ?? index + 1}`;
+}
+
+function MaterialChoicesList({ choices }: { choices: MaterialChoice[] }) {
+  return (
+    <ol className="mt-5 grid gap-3" aria-label="Pilihan jawaban">
+      {choices.map((choice) => (
+        <li key={choice.label} className="grid grid-cols-[2.75rem_minmax(0,1fr)] border-2 border-black bg-warm-white shadow-[3px_3px_0_0_#10100f]">
+          <span className="flex items-center justify-center border-r-2 border-black bg-brand-blue font-mono text-sm font-black text-white">
+            {choice.label}
+          </span>
+          <p className="px-4 py-3 text-base leading-7 sm:px-5 sm:py-4 sm:text-lg">{choice.text}</p>
+        </li>
+      ))}
+    </ol>
+  );
+}
+
+function MaterialAnalysisCard({ analysis }: { analysis: MaterialAnalysis }) {
+  const hasScores = Boolean(analysis.scores?.length);
+
+  return (
+    <aside className="mt-6 border-2 border-black bg-secondary shadow-[4px_4px_0_0_#10100f]" aria-label={hasScores ? "Bedah soal dan analisis skor" : "Bedah soal dan analisis"}>
+      <div className="border-b-2 border-black bg-brand-blue px-4 py-3 text-white sm:px-5">
+        <p className="font-mono text-xs font-black uppercase tracking-[.14em]">Bedah Soal &amp; {hasScores ? "Analisis Skor" : "Analisis"}</p>
+      </div>
+      <dl>
+        <div className="grid gap-2 border-b-2 border-black px-4 py-4 sm:grid-cols-[150px_minmax(0,1fr)] sm:px-5">
+          <dt className="font-mono text-[11px] font-black uppercase tracking-[.12em] text-brand-blue">Kompetensi diuji</dt>
+          <dd className="font-bold leading-6">{analysis.competency}</dd>
+        </div>
+        {analysis.scores?.length ? (
+          <div className="grid gap-3 border-b-2 border-black px-4 py-4 sm:grid-cols-[150px_minmax(0,1fr)] sm:px-5">
+            <dt className="font-mono text-[11px] font-black uppercase tracking-[.12em] text-brand-blue">Distribusi skor</dt>
+            <dd className="flex flex-wrap gap-2">
+              {analysis.scores.map((item) => (
+                <span key={item.label} className={`inline-flex min-w-12 items-center justify-between gap-2 border border-black px-2 py-1 font-mono text-xs font-black ${item.score === 5 ? "bg-signal" : "bg-warm-white"}`}>
+                  <span>{item.label}</span>
+                  <span>{item.score}</span>
+                </span>
+              ))}
+            </dd>
+          </div>
+        ) : null}
+        <div className="grid gap-3 bg-signal px-4 py-4 sm:grid-cols-[150px_minmax(0,1fr)] sm:px-5">
+          <dt className="font-mono text-[11px] font-black uppercase tracking-[.12em]">{hasScores ? "Jawaban skor 5" : "Jawaban terbaik"}</dt>
+          <dd className="flex items-start gap-3 font-bold leading-7">
+            <span className="flex size-8 shrink-0 items-center justify-center border-2 border-black bg-black font-mono text-sm font-black text-white">{analysis.bestChoice}</span>
+            <span>{analysis.explanation}</span>
+          </dd>
+        </div>
+      </dl>
+    </aside>
+  );
+}
+
+function MaterialComparisonTable({ table, caption }: { table: MaterialTable; caption: string }) {
+  return (
+    <>
+      <div className="mt-5 hidden overflow-hidden border-2 border-black bg-warm-white sm:block">
+        <Table className="table-fixed border-collapse text-left">
+          <TableCaption className="sr-only">{caption}</TableCaption>
+          <TableHeader>
+            <TableRow className="border-b-2 border-black bg-brand-blue hover:bg-brand-blue">
+              {table.columns.map((column) => (
+                <TableHead key={column} scope="col" className="h-auto whitespace-normal border-r-2 border-black px-3 py-3 align-top font-mono text-xs font-black uppercase leading-5 tracking-[.04em] text-white last:border-r-0 lg:px-4">
+                  {column}
+                </TableHead>
+              ))}
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {table.rows.map((row, rowIndex) => (
+              <TableRow key={`${caption}-${rowIndex}`} className="border-b-2 border-black odd:bg-warm-white even:bg-secondary/45 hover:bg-signal/20 last:border-b-0">
+                {row.map((cell, cellIndex) => (
+                  <TableCell key={`${rowIndex}-${cellIndex}`} className={`whitespace-normal border-r-2 border-black px-3 py-4 align-top text-sm leading-6 last:border-r-0 lg:px-4 ${cellIndex === 0 ? "font-bold" : ""}`}>
+                    {cell}
+                  </TableCell>
+                ))}
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
+
+      <div className="mt-5 grid gap-4 sm:hidden" aria-label={caption}>
+        {table.rows.map((row, rowIndex) => (
+          <article key={`${caption}-mobile-${rowIndex}`} className="border-2 border-black bg-warm-white shadow-[3px_3px_0_0_#10100f]">
+            <p className="border-b-2 border-black bg-brand-blue px-4 py-2 font-mono text-[11px] font-black uppercase tracking-[.12em] text-white">Baris {String(rowIndex + 1).padStart(2, "0")}</p>
+            <dl>
+              {row.map((cell, cellIndex) => (
+                <div key={`${rowIndex}-${cellIndex}`} className="border-b border-black px-4 py-3 last:border-b-0">
+                  <dt className="font-mono text-[10px] font-black uppercase tracking-[.1em] text-brand-blue">{table.columns[cellIndex]}</dt>
+                  <dd className={`mt-1.5 text-sm leading-6 ${cellIndex === 0 ? "font-bold" : ""}`}>{cell}</dd>
+                </div>
+              ))}
+            </dl>
+          </article>
+        ))}
+      </div>
+    </>
+  );
 }
 
 export function MaterialReaderClient({ material }: { material: MaterialTopic }) {
@@ -95,6 +197,9 @@ export function MaterialReaderClient({ material }: { material: MaterialTopic }) 
                         <h3 className="text-2xl font-black tracking-[-.035em] sm:text-3xl">{item.heading}</h3>
                         <p className="mt-4 text-base leading-8 text-muted-foreground sm:text-lg">{item.body}</p>
                         {item.bullets && <ul className="mt-5 grid gap-3">{item.bullets.map((bullet) => <li key={bullet} className="flex gap-3 border-l-4 border-signal bg-secondary px-4 py-3 text-base leading-7"><Check className="mt-1 size-4 shrink-0 text-brand-blue" /><span>{bullet}</span></li>)}</ul>}
+                        {item.table && <MaterialComparisonTable table={item.table} caption={item.heading} />}
+                        {item.choices && <MaterialChoicesList choices={item.choices} />}
+                        {item.analysis && <MaterialAnalysisCard analysis={item.analysis} />}
                       </section>
                     ))}
                   </div>

@@ -35,7 +35,7 @@ export function SiteHeader() {
           <BrandLogo
             className="w-[52px] flex-col items-center justify-center gap-0.5 md:w-auto md:flex-row md:gap-2"
             markClassName="h-[38px] w-[52px] md:h-[50px] md:w-[68px]"
-            wordmarkClassName="block w-[90%] text-center text-[10px] tracking-[.015em] md:w-auto md:text-[15px]"
+            wordmarkClassName="block w-[90%] text-center text-[10px] tracking-[.015em] md:w-auto md:text-[22px]"
           />
         </Link>
         <nav className="hidden h-full min-w-0 flex-1 items-stretch md:flex" aria-label="Navigasi utama">
@@ -45,7 +45,7 @@ export function SiteHeader() {
             </Link>
           ))}
         </nav>
-        <span className="hidden h-full items-center border-l border-black px-6 font-mono text-[11px] uppercase tracking-[.14em] lg:flex">CPNS / 2024</span>
+        <span className="hidden h-full items-center border-l border-black px-6 font-mono text-[11px] uppercase tracking-[.14em] lg:flex">CPNS / 2027</span>
 
         <Sheet>
           <SheetTrigger asChild>
@@ -88,9 +88,8 @@ export function SiteHeader() {
                     <Link
                       href={href}
                       aria-current={active ? "page" : undefined}
-                      className={`group grid min-h-16 grid-cols-[3.25rem_1fr_2rem] items-center border-b border-black px-4 transition-colors focus-visible:z-10 ${
-                        active ? "bg-signal text-black" : "bg-warm-white text-black hover:bg-secondary"
-                      }`}
+                      className={`group grid min-h-16 grid-cols-[3.25rem_1fr_2rem] items-center border-b border-black px-4 transition-colors focus-visible:z-10 ${active ? "bg-signal text-black" : "bg-warm-white text-black hover:bg-secondary"
+                        }`}
                     >
                       <span className="font-mono text-xs font-bold text-brand-red">{String(index + 1).padStart(2, "0")}</span>
                       <span className="text-lg font-black uppercase tracking-[-.02em]">{label}</span>
@@ -102,7 +101,7 @@ export function SiteHeader() {
             </nav>
 
             <div className="mt-auto border-t-2 border-black bg-secondary px-5 py-4 font-mono text-[11px] font-bold uppercase tracking-[.14em]">
-              Persiapan SKD CPNS / 2024
+              Persiapan SKD CPNS / 2027
             </div>
           </SheetContent>
         </Sheet>

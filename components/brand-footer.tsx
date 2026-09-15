@@ -17,7 +17,7 @@ export function BrandFooter({
                 inverted
                 className="w-[68px] flex-col items-center gap-1 md:w-auto md:flex-row md:gap-2.5"
                 markClassName="h-[50px] w-[68px] md:h-[56px] md:w-[76px]"
-                wordmarkClassName="block w-[90%] text-center text-[12px] tracking-[.015em] md:w-auto md:text-base"
+                wordmarkClassName="block w-[90%] text-center text-[12px] tracking-[.015em] md:w-auto md:text-[25px]"
               />
             </Link>
             <span className="block text-white/65">Bimbel SKD CPNS · Pontianak</span>

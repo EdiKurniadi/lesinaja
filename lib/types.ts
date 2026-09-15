@@ -115,13 +115,38 @@ export interface MaterialTopic {
   chapters?: MaterialChapter[];
 }
 
+export interface MaterialChoice {
+  label: string;
+  text: string;
+}
+
+export interface MaterialAnalysis {
+  competency: string;
+  scores?: Array<{
+    label: string;
+    score: number;
+  }>;
+  bestChoice: string;
+  explanation: string;
+}
+
+export interface MaterialTable {
+  columns: string[];
+  rows: string[][];
+}
+
+export interface MaterialSection {
+  heading: string;
+  body: string;
+  bullets?: string[];
+  choices?: MaterialChoice[];
+  analysis?: MaterialAnalysis;
+  table?: MaterialTable;
+}
+
 export interface MaterialChapter {
   title: string;
   intro: string;
-  sections: Array<{
-    heading: string;
-    body: string;
-    bullets?: string[];
-  }>;
+  sections: MaterialSection[];
   callout?: string;
 }

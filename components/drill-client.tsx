@@ -23,24 +23,6 @@ type DrillSummary = {
   answers: Record<string, string>;
 };
 
-const CATEGORY_DETAILS: Record<Category, { name: string; full: string; desc: string }> = {
-  TWK: {
-    name: "TWK",
-    full: "Wawasan Kebangsaan",
-    desc: "Pancasila, UUD 1945, NKRI, Integritas",
-  },
-  TIU: {
-    name: "TIU",
-    full: "Intelegensia Umum",
-    desc: "Verbal, Numerik, Deret & Pola, Logika",
-  },
-  TKP: {
-    name: "TKP",
-    full: "Karakteristik Pribadi",
-    desc: "Pelayanan Publik, Kerja Sama, TI, Sosial Budaya",
-  },
-};
-
 function currentTime() {
   return Date.now();
 }
@@ -510,13 +492,7 @@ export function DrillClient() {
                   onClick={() => setCategoryPopoutOpen(true)}
                   className="group flex w-full items-center justify-between border-2 border-black bg-warm-white p-4 text-left shadow-[3px_3px_0_0_#000] transition-all hover:bg-secondary hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px]"
                 >
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-xl font-black uppercase tracking-tight sm:text-2xl">{category}</span>
-                      <span className="bg-black px-1.5 py-0.5 font-mono text-[10px] font-bold text-white uppercase">Aktif</span>
-                    </div>
-                    <p className="mt-1 text-xs text-muted-foreground sm:text-sm">{CATEGORY_DETAILS[category].full}</p>
-                  </div>
+                  <span className="text-xl font-black uppercase tracking-tight sm:text-2xl">{category}</span>
                   <div className="flex items-center gap-1 font-mono text-xs font-bold uppercase text-brand-blue group-hover:underline">
                     <span>Ganti</span>
                     <ArrowUpRight className="size-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
@@ -531,12 +507,7 @@ export function DrillClient() {
                   onClick={() => setTopicPopoutOpen(true)}
                   className="group flex w-full items-center justify-between border-2 border-black bg-warm-white p-4 text-left shadow-[3px_3px_0_0_#000] transition-all hover:bg-secondary hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px]"
                 >
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-xl font-black uppercase tracking-tight sm:text-2xl">{topic}</span>
-                    </div>
-                    <p className="mt-1 font-mono text-xs text-muted-foreground">{packages.length} Paket Soal (20 Soal)</p>
-                  </div>
+                  <span className="text-xl font-black uppercase tracking-tight sm:text-2xl">{topic}</span>
                   <div className="flex items-center gap-1 font-mono text-xs font-bold uppercase text-brand-blue group-hover:underline">
                     <span>Ganti</span>
                     <ArrowUpRight className="size-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
@@ -570,7 +541,6 @@ export function DrillClient() {
                 <div className="grid overflow-y-auto overscroll-contain" aria-label="Daftar Kategori Drill">
                   {(["TWK", "TIU", "TKP"] as Category[]).map((catKey, index) => {
                     const isCatActive = catKey === category;
-                    const info = CATEGORY_DETAILS[catKey];
                     return (
                       <button
                         key={catKey}
@@ -586,10 +556,7 @@ export function DrillClient() {
                         }`}
                       >
                         <span className="font-mono text-xs font-bold text-brand-red">{String(index + 1).padStart(2, "0")}</span>
-                        <div className="min-w-0 pr-2">
-                          <div className="text-lg font-black uppercase tracking-[-.02em]">{info.name} — {info.full}</div>
-                          <p className="mt-0.5 text-xs text-muted-foreground line-clamp-1">{info.desc}</p>
-                        </div>
+                        <span className="min-w-0 pr-2 text-lg font-black uppercase tracking-[-.02em]">{catKey}</span>
                         {isCatActive ? (
                           <Check className="size-5 text-black" />
                         ) : (
@@ -631,7 +598,6 @@ export function DrillClient() {
                 <div className="grid overflow-y-auto overscroll-contain" aria-label="Daftar Topik Drill">
                   {topics.map((tItem, index) => {
                     const isTopicActive = tItem === topic;
-                    const topicPackages = DRILL_PACKAGES.filter((p) => p.category === category && p.topic === tItem);
                     return (
                       <button
                         key={tItem}
@@ -645,10 +611,7 @@ export function DrillClient() {
                         }`}
                       >
                         <span className="font-mono text-xs font-bold text-brand-red">{String(index + 1).padStart(2, "0")}</span>
-                        <div className="min-w-0 pr-2">
-                          <div className="text-lg font-black uppercase tracking-[-.02em]">{tItem}</div>
-                          <p className="mt-0.5 font-mono text-xs text-muted-foreground">{topicPackages.length} Paket Soal · 10 Soal/Paket</p>
-                        </div>
+                        <span className="min-w-0 pr-2 text-lg font-black uppercase tracking-[-.02em]">{tItem}</span>
                         {isTopicActive ? (
                           <Check className="size-5 text-black" />
                         ) : (
