@@ -1,5 +1,13 @@
 import { EXAM_RULES } from "./exam-rules";
+import { BELA_NEGARA_DRILL_QUESTIONS } from "./bela-negara-drill-content";
+import { INTEGRITAS_DRILL_QUESTIONS } from "./integritas-drill-content";
+import { JEJARING_KERJA_DRILL_QUESTIONS } from "./jejaring-kerja-drill-content";
 import { MINI_TIU_QUESTIONS } from "./mini-tiu-content";
+import { NASIONALISME_DRILL_QUESTIONS } from "./nasionalisme-drill-content";
+import { PELAYANAN_PUBLIK_DRILL_QUESTIONS } from "./pelayanan-publik-drill-content";
+import { PROFESIONALISME_DRILL_QUESTIONS } from "./profesionalisme-drill-content";
+import { SOSIAL_BUDAYA_DRILL_QUESTIONS } from "./sosial-budaya-drill-content";
+import { TEKNOLOGI_INFORMASI_DRILL_QUESTIONS } from "./teknologi-informasi-drill-content";
 import type { Category, Choice, DrillPackage, ExamPackage, Question } from "./types";
 
 type TwkSeed = [string, string, string[], string, string];
@@ -203,15 +211,38 @@ export const MINI_TRYOUT_PACKAGES: ExamPackage[] = [
 export const ALL_TRYOUT_PACKAGES = [...EXAM_PACKAGES, ...MINI_TRYOUT_PACKAGES];
 
 const DRILL_TOPICS: Record<Category, string[]> = {
-  TWK: ["Pancasila", "UUD 1945", "NKRI & Bhinneka", "Integritas & Bela Negara"],
+  TWK: ["Pancasila", "UUD 1945", "NKRI & Bhinneka", "Nasionalisme", "Integritas", "Bela Negara"],
   TIU: ["Kemampuan Verbal", "Kemampuan Numerik", "Deret & Pola", "Logika Analitis"],
-  TKP: ["Pelayanan Publik", "Kerja Sama", "Teknologi Informasi", "Sosial Budaya"],
+  TKP: ["Pelayanan Publik", "Profesionalisme", "Jejaring Kerja", "Teknologi Informasi", "Sosial Budaya"],
+};
+
+const DRILL_PACKAGE_COUNTS: Record<string, number> = {
+  "TWK:Nasionalisme": 5,
+  "TWK:Integritas": 5,
+  "TWK:Bela Negara": 5,
+  "TKP:Pelayanan Publik": 5,
+  "TKP:Profesionalisme": 5,
+  "TKP:Jejaring Kerja": 5,
+  "TKP:Teknologi Informasi": 5,
+  "TKP:Sosial Budaya": 5,
 };
 
 const drillSource: Question[] = [
-  ...[3, 4, 5].flatMap((variant) => makeTwk(`d${variant}`, variant)),
+  ...[3, 4, 5]
+    .flatMap((variant) => makeTwk(`d${variant}`, variant))
+    .filter((question) => question.topic !== "Integritas & Bela Negara"),
+  ...NASIONALISME_DRILL_QUESTIONS,
+  ...INTEGRITAS_DRILL_QUESTIONS,
+  ...BELA_NEGARA_DRILL_QUESTIONS,
   ...[3, 4, 5, 6].flatMap((variant) => makeTiu(`d${variant}`, variant)),
-  ...[3, 4, 5, 6, 7, 8, 9].flatMap((variant) => makeTkp(`d${variant}`, variant)),
+  ...PELAYANAN_PUBLIK_DRILL_QUESTIONS,
+  ...PROFESIONALISME_DRILL_QUESTIONS,
+  ...JEJARING_KERJA_DRILL_QUESTIONS,
+  ...TEKNOLOGI_INFORMASI_DRILL_QUESTIONS,
+  ...SOSIAL_BUDAYA_DRILL_QUESTIONS,
+  ...[3, 4, 5, 6, 7, 8, 9]
+    .flatMap((variant) => makeTkp(`d${variant}`, variant))
+    .filter((question) => !["Pelayanan Publik", "Profesionalisme", "Jejaring Kerja", "Teknologi Informasi", "Sosial Budaya"].includes(question.topic)),
 ];
 
 function topicSlug(topic: string): string {
@@ -220,8 +251,11 @@ function topicSlug(topic: string): string {
 
 export const DRILL_PACKAGES: DrillPackage[] = (Object.entries(DRILL_TOPICS) as [Category, string[]][]).flatMap(
   ([category, topics]) => topics.flatMap((topic) => {
-    const questions = drillSource.filter((question) => question.category === category && question.topic === topic).slice(0, 20);
-    return [1, 2].map((sequence) => ({
+    const packageCount = DRILL_PACKAGE_COUNTS[`${category}:${topic}`] ?? 2;
+    const questions = drillSource
+      .filter((question) => question.category === category && question.topic === topic)
+      .slice(0, packageCount * 10);
+    return Array.from({ length: packageCount }, (_, index) => index + 1).map((sequence) => ({
       id: `${category.toLowerCase()}-${topicSlug(topic)}-${sequence}`,
       title: `${topic} ${sequence}`,
       category,

@@ -1944,7 +1944,7 @@ export const MATERIALS: MaterialTopic[] = [
     ],
   },
   {
-    id: "tkp-jejaring", category: "TKP", title: "Kerja Sama",
+    id: "tkp-jejaring", category: "TKP", title: "Jejaring Kerja",
     summary: "Bangun, pelihara, dan manfaatkan jejaring profesional yang kooperatif untuk mempercepat kerja serta meningkatkan kualitas pelayanan publik.",
     points: ["Komunikasikan masalah secara langsung, terbuka, dan profesional.", "Libatkan pihak yang relevan serta kompeten untuk menghasilkan solusi kolaboratif.", "Bantu rekan secara proporsional tanpa mengabaikan tanggung jawab utama."],
     example: "Saat unit lain terlambat menyediakan data, temui pihak terkait, pahami kendalanya, sepakati alur berbagi data, dan tawarkan bantuan teknis yang diperlukan.",

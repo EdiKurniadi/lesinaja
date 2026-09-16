@@ -38,6 +38,7 @@ export function DrillClient() {
   const [activeReviewIndex, setActiveReviewIndex] = useState(0);
   const [reviewFilter, setReviewFilter] = useState<"all" | "incorrect" | "correct">("all");
   const session = state.activeDrill;
+  const invalidSessionId = session?.questionIds.some((questionId) => !getQuestion(questionId)) ? session.id : null;
 
   useEffect(() => {
     const initialize = window.setTimeout(() => {
@@ -53,10 +54,22 @@ export function DrillClient() {
     return () => window.clearTimeout(initialize);
   }, []);
 
+  useEffect(() => {
+    if (!invalidSessionId) return;
+    const clearInvalidSession = window.setTimeout(() => {
+      clearSessionOpen();
+      setSessionOpen(false);
+      updateLearningState((learning) => learning.activeDrill?.id === invalidSessionId
+        ? { ...learning, activeDrill: null }
+        : learning);
+    }, 0);
+    return () => window.clearTimeout(clearInvalidSession);
+  }, [invalidSessionId]);
+
   const questions = useMemo(() => {
     if (session) {
       const stored = session.questionIds.map(getQuestion).filter((item): item is Question => Boolean(item));
-      if (stored.length === session.questionIds.length) return stored;
+      return stored.length === session.questionIds.length ? stored : [];
     }
     const drillPackage = DRILL_PACKAGES.find((item) => item.category === category && item.topic === topic);
     return drillPackage?.questions ?? [];
@@ -339,7 +352,7 @@ export function DrillClient() {
                   </div>
                 </div>
 
-                <div className="mt-6 text-xl font-black leading-relaxed tracking-[-.02em] sm:text-2xl">
+                <div className="mt-6 whitespace-pre-line text-xl font-black leading-relaxed tracking-[-.02em] sm:text-2xl">
                   {currentReview.question.prompt}
                 </div>
 
@@ -400,7 +413,7 @@ export function DrillClient() {
                   <div className="flex items-center gap-2 font-mono text-xs font-bold uppercase tracking-[.14em] text-brand-blue">
                     <Info className="size-4" /> Pembahasan Soal
                   </div>
-                  <p className="mt-3 text-base leading-8 text-foreground sm:text-lg">
+                  <p className="mt-3 whitespace-pre-line text-base leading-8 text-foreground sm:text-lg">
                     {currentReview.question.explanation}
                   </p>
                 </div>

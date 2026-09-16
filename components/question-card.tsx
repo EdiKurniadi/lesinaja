@@ -26,7 +26,7 @@ export function QuestionCard({
         <span className="bg-brand-blue px-2 py-1 text-white">{question.category}</span>
         <span>{question.topic}</span>
       </div>
-      <h2 tabIndex={-1} data-exam-question-heading className="text-lg font-bold leading-snug outline-none sm:text-xl lg:text-2xl">{question.prompt}</h2>
+      <h2 tabIndex={-1} data-exam-question-heading className="whitespace-pre-line text-lg font-bold leading-snug outline-none sm:text-xl lg:text-2xl">{question.prompt}</h2>
       <div className="mt-4 grid gap-2 sm:mt-5 sm:gap-3" role="radiogroup" aria-label="Pilihan jawaban">
         {question.choices.map((choice, index) => {
           const selected = selectedId === choice.id;
@@ -63,7 +63,7 @@ export function QuestionCard({
       {reveal && selectedId && (
         <div className="mt-4 border border-black bg-secondary p-4 sm:mt-5" aria-live="polite">
           <p className="font-mono text-xs font-bold uppercase tracking-[.14em]">Skor {selectedScore}/{maximum}</p>
-          <p className="mt-2 leading-relaxed">{question.explanation}</p>
+          <p className="mt-2 whitespace-pre-line leading-relaxed">{question.explanation}</p>
         </div>
       )}
     </article>
