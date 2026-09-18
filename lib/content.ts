@@ -3,6 +3,7 @@ import { BELA_NEGARA_DRILL_QUESTIONS } from "./bela-negara-drill-content";
 import { INTEGRITAS_DRILL_QUESTIONS } from "./integritas-drill-content";
 import { JEJARING_KERJA_DRILL_QUESTIONS } from "./jejaring-kerja-drill-content";
 import { MINI_TIU_QUESTIONS } from "./mini-tiu-content";
+import { MINI_TIU_2_QUESTIONS } from "./mini-tiu-2-content";
 import { NASIONALISME_DRILL_QUESTIONS } from "./nasionalisme-drill-content";
 import { PELAYANAN_PUBLIK_DRILL_QUESTIONS } from "./pelayanan-publik-drill-content";
 import { PROFESIONALISME_DRILL_QUESTIONS } from "./profesionalisme-drill-content";
@@ -201,9 +202,17 @@ export const MINI_TRYOUT_PACKAGES: ExamPackage[] = [
   {
     id: "mini-tiu-kedinasan",
     kind: "mini",
-    title: "Mini TO TIU — Kedinasan",
-    description: "30 soal verbal dan numerik untuk melatih kecepatan dan ketelitian TIU.",
+    title: "Mini TO TIU — Kedinasan 1",
+    description: "35 soal verbal, numerik, dan figural untuk melatih kecepatan dan ketelitian TIU.",
     questions: MINI_TIU_QUESTIONS,
+    durationMinutes: 35,
+  },
+  {
+    id: "mini-tiu-pemantapan",
+    kind: "mini",
+    title: "Mini TO TIU — Pemantapan",
+    description: "35 soal verbal, numerik, dan figural paket pemantapan dengan variasi kasus baru.",
+    questions: MINI_TIU_2_QUESTIONS,
     durationMinutes: 35,
   },
 ];
@@ -268,7 +277,7 @@ export const DRILL_PACKAGES: DrillPackage[] = (Object.entries(DRILL_TOPICS) as [
 
 export const DRILL_QUESTIONS: Question[] = DRILL_PACKAGES.flatMap((drillPackage) => drillPackage.questions);
 
-export const ALL_QUESTIONS = [...DRILL_QUESTIONS, ...packageA, ...packageB, ...MINI_TIU_QUESTIONS];
+export const ALL_QUESTIONS = [...DRILL_QUESTIONS, ...packageA, ...packageB, ...MINI_TIU_QUESTIONS, ...MINI_TIU_2_QUESTIONS];
 const questionMap = new Map(ALL_QUESTIONS.map((question) => [question.id, question]));
 
 export function getQuestion(questionId: string): Question | undefined {
@@ -308,7 +317,7 @@ export function validateContent(): string[] {
   }
   for (const item of MINI_TRYOUT_PACKAGES) {
     if (item.durationMinutes !== 35) errors.push(`${item.id} harus berdurasi 35 menit`);
-    if (item.questions.length !== 30) errors.push(`${item.id} berisi ${item.questions.length} soal`);
+    if (item.questions.length !== 35 && item.questions.length !== 30) errors.push(`${item.id} berisi ${item.questions.length} soal`);
     if (item.questions.some((question) => question.category !== "TIU")) errors.push(`${item.id} harus hanya berisi soal TIU`);
   }
   for (const item of DRILL_PACKAGES) {

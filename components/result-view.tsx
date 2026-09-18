@@ -12,6 +12,7 @@ import {
   X,
   XCircle,
 } from "lucide-react";
+import { MathText } from "@/components/math-text";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -500,8 +501,8 @@ export function ResultView({
                   </div>
                 </div>
 
-                <div className="mt-6 text-xl font-black leading-relaxed tracking-[-.02em] sm:text-2xl">
-                  {currentReview.question.prompt}
+                <div className="mt-6 text-base font-normal leading-relaxed text-foreground sm:text-lg">
+                  <MathText text={currentReview.question.prompt} />
                 </div>
 
                 <div className="mt-6 space-y-2">
@@ -544,7 +545,7 @@ export function ResultView({
                           <span className="font-mono text-base font-black shrink-0 w-6 text-foreground">
                             {choice.id.toUpperCase()}.
                           </span>
-                          <span className="text-base font-medium leading-relaxed">{choice.label}</span>
+                          <span className="text-base font-normal leading-relaxed"><MathText text={choice.label} /></span>
                         </div>
                         <div className="flex shrink-0 items-center gap-3 pl-9 sm:pl-0">
                           <span className="font-mono text-xs font-bold text-muted-foreground">
@@ -561,9 +562,9 @@ export function ResultView({
                   <div className="flex items-center gap-2 font-mono text-xs font-bold uppercase tracking-[.14em] text-brand-blue">
                     <Info className="size-4" /> Pembahasan Soal
                   </div>
-                  <p className="mt-3 text-base leading-8 text-foreground sm:text-lg">
-                    {currentReview.question.explanation}
-                  </p>
+                  <div className="mt-3 text-base leading-relaxed text-foreground sm:text-lg">
+                    <MathText text={currentReview.question.explanation} />
+                  </div>
                 </div>
 
                 <div className="mt-8 flex items-center justify-between gap-2 border-t-2 border-black pt-5">

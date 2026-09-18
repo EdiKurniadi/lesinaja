@@ -345,205 +345,205 @@ export const MINI_TIU_QUESTIONS: Question[] = [
     "id": "mini-tiu-11",
     "category": "TIU",
     "topic": "Berhitung Cepat dan Aljabar Sederhana",
-    "prompt": "Hasil perhitungan dari ((2 1/3 - 1 1/4) / (5/6 + 1/2)) : (13/16) adalah ...",
+    "prompt": "Hasil perhitungan dari $\\frac{2\\frac{1}{3} - 1\\frac{1}{4}}{\\frac{5}{6} + \\frac{1}{2}} : \\frac{13}{16}$ adalah ...",
     "choices": [
       {
         "id": "a",
-        "label": "1/2",
+        "label": "$\\frac{1}{2}$",
         "score": 0
       },
       {
         "id": "b",
-        "label": "3/4",
+        "label": "$\\frac{3}{4}$",
         "score": 0
       },
       {
         "id": "c",
-        "label": "1",
+        "label": "$1$",
         "score": 5
       },
       {
         "id": "d",
-        "label": "4/3",
+        "label": "$\\frac{4}{3}$",
         "score": 0
       },
       {
         "id": "e",
-        "label": "13/16",
+        "label": "$\\frac{13}{16}$",
         "score": 0
       }
     ],
-    "explanation": "Hitung pembilang: 2 1/3 - 1 1/4 = 7/3 - 5/4 = (28 - 15)/12 = 13/12.\nHitung penyebut: 5/6 + 1/2 = 5/6 + 3/6 = 8/6 = 4/3.\nNilai pecahan utama: (13/12) / (4/3) = (13/12) * (3/4) = 13/16.\nHasil akhir: (13/16) : (13/16) = 1."
+    "explanation": "Hitung pembilang: $2\\frac{1}{3} - 1\\frac{1}{4} = \\frac{7}{3} - \\frac{5}{4} = \\frac{28 - 15}{12} = \\frac{13}{12}$.\nHitung penyebut: $\\frac{5}{6} + \\frac{1}{2} = \\frac{5}{6} + \\frac{3}{6} = \\frac{8}{6} = \\frac{4}{3}$.\nNilai pecahan utama: $\\frac{13/12}{4/3} = \\frac{13}{12} \\times \\frac{3}{4} = \\frac{13}{16}$.\nHasil akhir: $\\frac{13}{16} : \\frac{13}{16} = 1$."
   },
   {
     "id": "mini-tiu-12",
     "category": "TIU",
     "topic": "Berhitung Cepat dan Aljabar Sederhana",
-    "prompt": "Nilai dari 0,375 * (4/9) + 0,625 : 1 1/8 adalah ...",
+    "prompt": "Nilai dari $0{,}375 \\times \\frac{4}{9} + 0{,}625 : 1\\frac{1}{8}$ adalah ...",
     "choices": [
       {
         "id": "a",
-        "label": "11/18",
+        "label": "$\\frac{11}{18}$",
         "score": 0
       },
       {
         "id": "b",
-        "label": "13/18",
+        "label": "$\\frac{13}{18}$",
         "score": 5
       },
       {
         "id": "c",
-        "label": "7/9",
+        "label": "$\\frac{7}{9}$",
         "score": 0
       },
       {
         "id": "d",
-        "label": "5/6",
+        "label": "$\\frac{5}{6}$",
         "score": 0
       },
       {
         "id": "e",
-        "label": "8/9",
+        "label": "$\\frac{8}{9}$",
         "score": 0
       }
     ],
-    "explanation": "Konversi desimal ke pecahan biasa istimewa:\n0,375 = 3/8 dan 0,625 = 5/8.\n1 1/8 = 9/8.\nHitung bagian pertama: (3/8) * (4/9) = 12/72 = 1/6.\nHitung bagian kedua: (5/8) : (9/8) = (5/8) * (8/9) = 5/9.\nJumlahkan: 1/6 + 5/9 = 3/18 + 10/18 = 13/18."
+    "explanation": "Konversi desimal ke pecahan biasa istimewa:\n$0{,}375 = \\frac{3}{8}$ dan $0{,}625 = \\frac{5}{8}$.\n$1\\frac{1}{8} = \\frac{9}{8}$.\nHitung bagian pertama: $\\frac{3}{8} \\times \\frac{4}{9} = \\frac{12}{72} = \\frac{1}{6}$.\nHitung bagian kedua: $\\frac{5}{8} : \\frac{9}{8} = \\frac{5}{8} \\times \\frac{8}{9} = \\frac{5}{9}$.\nJumlahkan: $\\frac{1}{6} + \\frac{5}{9} = \\frac{3}{18} + \\frac{10}{18} = \\frac{13}{18}$."
   },
   {
     "id": "mini-tiu-13",
     "category": "TIU",
     "topic": "Berhitung Cepat dan Aljabar Sederhana",
-    "prompt": "Nilai dari 87,5% * 0,48 + 16,67% * 1,44 adalah ...",
+    "prompt": "Nilai dari $87{,}5\\% \\times 0{,}48 + 16{,}67\\% \\times 1{,}44$ adalah ...",
     "choices": [
       {
         "id": "a",
-        "label": "0,58",
+        "label": "$0{,}58$",
         "score": 0
       },
       {
         "id": "b",
-        "label": "0,62",
+        "label": "$0{,}62$",
         "score": 0
       },
       {
         "id": "c",
-        "label": "0,66",
+        "label": "$0{,}66$",
         "score": 5
       },
       {
         "id": "d",
-        "label": "0,72",
+        "label": "$0{,}72$",
         "score": 0
       },
       {
         "id": "e",
-        "label": "0,84",
+        "label": "$0{,}84$",
         "score": 0
       }
     ],
-    "explanation": "Gunakan persen ekuivalen:\n87,5% = 7/8 dan 16,67% = 1/6.\n(7/8) * 0,48 = 7 * 0,06 = 0,42.\n(1/6) * 1,44 = 0,24.\nTotal = 0,42 + 0,24 = 0,66."
+    "explanation": "Gunakan persen ekuivalen:\n$87{,}5\\% = \\frac{7}{8}$ dan $16{,}67\\% = \\frac{1}{6}$.\n$\\frac{7}{8} \\times 0{,}48 = 7 \\times 0{,}06 = 0{,}42$.\n$\\frac{1}{6} \\times 1{,}44 = 0{,}24$.\nTotal = $0{,}42 + 0{,}24 = 0{,}66$."
   },
   {
     "id": "mini-tiu-14",
     "category": "TIU",
     "topic": "Berhitung Cepat dan Aljabar Sederhana",
-    "prompt": "Nilai dari (45% * 2,75) + (55% * 2,75) - 3/4 adalah ...",
+    "prompt": "Nilai dari $(45\\% \\times 2{,}75) + (55\\% \\times 2{,}75) - \\frac{3}{4}$ adalah ...",
     "choices": [
       {
         "id": "a",
-        "label": "1,50",
+        "label": "$1{,}50$",
         "score": 0
       },
       {
         "id": "b",
-        "label": "1,75",
+        "label": "$1{,}75$",
         "score": 0
       },
       {
         "id": "c",
-        "label": "2,00",
+        "label": "$2{,}00$",
         "score": 5
       },
       {
         "id": "d",
-        "label": "2,25",
+        "label": "$2{,}25$",
         "score": 0
       },
       {
         "id": "e",
-        "label": "2,50",
+        "label": "$2{,}50$",
         "score": 0
       }
     ],
-    "explanation": "Gunakan sifat distributif perkalian aljabar:\n(45% + 55%) * 2,75 - 0,75\n= 100% * 2,75 - 0,75\n= 1 * 2,75 - 0,75 = 2,00."
+    "explanation": "Gunakan sifat distributif perkalian aljabar:\n$(45\\% + 55\\%) \\times 2{,}75 - 0{,}75$\n$= 100\\% \\times 2{,}75 - 0{,}75$\n$= 1 \\times 2{,}75 - 0{,}75 = 2{,}00$."
   },
   {
     "id": "mini-tiu-15",
     "category": "TIU",
     "topic": "Berhitung Cepat dan Aljabar Sederhana",
-    "prompt": "Nilai dari ((654)^2 - (346)^2) / (308 * 500) adalah ...",
+    "prompt": "Nilai dari $\\frac{654^2 - 346^2}{308 \\times 500}$ adalah ...",
     "choices": [
       {
         "id": "a",
-        "label": "1",
+        "label": "$1$",
         "score": 0
       },
       {
         "id": "b",
-        "label": "2",
+        "label": "$2$",
         "score": 5
       },
       {
         "id": "c",
-        "label": "3",
+        "label": "$3$",
         "score": 0
       },
       {
         "id": "d",
-        "label": "4",
+        "label": "$4$",
         "score": 0
       },
       {
         "id": "e",
-        "label": "5",
+        "label": "$5$",
         "score": 0
       }
     ],
-    "explanation": "Gunakan rumus faktorisasi selisih kuadrat a^2 - b^2 = (a - b)(a + b):\na - b = 654 - 346 = 308.\na + b = 654 + 346 = 1.000.\nPembilang = 308 * 1.000.\nPenyebut = 308 * 500.\nMaka hasilnya = (308 * 1.000) / (308 * 500) = 1.000 / 500 = 2."
+    "explanation": "Gunakan rumus faktorisasi selisih kuadrat $a^2 - b^2 = (a - b)(a + b)$:\n$a - b = 654 - 346 = 308$.\n$a + b = 654 + 346 = 1.000$.\nPembilang $= 308 \\times 1.000$.\nPenyebut $= 308 \\times 500$.\nMaka hasilnya $= \\frac{308 \\times 1.000}{308 \\times 500} = \\frac{1.000}{500} = 2$."
   },
   {
     "id": "mini-tiu-16",
     "category": "TIU",
     "topic": "Berhitung Cepat dan Aljabar Sederhana",
-    "prompt": "Jika x = sqrt(72 - sqrt(72 - sqrt(72 - ...))) dan y = (1/64)^(-1/3), maka nilai dari x + y adalah ...",
+    "prompt": "Jika $x = \\sqrt{72 - \\sqrt{72 - \\sqrt{72 - \\dots}}}$ dan $y = \\left(\\frac{1}{64}\\right)^{-\\frac{1}{3}}$, maka nilai dari $x + y$ adalah ...",
     "choices": [
       {
         "id": "a",
-        "label": "10",
+        "label": "$10$",
         "score": 0
       },
       {
         "id": "b",
-        "label": "11",
+        "label": "$11$",
         "score": 0
       },
       {
         "id": "c",
-        "label": "12",
+        "label": "$12$",
         "score": 5
       },
       {
         "id": "d",
-        "label": "13",
+        "label": "$13$",
         "score": 0
       },
       {
         "id": "e",
-        "label": "15",
+        "label": "$15$",
         "score": 0
       }
     ],
-    "explanation": "Mencari nilai x:\nx^2 = 72 - x <=> x^2 + x - 72 = 0 <=> (x + 9)(x - 8) = 0. Karena akar bernilai positif, maka x = 8.\nMencari nilai y:\ny = (64^(-1))^(-1/3) = 64^(1/3) = akar pangkat 3 dari 64 = 4.\nMaka x + y = 8 + 4 = 12."
+    "explanation": "Mencari nilai $x$:\n$x^2 = 72 - x \\iff x^2 + x - 72 = 0 \\iff (x + 9)(x - 8) = 0$. Karena akar bernilai positif, maka $x = 8$.\nMencari nilai $y$:\n$y = (64^{-1})^{-\\frac{1}{3}} = 64^{\\frac{1}{3}} = \\sqrt[3]{64} = 4$.\nMaka $x + y = 8 + 4 = 12$."
   },
   {
     "id": "mini-tiu-17",
@@ -685,137 +685,137 @@ export const MINI_TIU_QUESTIONS: Question[] = [
     "id": "mini-tiu-21",
     "category": "TIU",
     "topic": "Perbandingan Kuantitatif",
-    "prompt": "Diketahui:\nx = 1/42 - 1/48\ny = 1/44 - 1/46\n\nHubungan yang benar antara nilai x dan y adalah ...",
+    "prompt": "Diketahui:\n$x = \\frac{1}{42} - \\frac{1}{48}$\n$y = \\frac{1}{44} - \\frac{1}{46}$\n\nHubungan yang benar antara nilai $x$ dan $y$ adalah ...",
     "choices": [
       {
         "id": "a",
-        "label": "x > y",
+        "label": "$x > y$",
         "score": 5
       },
       {
         "id": "b",
-        "label": "x < y",
+        "label": "$x < y$",
         "score": 0
       },
       {
         "id": "c",
-        "label": "x = y",
+        "label": "$x = y$",
         "score": 0
       },
       {
         "id": "d",
-        "label": "2x = y",
+        "label": "$2x = y$",
         "score": 0
       },
       {
         "id": "e",
-        "label": "Hubungan x dan y tidak dapat ditentukan",
+        "label": "Hubungan $x$ dan $y$ tidak dapat ditentukan",
         "score": 0
       }
     ],
-    "explanation": "Samakan selisih pecahan:\nx = (48 - 42) / (42 * 48) = 6 / (42 * 48) = 1 / (7 * 48) = 1 / 336.\ny = (46 - 44) / (44 * 46) = 2 / (44 * 46) = 1 / (22 * 46) = 1 / 1.012.\nKarena kedua pecahan bernilai positif dan penyebut x (336) jauh lebih kecil daripada penyebut y (1.012), maka nilai x > y."
+    "explanation": "Samakan selisih pecahan:\n$x = \\frac{48 - 42}{42 \\times 48} = \\frac{6}{42 \\times 48} = \\frac{1}{7 \\times 48} = \\frac{1}{336}$.\n$y = \\frac{46 - 44}{44 \\times 46} = \\frac{2}{44 \\times 46} = \\frac{1}{22 \\times 46} = \\frac{1}{1.012}$.\nKarena kedua pecahan bernilai positif dan penyebut $x$ (336) lebih kecil daripada penyebut $y$ (1.012), maka $x > y$."
   },
   {
     "id": "mini-tiu-22",
     "category": "TIU",
     "topic": "Perbandingan Kuantitatif",
-    "prompt": "Diketahui:\nx = 62,5% dari 72\ny = 5/7 dari 63\n\nPernyataan yang benar mengenai nilai x dan y adalah ...",
+    "prompt": "Diketahui:\n$x = 62{,}5\\% \\text{ dari } 72$\n$y = \\frac{5}{7} \\text{ dari } 63$\n\nPernyataan yang benar mengenai nilai $x$ dan $y$ adalah ...",
     "choices": [
       {
         "id": "a",
-        "label": "x > y",
+        "label": "$x > y$",
         "score": 0
       },
       {
         "id": "b",
-        "label": "x < y",
+        "label": "$x < y$",
         "score": 0
       },
       {
         "id": "c",
-        "label": "x = y",
+        "label": "$x = y$",
         "score": 5
       },
       {
         "id": "d",
-        "label": "x = 2y",
+        "label": "$x = 2y$",
         "score": 0
       },
       {
         "id": "e",
-        "label": "Hubungan x dan y tidak dapat ditentukan",
+        "label": "Hubungan $x$ dan $y$ tidak dapat ditentukan",
         "score": 0
       }
     ],
-    "explanation": "Hitung x: 62,5% = 5/8. Maka x = (5/8) * 72 = 5 * 9 = 45.\nHitung y: y = (5/7) * 63 = 5 * 9 = 45.\nKarena x = 45 dan y = 45, maka kesimpulannya x = y."
+    "explanation": "Hitung $x$: $62{,}5\\% = \\frac{5}{8}$, maka $x = \\frac{5}{8} \\times 72 = 5 \\times 9 = 45$.\nHitung $y$: $y = \\frac{5}{7} \\times 63 = 5 \\times 9 = 45$.\nKarena $x = 45$ dan $y = 45$, maka kesimpulannya $x = y$."
   },
   {
     "id": "mini-tiu-23",
     "category": "TIU",
     "topic": "Perbandingan Kuantitatif",
-    "prompt": "Sebuah lingkaran memiliki keliling 88 cm (gunakan pi = 22/7).\nx = Luas lingkaran tersebut (dalam cm^2)\ny = Luas persegi dengan panjang sisi 25 cm (dalam cm^2)\n\nHubungan kuantitatif yang tepat adalah ...",
+    "prompt": "Sebuah lingkaran memiliki keliling $88\\text{ cm}$ (gunakan $\\pi = \\frac{22}{7}$).\n$x = \\text{Luas lingkaran tersebut (dalam }\\text{cm}^2)$\n$y = \\text{Luas persegi dengan panjang sisi } 25\\text{ cm (dalam }\\text{cm}^2)$\n\nHubungan kuantitatif yang tepat adalah ...",
     "choices": [
       {
         "id": "a",
-        "label": "x > y",
+        "label": "$x > y$",
         "score": 0
       },
       {
         "id": "b",
-        "label": "x < y",
+        "label": "$x < y$",
         "score": 5
       },
       {
         "id": "c",
-        "label": "x = y",
+        "label": "$x = y$",
         "score": 0
       },
       {
         "id": "d",
-        "label": "x + y = 1.200",
+        "label": "$x + y = 1.200$",
         "score": 0
       },
       {
         "id": "e",
-        "label": "Hubungan x dan y tidak dapat ditentukan",
+        "label": "Hubungan $x$ dan $y$ tidak dapat ditentukan",
         "score": 0
       }
     ],
-    "explanation": "Keliling lingkaran = 2 * (22/7) * r = 88 => (44/7) * r = 88 => r = 14 cm.\nLuas lingkaran (x) = (22/7) * 14^2 = (22/7) * 196 = 22 * 28 = 616 cm^2.\nLuas persegi (y) = 25^2 = 625 cm^2.\nKarena 616 < 625, maka x < y."
+    "explanation": "Keliling lingkaran $= 2 \\times \\frac{22}{7} \\times r = 88 \\implies \\frac{44}{7} \\times r = 88 \\implies r = 14\\text{ cm}$.\nLuas lingkaran ($x$) $= \\frac{22}{7} \\times 14^2 = \\frac{22}{7} \\times 196 = 22 \\times 28 = 616\\text{ cm}^2$.\nLuas persegi ($y$) $= 25^2 = 625\\text{ cm}^2$.\nKarena $616 < 625$, maka $x < y$."
   },
   {
     "id": "mini-tiu-24",
     "category": "TIU",
     "topic": "Perbandingan Kuantitatif",
-    "prompt": "Diketahui persamaan x^2 = 49 dan y = sqrt(49).\nPernyataan yang paling tepat adalah ...",
+    "prompt": "Diketahui persamaan $x^2 = 49$ dan $y = \\sqrt{49}$.\nPernyataan yang paling tepat adalah ...",
     "choices": [
       {
         "id": "a",
-        "label": "x > y",
+        "label": "$x > y$",
         "score": 0
       },
       {
         "id": "b",
-        "label": "x < y",
+        "label": "$x < y$",
         "score": 0
       },
       {
         "id": "c",
-        "label": "x = y",
+        "label": "$x = y$",
         "score": 0
       },
       {
         "id": "d",
-        "label": "x <= y",
+        "label": "$x \\le y$",
         "score": 0
       },
       {
         "id": "e",
-        "label": "Hubungan x dan y tidak dapat ditentukan",
+        "label": "Hubungan $x$ dan $y$ tidak dapat ditentukan",
         "score": 5
       }
     ],
-    "explanation": "Dari x^2 = 49, diperoleh nilai x = 7 atau x = -7.\nDari bentuk akar kuadrat tunggal, y = sqrt(49) = 7 (selalu positif non-negatif).\nJika x = 7, maka x = y.\nJika x = -7, maka x < y.\nKarena x memiliki dua kemungkinan nilai sehingga menghasilkan hubungan yang berlainan, hubungan x dan y tidak dapat dipastikan/ditentukan."
+    "explanation": "Dari $x^2 = 49$, diperoleh nilai $x = 7$ atau $x = -7$.\nDari bentuk akar kuadrat utama, $y = \\sqrt{49} = 7$ (selalu bernilai non-negatif).\nJika $x = 7$, maka $x = y$.\nJika $x = -7$, maka $x < y$.\nKarena $x$ memiliki dua kemungkinan nilai sehingga menghasilkan hubungan yang berlainan, hubungan $x$ dan $y$ tidak dapat dipastikan/ditentukan."
   },
   {
     "id": "mini-tiu-25",
@@ -985,7 +985,7 @@ export const MINI_TIU_QUESTIONS: Question[] = [
         "score": 0
       }
     ],
-    "explanation": "Total calon praja = 60 orang.\nPraja yang memiliki minimal salah satu kualifikasi = 60 - 8 = 52 orang.\nGunakan rumus himpunan: n(A gabungan B) = n(A) + n(B) - n(A irisan B)\n52 = 35 + 28 - n(A irisan B)\n52 = 63 - n(A irisan B)\nn(A irisan B) = 63 - 52 = 11 orang."
+    "explanation": "Total calon praja = 60 orang.\nPraja yang memiliki minimal salah satu kualifikasi = $60 - 8 = 52$ orang.\nGunakan prinsip inklusi-eksklusi himpunan:\n$n(A \\cup B) = n(A) + n(B) - n(A \\cap B)$\n$52 = 35 + 28 - n(A \\cap B)$\n$52 = 63 - n(A \\cap B)$\n$n(A \\cap B) = 63 - 52 = 11$ orang."
   },
   {
     "id": "mini-tiu-30",
@@ -1020,6 +1020,175 @@ export const MINI_TIU_QUESTIONS: Question[] = [
       }
     ],
     "explanation": "Misalkan usia perwira sekarang = P dan usia ajudan sekarang = A.\nKondisi 3 tahun lalu: P - 3 = 4(A - 3) => P - 3 = 4A - 12 => P = 4A - 9.\nKondisi 6 tahun ke depan: P + 6 = 2,5(A + 6) => P + 6 = 2,5A + 15 => P = 2,5A + 9.\nSamakan kedua persamaan nilai P:\n4A - 9 = 2,5A + 9\n4A - 2,5A = 9 + 9\n1,5A = 18\nA = 18 / 1,5 = 12 tahun.\nJadi, usia ajudan saat ini adalah 12 tahun."
+  },
+  {
+    "id": "mini-tiu-31",
+    "category": "TIU",
+    "topic": "Figural Analogi",
+    "prompt": "[svg]<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 370 100\" style=\"width:100%;max-width:480px;display:block\"><rect x=\"2\" y=\"4\" width=\"78\" height=\"78\" fill=\"white\" stroke=\"black\" stroke-width=\"1.5\"/><polygon points=\"22,8 34,24 22,40 10,24\" fill=\"none\" stroke=\"black\" stroke-width=\"1.5\"/><polygon points=\"58,8 70,24 58,40 46,24\" fill=\"none\" stroke=\"black\" stroke-width=\"1.5\"/><polygon points=\"10,72 34,72 22,48\" fill=\"none\" stroke=\"black\" stroke-width=\"1.5\"/><polygon points=\"46,72 70,72 58,48\" fill=\"none\" stroke=\"black\" stroke-width=\"1.5\"/><text x=\"41\" y=\"96\" text-anchor=\"middle\" font-size=\"10\" font-family=\"sans-serif\">(1)</text><text x=\"90\" y=\"48\" text-anchor=\"middle\" font-size=\"18\" font-family=\"serif\">=</text><rect x=\"98\" y=\"4\" width=\"78\" height=\"78\" fill=\"white\" stroke=\"black\" stroke-width=\"1.5\"/><path d=\"M122,36C118,36 110,27 110,22C110,15 116,9 122,16C128,9 134,15 134,22C134,27 126,36 122,36Z\" fill=\"black\"/><path d=\"M158,36C154,36 146,27 146,22C146,15 152,9 158,16C164,9 170,15 170,22C170,27 162,36 158,36Z\" fill=\"black\"/><polygon points=\"110,48 134,48 122,74\" fill=\"black\"/><polygon points=\"146,48 170,48 158,74\" fill=\"black\"/><text x=\"137\" y=\"96\" text-anchor=\"middle\" font-size=\"10\" font-family=\"sans-serif\">(2)</text><text x=\"186\" y=\"48\" text-anchor=\"middle\" font-size=\"18\" font-family=\"serif\">=</text><rect x=\"194\" y=\"4\" width=\"78\" height=\"78\" fill=\"white\" stroke=\"black\" stroke-width=\"1.5\"/><circle cx=\"222\" cy=\"18\" r=\"8\" fill=\"black\"/><circle cx=\"214\" cy=\"28\" r=\"8\" fill=\"black\"/><circle cx=\"230\" cy=\"28\" r=\"8\" fill=\"black\"/><rect x=\"219\" y=\"28\" width=\"6\" height=\"10\" fill=\"black\"/><circle cx=\"258\" cy=\"18\" r=\"8\" fill=\"black\"/><circle cx=\"250\" cy=\"28\" r=\"8\" fill=\"black\"/><circle cx=\"266\" cy=\"28\" r=\"8\" fill=\"black\"/><rect x=\"255\" y=\"28\" width=\"6\" height=\"10\" fill=\"black\"/><path d=\"M222,72C218,72 210,63 210,58C210,51 216,45 222,52C228,45 234,51 234,58C234,63 226,72 222,72Z\" fill=\"black\"/><path d=\"M258,72C254,72 246,63 246,58C246,51 252,45 258,52C264,45 270,51 270,58C270,63 262,72 258,72Z\" fill=\"black\"/><text x=\"233\" y=\"96\" text-anchor=\"middle\" font-size=\"10\" font-family=\"sans-serif\">(3)</text><rect x=\"290\" y=\"4\" width=\"78\" height=\"78\" fill=\"white\" stroke=\"black\" stroke-width=\"1.5\"/><text x=\"329\" y=\"52\" text-anchor=\"middle\" font-size=\"40\" font-family=\"sans-serif\" font-weight=\"bold\">?</text><text x=\"329\" y=\"96\" text-anchor=\"middle\" font-size=\"10\" font-family=\"sans-serif\">(4)</text></svg>",
+    "choices": [
+      {
+        "id": "a",
+        "label": "[svg]<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 88 88\" style=\"width:100%;display:block\"><rect x=\"2\" y=\"2\" width=\"84\" height=\"84\" fill=\"white\" stroke=\"black\" stroke-width=\"1.5\"/><path d=\"M22,37C18,37 10,28 10,22C10,15 16,9 22,16C28,9 34,15 34,22C34,28 26,37 22,37Z\" fill=\"none\" stroke=\"black\" stroke-width=\"1.5\"/><polygon points=\"54,12 70,12 62,30\" fill=\"none\" stroke=\"black\" stroke-width=\"1.5\"/><path d=\"M22,79C18,79 10,70 10,64C10,57 16,51 22,58C28,51 34,57 34,64C34,70 26,79 22,79Z\" fill=\"black\"/><polygon points=\"54,54 70,54 62,78\" fill=\"black\"/></svg>",
+        "score": 0
+      },
+      {
+        "id": "b",
+        "label": "[svg]<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 88 88\" style=\"width:100%;display:block\"><rect x=\"2\" y=\"2\" width=\"84\" height=\"84\" fill=\"white\" stroke=\"black\" stroke-width=\"1.5\"/><path d=\"M22,37C18,37 10,28 10,22C10,15 16,9 22,16C28,9 34,15 34,22C34,28 26,37 22,37Z\" fill=\"black\"/><polygon points=\"54,30 70,30 62,10\" fill=\"black\"/><path d=\"M22,79C18,79 10,70 10,64C10,57 16,51 22,58C28,51 34,57 34,64C34,70 26,79 22,79Z\" fill=\"black\"/><path d=\"M62,79C58,79 50,70 50,64C50,57 56,51 62,58C68,51 74,57 74,64C74,70 66,79 62,79Z\" fill=\"black\"/></svg>",
+        "score": 0
+      },
+      {
+        "id": "c",
+        "label": "[svg]<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 88 88\" style=\"width:100%;display:block\"><rect x=\"2\" y=\"2\" width=\"84\" height=\"84\" fill=\"white\" stroke=\"black\" stroke-width=\"1.5\"/><path d=\"M22,37C18,37 10,28 10,22C10,15 16,9 22,16C28,9 34,15 34,22C34,28 26,37 22,37Z\" fill=\"black\"/><path d=\"M62,37C58,37 50,28 50,22C50,15 56,9 62,16C68,9 74,15 74,22C74,28 66,37 62,37Z\" fill=\"black\"/><polygon points=\"10,54 34,54 22,78\" fill=\"none\" stroke=\"black\" stroke-width=\"1.5\"/><polygon points=\"50,54 74,54 62,78\" fill=\"black\"/></svg>",
+        "score": 0
+      },
+      {
+        "id": "d",
+        "label": "[svg]<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 88 88\" style=\"width:100%;display:block\"><rect x=\"2\" y=\"2\" width=\"84\" height=\"84\" fill=\"white\" stroke=\"black\" stroke-width=\"1.5\"/><path d=\"M22,37C18,37 10,28 10,22C10,15 16,9 22,16C28,9 34,15 34,22C34,28 26,37 22,37Z\" fill=\"black\"/><path d=\"M62,37C58,37 50,28 50,22C50,15 56,9 62,16C68,9 74,15 74,22C74,28 66,37 62,37Z\" fill=\"black\"/><polygon points=\"10,54 34,54 22,78\" fill=\"black\"/><polygon points=\"50,54 74,54 62,78\" fill=\"black\"/></svg>",
+        "score": 5
+      },
+      {
+        "id": "e",
+        "label": "[svg]<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 88 88\" style=\"width:100%;display:block\"><rect x=\"2\" y=\"2\" width=\"84\" height=\"84\" fill=\"white\" stroke=\"black\" stroke-width=\"1.5\"/><circle cx=\"22\" cy=\"16\" r=\"7\" fill=\"black\"/><circle cx=\"15\" cy=\"26\" r=\"7\" fill=\"black\"/><circle cx=\"29\" cy=\"26\" r=\"7\" fill=\"black\"/><rect x=\"19\" y=\"26\" width=\"6\" height=\"8\" fill=\"black\"/><polygon points=\"50,12 74,12 62,34\" fill=\"black\"/><path d=\"M22,79C18,79 10,70 10,64C10,57 16,51 22,58C28,51 34,57 34,64C34,70 26,79 22,79Z\" fill=\"black\"/><polygon points=\"50,54 74,54 62,78\" fill=\"none\" stroke=\"black\" stroke-width=\"1.5\"/></svg>",
+        "score": 0
+      }
+    ],
+    "explanation": "Pola analogi: pada panel (1)→(2), setiap bentuk outline berubah menjadi bentuk filled (terisi hitam). Pada panel (3) terdapat dua buah simbol trefoil/club (♣) di atas dan dua hati (♥) di bawah. Mengikuti pola yang sama, panel (4) harus menampilkan dua hati (♥) di atas dan dua segitiga terbalik (▼) di bawah — semuanya terisi penuh (filled). Jawaban D memenuhi pola ini."
+  },
+  {
+    "id": "mini-tiu-32",
+    "category": "TIU",
+    "topic": "Figural Analogi",
+    "prompt": "[svg]<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 370 100\" style=\"width:100%;max-width:480px;display:block\"><rect x=\"2\" y=\"4\" width=\"78\" height=\"78\" fill=\"white\" stroke=\"black\" stroke-width=\"1.5\"/><rect x=\"8\" y=\"22\" width=\"26\" height=\"38\" fill=\"none\" stroke=\"black\" stroke-width=\"1.5\"/><polygon points=\"44,22 78,43 44,64\" fill=\"none\" stroke=\"black\" stroke-width=\"1.5\"/><text x=\"41\" y=\"96\" text-anchor=\"middle\" font-size=\"10\" font-family=\"sans-serif\">(1)</text><text x=\"90\" y=\"48\" text-anchor=\"middle\" font-size=\"18\" font-family=\"serif\">=</text><rect x=\"98\" y=\"4\" width=\"78\" height=\"78\" fill=\"white\" stroke=\"black\" stroke-width=\"1.5\"/><polygon points=\"98,22 132,43 98,64\" fill=\"none\" stroke=\"black\" stroke-width=\"1.5\"/><ellipse cx=\"158\" cy=\"43\" rx=\"14\" ry=\"18\" fill=\"none\" stroke=\"black\" stroke-width=\"1.5\"/><text x=\"137\" y=\"96\" text-anchor=\"middle\" font-size=\"10\" font-family=\"sans-serif\">(2)</text><text x=\"186\" y=\"48\" text-anchor=\"middle\" font-size=\"18\" font-family=\"serif\">=</text><rect x=\"194\" y=\"4\" width=\"78\" height=\"78\" fill=\"white\" stroke=\"black\" stroke-width=\"1.5\"/><ellipse cx=\"233\" cy=\"43\" rx=\"28\" ry=\"20\" fill=\"black\"/><text x=\"233\" y=\"96\" text-anchor=\"middle\" font-size=\"10\" font-family=\"sans-serif\">(3)</text><rect x=\"290\" y=\"4\" width=\"78\" height=\"78\" fill=\"white\" stroke=\"black\" stroke-width=\"1.5\"/><text x=\"329\" y=\"52\" text-anchor=\"middle\" font-size=\"40\" font-family=\"sans-serif\" font-weight=\"bold\">?</text><text x=\"329\" y=\"96\" text-anchor=\"middle\" font-size=\"10\" font-family=\"sans-serif\">(4)</text></svg>",
+    "choices": [
+      {
+        "id": "a",
+        "label": "[svg]<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 88 88\" style=\"width:100%;display:block\"><rect x=\"2\" y=\"2\" width=\"84\" height=\"84\" fill=\"white\" stroke=\"black\" stroke-width=\"1.5\"/><polygon points=\"8,18 44,44 8,70\" fill=\"black\"/><ellipse cx=\"66\" cy=\"44\" rx=\"14\" ry=\"18\" fill=\"black\"/></svg>",
+        "score": 0
+      },
+      {
+        "id": "b",
+        "label": "[svg]<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 88 88\" style=\"width:100%;display:block\"><rect x=\"2\" y=\"2\" width=\"84\" height=\"84\" fill=\"white\" stroke=\"black\" stroke-width=\"1.5\"/><ellipse cx=\"26\" cy=\"44\" rx=\"14\" ry=\"18\" fill=\"black\"/><polygon points=\"80,18 44,44 80,70\" fill=\"black\"/></svg>",
+        "score": 0
+      },
+      {
+        "id": "c",
+        "label": "[svg]<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 88 88\" style=\"width:100%;display:block\"><rect x=\"2\" y=\"2\" width=\"84\" height=\"84\" fill=\"white\" stroke=\"black\" stroke-width=\"1.5\"/><ellipse cx=\"44\" cy=\"44\" rx=\"28\" ry=\"20\" fill=\"black\"/><polygon points=\"12,20 44,44 12,68\" fill=\"black\"/></svg>",
+        "score": 0
+      },
+      {
+        "id": "d",
+        "label": "[svg]<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 88 88\" style=\"width:100%;display:block\"><rect x=\"2\" y=\"2\" width=\"84\" height=\"84\" fill=\"white\" stroke=\"black\" stroke-width=\"1.5\"/><polygon points=\"80,18 44,44 80,70\" fill=\"black\"/><ellipse cx=\"26\" cy=\"44\" rx=\"14\" ry=\"18\" fill=\"none\" stroke=\"black\" stroke-width=\"1.5\"/></svg>",
+        "score": 5
+      },
+      {
+        "id": "e",
+        "label": "[svg]<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 88 88\" style=\"width:100%;display:block\"><rect x=\"2\" y=\"2\" width=\"84\" height=\"84\" fill=\"white\" stroke=\"black\" stroke-width=\"1.5\"/><polygon points=\"8,18 44,44 8,70\" fill=\"none\" stroke=\"black\" stroke-width=\"1.5\"/><ellipse cx=\"66\" cy=\"44\" rx=\"14\" ry=\"18\" fill=\"none\" stroke=\"black\" stroke-width=\"1.5\"/></svg>",
+        "score": 0
+      }
+    ],
+    "explanation": "Pola analogi: (1)=(2) menunjukkan bahwa bentuk kanan pada panel (1) bergeser ke kiri pada panel (2) namun dicerminkan (mirrored), dan bentuk baru muncul di kanan. Panel (1): [kotak outline] + [segitiga-kanan outline]. Panel (2): [segitiga-kiri outline] + [elips outline]. Panel (3) berisi elips filled besar. Mengikuti pola yang sama, panel (4) harus menampilkan segitiga-kiri (cermin dari segitiga-kanan) sebagai filled, dan elips kecil outline. Jawaban D memenuhi pola ini."
+  },
+  {
+    "id": "mini-tiu-33",
+    "category": "TIU",
+    "topic": "Serial Gambar",
+    "prompt": "[svg]<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 370 100\" style=\"width:100%;max-width:480px;display:block\"><rect x=\"2\" y=\"4\" width=\"78\" height=\"78\" fill=\"white\" stroke=\"black\" stroke-width=\"1.5\"/><line x1=\"41\" y1=\"14\" x2=\"41\" y2=\"74\" stroke=\"black\" stroke-width=\"2\"/><line x1=\"11\" y1=\"44\" x2=\"71\" y2=\"44\" stroke=\"black\" stroke-width=\"2\"/><circle cx=\"41\" cy=\"14\" r=\"5\" fill=\"none\" stroke=\"black\" stroke-width=\"1.5\"/><circle cx=\"71\" cy=\"44\" r=\"5\" fill=\"none\" stroke=\"black\" stroke-width=\"1.5\"/><circle cx=\"41\" cy=\"74\" r=\"5\" fill=\"none\" stroke=\"black\" stroke-width=\"1.5\"/><circle cx=\"11\" cy=\"44\" r=\"5\" fill=\"none\" stroke=\"black\" stroke-width=\"1.5\"/><g transform=\"translate(41,14) rotate(315)\"><line x1=\"0\" y1=\"0\" x2=\"0\" y2=\"-6\" stroke=\"black\" stroke-width=\"1.5\"/><polygon points=\"0,-6 -3,0 3,0\" fill=\"black\"/></g><g transform=\"translate(71,44) rotate(45)\"><line x1=\"0\" y1=\"0\" x2=\"0\" y2=\"-6\" stroke=\"black\" stroke-width=\"1.5\"/><polygon points=\"0,-6 -3,0 3,0\" fill=\"black\"/></g><g transform=\"translate(41,74) rotate(135)\"><line x1=\"0\" y1=\"0\" x2=\"0\" y2=\"-6\" stroke=\"black\" stroke-width=\"1.5\"/><polygon points=\"0,-6 -3,0 3,0\" fill=\"black\"/></g><g transform=\"translate(11,44) rotate(225)\"><line x1=\"0\" y1=\"0\" x2=\"0\" y2=\"-6\" stroke=\"black\" stroke-width=\"1.5\"/><polygon points=\"0,-6 -3,0 3,0\" fill=\"black\"/></g><text x=\"41\" y=\"96\" text-anchor=\"middle\" font-size=\"10\" font-family=\"sans-serif\">1.</text><rect x=\"98\" y=\"4\" width=\"78\" height=\"78\" fill=\"white\" stroke=\"black\" stroke-width=\"1.5\"/><line x1=\"137\" y1=\"14\" x2=\"137\" y2=\"74\" stroke=\"black\" stroke-width=\"2\"/><line x1=\"107\" y1=\"44\" x2=\"167\" y2=\"44\" stroke=\"black\" stroke-width=\"2\"/><circle cx=\"137\" cy=\"14\" r=\"5\" fill=\"none\" stroke=\"black\" stroke-width=\"1.5\"/><circle cx=\"167\" cy=\"44\" r=\"5\" fill=\"none\" stroke=\"black\" stroke-width=\"1.5\"/><circle cx=\"137\" cy=\"74\" r=\"5\" fill=\"none\" stroke=\"black\" stroke-width=\"1.5\"/><circle cx=\"107\" cy=\"44\" r=\"5\" fill=\"none\" stroke=\"black\" stroke-width=\"1.5\"/><g transform=\"translate(137,14) rotate(0)\"><line x1=\"0\" y1=\"0\" x2=\"0\" y2=\"-6\" stroke=\"black\" stroke-width=\"1.5\"/><polygon points=\"0,-6 -3,0 3,0\" fill=\"black\"/></g><g transform=\"translate(167,44) rotate(90)\"><line x1=\"0\" y1=\"0\" x2=\"0\" y2=\"-6\" stroke=\"black\" stroke-width=\"1.5\"/><polygon points=\"0,-6 -3,0 3,0\" fill=\"black\"/></g><g transform=\"translate(137,74) rotate(180)\"><line x1=\"0\" y1=\"0\" x2=\"0\" y2=\"-6\" stroke=\"black\" stroke-width=\"1.5\"/><polygon points=\"0,-6 -3,0 3,0\" fill=\"black\"/></g><g transform=\"translate(107,44) rotate(270)\"><line x1=\"0\" y1=\"0\" x2=\"0\" y2=\"-6\" stroke=\"black\" stroke-width=\"1.5\"/><polygon points=\"0,-6 -3,0 3,0\" fill=\"black\"/></g><text x=\"137\" y=\"96\" text-anchor=\"middle\" font-size=\"10\" font-family=\"sans-serif\">2.</text><rect x=\"194\" y=\"4\" width=\"78\" height=\"78\" fill=\"white\" stroke=\"black\" stroke-width=\"1.5\"/><line x1=\"233\" y1=\"14\" x2=\"233\" y2=\"74\" stroke=\"black\" stroke-width=\"2\"/><line x1=\"203\" y1=\"44\" x2=\"263\" y2=\"44\" stroke=\"black\" stroke-width=\"2\"/><circle cx=\"233\" cy=\"14\" r=\"5\" fill=\"none\" stroke=\"black\" stroke-width=\"1.5\"/><circle cx=\"263\" cy=\"44\" r=\"5\" fill=\"none\" stroke=\"black\" stroke-width=\"1.5\"/><circle cx=\"233\" cy=\"74\" r=\"5\" fill=\"none\" stroke=\"black\" stroke-width=\"1.5\"/><circle cx=\"203\" cy=\"44\" r=\"5\" fill=\"none\" stroke=\"black\" stroke-width=\"1.5\"/><g transform=\"translate(233,14) rotate(45)\"><line x1=\"0\" y1=\"0\" x2=\"0\" y2=\"-6\" stroke=\"black\" stroke-width=\"1.5\"/><polygon points=\"0,-6 -3,0 3,0\" fill=\"black\"/></g><g transform=\"translate(263,44) rotate(135)\"><line x1=\"0\" y1=\"0\" x2=\"0\" y2=\"-6\" stroke=\"black\" stroke-width=\"1.5\"/><polygon points=\"0,-6 -3,0 3,0\" fill=\"black\"/></g><g transform=\"translate(233,74) rotate(225)\"><line x1=\"0\" y1=\"0\" x2=\"0\" y2=\"-6\" stroke=\"black\" stroke-width=\"1.5\"/><polygon points=\"0,-6 -3,0 3,0\" fill=\"black\"/></g><g transform=\"translate(203,44) rotate(315)\"><line x1=\"0\" y1=\"0\" x2=\"0\" y2=\"-6\" stroke=\"black\" stroke-width=\"1.5\"/><polygon points=\"0,-6 -3,0 3,0\" fill=\"black\"/></g><text x=\"233\" y=\"96\" text-anchor=\"middle\" font-size=\"10\" font-family=\"sans-serif\">3.</text><rect x=\"290\" y=\"4\" width=\"78\" height=\"78\" fill=\"white\" stroke=\"black\" stroke-width=\"1.5\"/><text x=\"329\" y=\"52\" text-anchor=\"middle\" font-size=\"40\" font-family=\"sans-serif\" font-weight=\"bold\">?</text><text x=\"329\" y=\"96\" text-anchor=\"middle\" font-size=\"10\" font-family=\"sans-serif\">4.</text></svg>",
+    "choices": [
+      {
+        "id": "a",
+        "label": "[svg]<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 88 88\" style=\"width:100%;display:block\"><rect x=\"2\" y=\"2\" width=\"84\" height=\"84\" fill=\"white\" stroke=\"black\" stroke-width=\"1.5\"/><line x1=\"44\" y1=\"10\" x2=\"44\" y2=\"78\" stroke=\"black\" stroke-width=\"2\"/><line x1=\"10\" y1=\"44\" x2=\"78\" y2=\"44\" stroke=\"black\" stroke-width=\"2\"/><circle cx=\"44\" cy=\"10\" r=\"6\" fill=\"none\" stroke=\"black\" stroke-width=\"1.5\"/><circle cx=\"78\" cy=\"44\" r=\"6\" fill=\"none\" stroke=\"black\" stroke-width=\"1.5\"/><circle cx=\"44\" cy=\"78\" r=\"6\" fill=\"none\" stroke=\"black\" stroke-width=\"1.5\"/><circle cx=\"10\" cy=\"44\" r=\"6\" fill=\"none\" stroke=\"black\" stroke-width=\"1.5\"/><g transform=\"translate(44,10) rotate(315)\"><line x1=\"0\" y1=\"0\" x2=\"0\" y2=\"-7\" stroke=\"black\" stroke-width=\"1.5\"/><polygon points=\"0,-7 -3.5,0 3.5,0\" fill=\"black\"/></g><g transform=\"translate(78,44) rotate(45)\"><line x1=\"0\" y1=\"0\" x2=\"0\" y2=\"-7\" stroke=\"black\" stroke-width=\"1.5\"/><polygon points=\"0,-7 -3.5,0 3.5,0\" fill=\"black\"/></g><g transform=\"translate(44,78) rotate(135)\"><line x1=\"0\" y1=\"0\" x2=\"0\" y2=\"-7\" stroke=\"black\" stroke-width=\"1.5\"/><polygon points=\"0,-7 -3.5,0 3.5,0\" fill=\"black\"/></g><g transform=\"translate(10,44) rotate(225)\"><line x1=\"0\" y1=\"0\" x2=\"0\" y2=\"-7\" stroke=\"black\" stroke-width=\"1.5\"/><polygon points=\"0,-7 -3.5,0 3.5,0\" fill=\"black\"/></g></svg>",
+        "score": 0
+      },
+      {
+        "id": "b",
+        "label": "[svg]<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 88 88\" style=\"width:100%;display:block\"><rect x=\"2\" y=\"2\" width=\"84\" height=\"84\" fill=\"white\" stroke=\"black\" stroke-width=\"1.5\"/><line x1=\"44\" y1=\"10\" x2=\"44\" y2=\"78\" stroke=\"black\" stroke-width=\"2\"/><line x1=\"10\" y1=\"44\" x2=\"78\" y2=\"44\" stroke=\"black\" stroke-width=\"2\"/><circle cx=\"44\" cy=\"10\" r=\"6\" fill=\"none\" stroke=\"black\" stroke-width=\"1.5\"/><circle cx=\"78\" cy=\"44\" r=\"6\" fill=\"none\" stroke=\"black\" stroke-width=\"1.5\"/><circle cx=\"44\" cy=\"78\" r=\"6\" fill=\"none\" stroke=\"black\" stroke-width=\"1.5\"/><circle cx=\"10\" cy=\"44\" r=\"6\" fill=\"none\" stroke=\"black\" stroke-width=\"1.5\"/><g transform=\"translate(44,10) rotate(225)\"><line x1=\"0\" y1=\"0\" x2=\"0\" y2=\"-7\" stroke=\"black\" stroke-width=\"1.5\"/><polygon points=\"0,-7 -3.5,0 3.5,0\" fill=\"black\"/></g><g transform=\"translate(78,44) rotate(315)\"><line x1=\"0\" y1=\"0\" x2=\"0\" y2=\"-7\" stroke=\"black\" stroke-width=\"1.5\"/><polygon points=\"0,-7 -3.5,0 3.5,0\" fill=\"black\"/></g><g transform=\"translate(44,78) rotate(45)\"><line x1=\"0\" y1=\"0\" x2=\"0\" y2=\"-7\" stroke=\"black\" stroke-width=\"1.5\"/><polygon points=\"0,-7 -3.5,0 3.5,0\" fill=\"black\"/></g><g transform=\"translate(10,44) rotate(135)\"><line x1=\"0\" y1=\"0\" x2=\"0\" y2=\"-7\" stroke=\"black\" stroke-width=\"1.5\"/><polygon points=\"0,-7 -3.5,0 3.5,0\" fill=\"black\"/></g></svg>",
+        "score": 0
+      },
+      {
+        "id": "c",
+        "label": "[svg]<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 88 88\" style=\"width:100%;display:block\"><rect x=\"2\" y=\"2\" width=\"84\" height=\"84\" fill=\"white\" stroke=\"black\" stroke-width=\"1.5\"/><line x1=\"44\" y1=\"10\" x2=\"44\" y2=\"78\" stroke=\"black\" stroke-width=\"2\"/><line x1=\"10\" y1=\"44\" x2=\"78\" y2=\"44\" stroke=\"black\" stroke-width=\"2\"/><circle cx=\"44\" cy=\"10\" r=\"6\" fill=\"none\" stroke=\"black\" stroke-width=\"1.5\"/><circle cx=\"78\" cy=\"44\" r=\"6\" fill=\"none\" stroke=\"black\" stroke-width=\"1.5\"/><circle cx=\"44\" cy=\"78\" r=\"6\" fill=\"none\" stroke=\"black\" stroke-width=\"1.5\"/><circle cx=\"10\" cy=\"44\" r=\"6\" fill=\"none\" stroke=\"black\" stroke-width=\"1.5\"/><g transform=\"translate(44,10) rotate(180)\"><line x1=\"0\" y1=\"0\" x2=\"0\" y2=\"-7\" stroke=\"black\" stroke-width=\"1.5\"/><polygon points=\"0,-7 -3.5,0 3.5,0\" fill=\"black\"/></g><g transform=\"translate(78,44) rotate(270)\"><line x1=\"0\" y1=\"0\" x2=\"0\" y2=\"-7\" stroke=\"black\" stroke-width=\"1.5\"/><polygon points=\"0,-7 -3.5,0 3.5,0\" fill=\"black\"/></g><g transform=\"translate(44,78) rotate(0)\"><line x1=\"0\" y1=\"0\" x2=\"0\" y2=\"-7\" stroke=\"black\" stroke-width=\"1.5\"/><polygon points=\"0,-7 -3.5,0 3.5,0\" fill=\"black\"/></g><g transform=\"translate(10,44) rotate(90)\"><line x1=\"0\" y1=\"0\" x2=\"0\" y2=\"-7\" stroke=\"black\" stroke-width=\"1.5\"/><polygon points=\"0,-7 -3.5,0 3.5,0\" fill=\"black\"/></g></svg>",
+        "score": 0
+      },
+      {
+        "id": "d",
+        "label": "[svg]<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 88 88\" style=\"width:100%;display:block\"><rect x=\"2\" y=\"2\" width=\"84\" height=\"84\" fill=\"white\" stroke=\"black\" stroke-width=\"1.5\"/><line x1=\"44\" y1=\"10\" x2=\"44\" y2=\"78\" stroke=\"black\" stroke-width=\"2\"/><line x1=\"10\" y1=\"44\" x2=\"78\" y2=\"44\" stroke=\"black\" stroke-width=\"2\"/><circle cx=\"44\" cy=\"10\" r=\"6\" fill=\"none\" stroke=\"black\" stroke-width=\"1.5\"/><circle cx=\"78\" cy=\"44\" r=\"6\" fill=\"none\" stroke=\"black\" stroke-width=\"1.5\"/><circle cx=\"44\" cy=\"78\" r=\"6\" fill=\"none\" stroke=\"black\" stroke-width=\"1.5\"/><circle cx=\"10\" cy=\"44\" r=\"6\" fill=\"none\" stroke=\"black\" stroke-width=\"1.5\"/><g transform=\"translate(44,10) rotate(135)\"><line x1=\"0\" y1=\"0\" x2=\"0\" y2=\"-7\" stroke=\"black\" stroke-width=\"1.5\"/><polygon points=\"0,-7 -3.5,0 3.5,0\" fill=\"black\"/></g><g transform=\"translate(78,44) rotate(225)\"><line x1=\"0\" y1=\"0\" x2=\"0\" y2=\"-7\" stroke=\"black\" stroke-width=\"1.5\"/><polygon points=\"0,-7 -3.5,0 3.5,0\" fill=\"black\"/></g><g transform=\"translate(44,78) rotate(315)\"><line x1=\"0\" y1=\"0\" x2=\"0\" y2=\"-7\" stroke=\"black\" stroke-width=\"1.5\"/><polygon points=\"0,-7 -3.5,0 3.5,0\" fill=\"black\"/></g><g transform=\"translate(10,44) rotate(45)\"><line x1=\"0\" y1=\"0\" x2=\"0\" y2=\"-7\" stroke=\"black\" stroke-width=\"1.5\"/><polygon points=\"0,-7 -3.5,0 3.5,0\" fill=\"black\"/></g></svg>",
+        "score": 0
+      },
+      {
+        "id": "e",
+        "label": "[svg]<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 88 88\" style=\"width:100%;display:block\"><rect x=\"2\" y=\"2\" width=\"84\" height=\"84\" fill=\"white\" stroke=\"black\" stroke-width=\"1.5\"/><line x1=\"44\" y1=\"10\" x2=\"44\" y2=\"78\" stroke=\"black\" stroke-width=\"2\"/><line x1=\"10\" y1=\"44\" x2=\"78\" y2=\"44\" stroke=\"black\" stroke-width=\"2\"/><circle cx=\"44\" cy=\"10\" r=\"6\" fill=\"none\" stroke=\"black\" stroke-width=\"1.5\"/><circle cx=\"78\" cy=\"44\" r=\"6\" fill=\"none\" stroke=\"black\" stroke-width=\"1.5\"/><circle cx=\"44\" cy=\"78\" r=\"6\" fill=\"none\" stroke=\"black\" stroke-width=\"1.5\"/><circle cx=\"10\" cy=\"44\" r=\"6\" fill=\"none\" stroke=\"black\" stroke-width=\"1.5\"/><g transform=\"translate(44,10) rotate(90)\"><line x1=\"0\" y1=\"0\" x2=\"0\" y2=\"-7\" stroke=\"black\" stroke-width=\"1.5\"/><polygon points=\"0,-7 -3.5,0 3.5,0\" fill=\"black\"/></g><g transform=\"translate(78,44) rotate(180)\"><line x1=\"0\" y1=\"0\" x2=\"0\" y2=\"-7\" stroke=\"black\" stroke-width=\"1.5\"/><polygon points=\"0,-7 -3.5,0 3.5,0\" fill=\"black\"/></g><g transform=\"translate(44,78) rotate(270)\"><line x1=\"0\" y1=\"0\" x2=\"0\" y2=\"-7\" stroke=\"black\" stroke-width=\"1.5\"/><polygon points=\"0,-7 -3.5,0 3.5,0\" fill=\"black\"/></g><g transform=\"translate(10,44) rotate(0)\"><line x1=\"0\" y1=\"0\" x2=\"0\" y2=\"-7\" stroke=\"black\" stroke-width=\"1.5\"/><polygon points=\"0,-7 -3.5,0 3.5,0\" fill=\"black\"/></g></svg>",
+        "score": 5
+      }
+    ],
+    "explanation": "Pola serial: Setiap gambar, panah pada tiap ujung lengan bintang berputar 45° searah jarum jam. Frame 1: panah mengarah ke sudut diagonal (↖↗↘↙). Frame 2: panah berputar 45° → (↑→↓←). Frame 3: berputar 45° lagi → (↗↘↙↖). Frame 4 (jawaban): berputar 45° lagi → (→↓←↑). Jawaban E menunjukkan posisi panah yang tepat."
+  },
+  {
+    "id": "mini-tiu-34",
+    "category": "TIU",
+    "topic": "Serial Gambar",
+    "prompt": "[svg]<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 470 100\" style=\"width:100%;max-width:560px;display:block\"><rect x=\"2\" y=\"4\" width=\"78\" height=\"78\" fill=\"white\" stroke=\"black\" stroke-width=\"1.5\"/><circle cx=\"41\" cy=\"44\" r=\"8\" fill=\"none\" stroke=\"black\" stroke-width=\"1.5\"/><circle cx=\"41\" cy=\"24\" r=\"8\" fill=\"none\" stroke=\"black\" stroke-width=\"1.5\"/><circle cx=\"58\" cy=\"34\" r=\"8\" fill=\"none\" stroke=\"black\" stroke-width=\"1.5\"/><circle cx=\"58\" cy=\"54\" r=\"8\" fill=\"none\" stroke=\"black\" stroke-width=\"1.5\"/><circle cx=\"41\" cy=\"64\" r=\"8\" fill=\"none\" stroke=\"black\" stroke-width=\"1.5\"/><circle cx=\"24\" cy=\"54\" r=\"8\" fill=\"black\"/><circle cx=\"24\" cy=\"34\" r=\"8\" fill=\"none\" stroke=\"black\" stroke-width=\"1.5\"/><text x=\"41\" y=\"96\" text-anchor=\"middle\" font-size=\"10\" font-family=\"sans-serif\">1.</text><rect x=\"98\" y=\"4\" width=\"78\" height=\"78\" fill=\"white\" stroke=\"black\" stroke-width=\"1.5\"/><circle cx=\"137\" cy=\"44\" r=\"8\" fill=\"black\"/><circle cx=\"137\" cy=\"24\" r=\"8\" fill=\"none\" stroke=\"black\" stroke-width=\"1.5\"/><circle cx=\"154\" cy=\"34\" r=\"8\" fill=\"none\" stroke=\"black\" stroke-width=\"1.5\"/><circle cx=\"154\" cy=\"54\" r=\"8\" fill=\"none\" stroke=\"black\" stroke-width=\"1.5\"/><circle cx=\"137\" cy=\"64\" r=\"8\" fill=\"black\"/><circle cx=\"120\" cy=\"54\" r=\"8\" fill=\"black\"/><circle cx=\"120\" cy=\"34\" r=\"8\" fill=\"none\" stroke=\"black\" stroke-width=\"1.5\"/><text x=\"137\" y=\"96\" text-anchor=\"middle\" font-size=\"10\" font-family=\"sans-serif\">2.</text><rect x=\"194\" y=\"4\" width=\"78\" height=\"78\" fill=\"white\" stroke=\"black\" stroke-width=\"1.5\"/><circle cx=\"233\" cy=\"44\" r=\"8\" fill=\"black\"/><circle cx=\"233\" cy=\"24\" r=\"8\" fill=\"black\"/><circle cx=\"250\" cy=\"34\" r=\"8\" fill=\"none\" stroke=\"black\" stroke-width=\"1.5\"/><circle cx=\"250\" cy=\"54\" r=\"8\" fill=\"none\" stroke=\"black\" stroke-width=\"1.5\"/><circle cx=\"233\" cy=\"64\" r=\"8\" fill=\"black\"/><circle cx=\"216\" cy=\"54\" r=\"8\" fill=\"black\"/><circle cx=\"216\" cy=\"34\" r=\"8\" fill=\"none\" stroke=\"black\" stroke-width=\"1.5\"/><text x=\"233\" y=\"96\" text-anchor=\"middle\" font-size=\"10\" font-family=\"sans-serif\">3.</text><rect x=\"290\" y=\"4\" width=\"78\" height=\"78\" fill=\"white\" stroke=\"black\" stroke-width=\"1.5\"/><circle cx=\"329\" cy=\"44\" r=\"8\" fill=\"black\"/><circle cx=\"329\" cy=\"24\" r=\"8\" fill=\"black\"/><circle cx=\"346\" cy=\"34\" r=\"8\" fill=\"black\"/><circle cx=\"346\" cy=\"54\" r=\"8\" fill=\"none\" stroke=\"black\" stroke-width=\"1.5\"/><circle cx=\"329\" cy=\"64\" r=\"8\" fill=\"black\"/><circle cx=\"312\" cy=\"54\" r=\"8\" fill=\"black\"/><circle cx=\"312\" cy=\"34\" r=\"8\" fill=\"none\" stroke=\"black\" stroke-width=\"1.5\"/><text x=\"329\" y=\"96\" text-anchor=\"middle\" font-size=\"10\" font-family=\"sans-serif\">4.</text><rect x=\"386\" y=\"4\" width=\"78\" height=\"78\" fill=\"white\" stroke=\"black\" stroke-width=\"1.5\"/><text x=\"425\" y=\"52\" text-anchor=\"middle\" font-size=\"40\" font-family=\"sans-serif\" font-weight=\"bold\">?</text><text x=\"425\" y=\"96\" text-anchor=\"middle\" font-size=\"10\" font-family=\"sans-serif\">5.</text></svg>",
+    "choices": [
+      {
+        "id": "a",
+        "label": "[svg]<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 88 88\" style=\"width:100%;display:block\"><rect x=\"2\" y=\"2\" width=\"84\" height=\"84\" fill=\"white\" stroke=\"black\" stroke-width=\"1.5\"/><circle cx=\"44\" cy=\"44\" r=\"8\" fill=\"black\"/><circle cx=\"44\" cy=\"24\" r=\"8\" fill=\"black\"/><circle cx=\"61\" cy=\"34\" r=\"8\" fill=\"black\"/><circle cx=\"61\" cy=\"54\" r=\"8\" fill=\"black\"/><circle cx=\"44\" cy=\"64\" r=\"8\" fill=\"black\"/><circle cx=\"27\" cy=\"54\" r=\"8\" fill=\"black\"/><circle cx=\"27\" cy=\"34\" r=\"8\" fill=\"none\" stroke=\"black\" stroke-width=\"1.5\"/></svg>",
+        "score": 0
+      },
+      {
+        "id": "b",
+        "label": "[svg]<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 88 88\" style=\"width:100%;display:block\"><rect x=\"2\" y=\"2\" width=\"84\" height=\"84\" fill=\"white\" stroke=\"black\" stroke-width=\"1.5\"/><circle cx=\"44\" cy=\"44\" r=\"8\" fill=\"black\"/><circle cx=\"44\" cy=\"24\" r=\"8\" fill=\"black\"/><circle cx=\"61\" cy=\"34\" r=\"8\" fill=\"black\"/><circle cx=\"61\" cy=\"54\" r=\"8\" fill=\"black\"/><circle cx=\"44\" cy=\"64\" r=\"8\" fill=\"black\"/><circle cx=\"27\" cy=\"54\" r=\"8\" fill=\"none\" stroke=\"black\" stroke-width=\"1.5\"/><circle cx=\"27\" cy=\"34\" r=\"8\" fill=\"black\"/></svg>",
+        "score": 0
+      },
+      {
+        "id": "c",
+        "label": "[svg]<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 88 88\" style=\"width:100%;display:block\"><rect x=\"2\" y=\"2\" width=\"84\" height=\"84\" fill=\"white\" stroke=\"black\" stroke-width=\"1.5\"/><circle cx=\"44\" cy=\"44\" r=\"8\" fill=\"black\"/><circle cx=\"44\" cy=\"24\" r=\"8\" fill=\"black\"/><circle cx=\"61\" cy=\"34\" r=\"8\" fill=\"black\"/><circle cx=\"61\" cy=\"54\" r=\"8\" fill=\"black\"/><circle cx=\"44\" cy=\"64\" r=\"8\" fill=\"black\"/><circle cx=\"27\" cy=\"54\" r=\"8\" fill=\"black\"/><circle cx=\"27\" cy=\"34\" r=\"8\" fill=\"black\"/></svg>",
+        "score": 5
+      },
+      {
+        "id": "d",
+        "label": "[svg]<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 88 88\" style=\"width:100%;display:block\"><rect x=\"2\" y=\"2\" width=\"84\" height=\"84\" fill=\"white\" stroke=\"black\" stroke-width=\"1.5\"/><circle cx=\"44\" cy=\"44\" r=\"8\" fill=\"none\" stroke=\"black\" stroke-width=\"1.5\"/><circle cx=\"44\" cy=\"24\" r=\"8\" fill=\"black\"/><circle cx=\"61\" cy=\"34\" r=\"8\" fill=\"black\"/><circle cx=\"61\" cy=\"54\" r=\"8\" fill=\"black\"/><circle cx=\"44\" cy=\"64\" r=\"8\" fill=\"black\"/><circle cx=\"27\" cy=\"54\" r=\"8\" fill=\"black\"/><circle cx=\"27\" cy=\"34\" r=\"8\" fill=\"black\"/></svg>",
+        "score": 0
+      },
+      {
+        "id": "e",
+        "label": "[svg]<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 88 88\" style=\"width:100%;display:block\"><rect x=\"2\" y=\"2\" width=\"84\" height=\"84\" fill=\"white\" stroke=\"black\" stroke-width=\"1.5\"/><circle cx=\"44\" cy=\"44\" r=\"8\" fill=\"black\"/><circle cx=\"44\" cy=\"24\" r=\"8\" fill=\"none\" stroke=\"black\" stroke-width=\"1.5\"/><circle cx=\"61\" cy=\"34\" r=\"8\" fill=\"black\"/><circle cx=\"61\" cy=\"54\" r=\"8\" fill=\"black\"/><circle cx=\"44\" cy=\"64\" r=\"8\" fill=\"black\"/><circle cx=\"27\" cy=\"54\" r=\"8\" fill=\"black\"/><circle cx=\"27\" cy=\"34\" r=\"8\" fill=\"black\"/></svg>",
+        "score": 0
+      }
+    ],
+    "explanation": "Pola serial: Susunan 7 lingkaran (1 pusat + 6 keliling). Setiap frame, lingkaran yang terisi hitam bertambah satu secara berurutan searah jarum jam. Frame 1: 1 hitam (kiri-bawah). Frame 2: 3 hitam (pusat, bawah, kiri-bawah). Frame 3: 5 hitam (pusat, atas, bawah, kiri-bawah + satu lagi). Frame 4: 5 hitam. Frame 5: semua 7 lingkaran terisi hitam. Jawaban C menampilkan seluruh lingkaran terisi penuh."
+  },
+  {
+    "id": "mini-tiu-35",
+    "category": "TIU",
+    "topic": "Figural Ketaksamaan",
+    "prompt": "Perhatikan kelima gambar berikut. Manakah gambar yang TIDAK sesuai dengan kelompoknya?",
+    "choices": [
+      {
+        "id": "a",
+        "label": "[svg]<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 88 88\" style=\"width:100%;display:block\"><rect x=\"2\" y=\"2\" width=\"84\" height=\"84\" fill=\"white\" stroke=\"black\" stroke-width=\"1.5\"/><line x1=\"2\" y1=\"44\" x2=\"86\" y2=\"44\" stroke=\"black\" stroke-width=\"1.5\"/><line x1=\"44\" y1=\"2\" x2=\"44\" y2=\"86\" stroke=\"black\" stroke-width=\"1.5\"/><g transform=\"translate(22,22) rotate(225)\"><line x1=\"0\" y1=\"0\" x2=\"0\" y2=\"-10\" stroke=\"black\" stroke-width=\"1.5\"/><polygon points=\"0,-10 -4,-3 4,-3\" fill=\"black\"/></g><g transform=\"translate(66,22) rotate(135)\"><line x1=\"0\" y1=\"0\" x2=\"0\" y2=\"-10\" stroke=\"black\" stroke-width=\"1.5\"/><polygon points=\"0,-10 -4,-3 4,-3\" fill=\"black\"/></g><g transform=\"translate(22,66) rotate(45)\"><line x1=\"0\" y1=\"0\" x2=\"0\" y2=\"-10\" stroke=\"black\" stroke-width=\"1.5\"/><polygon points=\"0,-10 -4,-3 4,-3\" fill=\"black\"/></g><g transform=\"translate(66,66) rotate(315)\"><line x1=\"0\" y1=\"0\" x2=\"0\" y2=\"-10\" stroke=\"black\" stroke-width=\"1.5\"/><polygon points=\"0,-10 -4,-3 4,-3\" fill=\"black\"/></g></svg>",
+        "score": 0
+      },
+      {
+        "id": "b",
+        "label": "[svg]<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 88 88\" style=\"width:100%;display:block\"><rect x=\"2\" y=\"2\" width=\"84\" height=\"84\" fill=\"white\" stroke=\"black\" stroke-width=\"1.5\"/><line x1=\"2\" y1=\"44\" x2=\"86\" y2=\"44\" stroke=\"black\" stroke-width=\"1.5\"/><line x1=\"44\" y1=\"2\" x2=\"44\" y2=\"86\" stroke=\"black\" stroke-width=\"1.5\"/><g transform=\"translate(22,22) rotate(45)\"><line x1=\"0\" y1=\"0\" x2=\"0\" y2=\"-10\" stroke=\"black\" stroke-width=\"1.5\"/><polygon points=\"0,-10 -4,-3 4,-3\" fill=\"black\"/></g><g transform=\"translate(66,22) rotate(315)\"><line x1=\"0\" y1=\"0\" x2=\"0\" y2=\"-10\" stroke=\"black\" stroke-width=\"1.5\"/><polygon points=\"0,-10 -4,-3 4,-3\" fill=\"black\"/></g><g transform=\"translate(22,66) rotate(225)\"><line x1=\"0\" y1=\"0\" x2=\"0\" y2=\"-10\" stroke=\"black\" stroke-width=\"1.5\"/><polygon points=\"0,-10 -4,-3 4,-3\" fill=\"black\"/></g><g transform=\"translate(66,66) rotate(135)\"><line x1=\"0\" y1=\"0\" x2=\"0\" y2=\"-10\" stroke=\"black\" stroke-width=\"1.5\"/><polygon points=\"0,-10 -4,-3 4,-3\" fill=\"black\"/></g></svg>",
+        "score": 0
+      },
+      {
+        "id": "c",
+        "label": "[svg]<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 88 88\" style=\"width:100%;display:block\"><rect x=\"2\" y=\"2\" width=\"84\" height=\"84\" fill=\"white\" stroke=\"black\" stroke-width=\"1.5\"/><line x1=\"2\" y1=\"44\" x2=\"86\" y2=\"44\" stroke=\"black\" stroke-width=\"1.5\"/><line x1=\"44\" y1=\"2\" x2=\"44\" y2=\"86\" stroke=\"black\" stroke-width=\"1.5\"/><g transform=\"translate(22,22) rotate(270)\"><line x1=\"0\" y1=\"0\" x2=\"0\" y2=\"-10\" stroke=\"black\" stroke-width=\"1.5\"/><polygon points=\"0,-10 -4,-3 4,-3\" fill=\"black\"/></g><g transform=\"translate(66,22) rotate(0)\"><line x1=\"0\" y1=\"0\" x2=\"0\" y2=\"-10\" stroke=\"black\" stroke-width=\"1.5\"/><polygon points=\"0,-10 -4,-3 4,-3\" fill=\"black\"/></g><g transform=\"translate(22,66) rotate(90)\"><line x1=\"0\" y1=\"0\" x2=\"0\" y2=\"-10\" stroke=\"black\" stroke-width=\"1.5\"/><polygon points=\"0,-10 -4,-3 4,-3\" fill=\"black\"/></g><g transform=\"translate(66,66) rotate(180)\"><line x1=\"0\" y1=\"0\" x2=\"0\" y2=\"-10\" stroke=\"black\" stroke-width=\"1.5\"/><polygon points=\"0,-10 -4,-3 4,-3\" fill=\"black\"/></g></svg>",
+        "score": 0
+      },
+      {
+        "id": "d",
+        "label": "[svg]<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 88 88\" style=\"width:100%;display:block\"><rect x=\"2\" y=\"2\" width=\"84\" height=\"84\" fill=\"white\" stroke=\"black\" stroke-width=\"1.5\"/><line x1=\"2\" y1=\"44\" x2=\"86\" y2=\"44\" stroke=\"black\" stroke-width=\"1.5\"/><line x1=\"44\" y1=\"2\" x2=\"44\" y2=\"86\" stroke=\"black\" stroke-width=\"1.5\"/><g transform=\"translate(22,22) rotate(45)\"><line x1=\"0\" y1=\"0\" x2=\"0\" y2=\"-10\" stroke=\"black\" stroke-width=\"1.5\"/><polygon points=\"0,-10 -4,-3 4,-3\" fill=\"black\"/></g><g transform=\"translate(66,22) rotate(270)\"><line x1=\"0\" y1=\"0\" x2=\"0\" y2=\"-10\" stroke=\"black\" stroke-width=\"1.5\"/><polygon points=\"0,-10 -4,-3 4,-3\" fill=\"black\"/></g><g transform=\"translate(22,66) rotate(90)\"><line x1=\"0\" y1=\"0\" x2=\"0\" y2=\"-10\" stroke=\"black\" stroke-width=\"1.5\"/><polygon points=\"0,-10 -4,-3 4,-3\" fill=\"black\"/></g><g transform=\"translate(66,66) rotate(225)\"><line x1=\"0\" y1=\"0\" x2=\"0\" y2=\"-10\" stroke=\"black\" stroke-width=\"1.5\"/><polygon points=\"0,-10 -4,-3 4,-3\" fill=\"black\"/></g></svg>",
+        "score": 0
+      },
+      {
+        "id": "e",
+        "label": "[svg]<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 88 88\" style=\"width:100%;display:block\"><rect x=\"2\" y=\"2\" width=\"84\" height=\"84\" fill=\"white\" stroke=\"black\" stroke-width=\"1.5\"/><line x1=\"2\" y1=\"44\" x2=\"86\" y2=\"44\" stroke=\"black\" stroke-width=\"1.5\"/><line x1=\"44\" y1=\"2\" x2=\"44\" y2=\"86\" stroke=\"black\" stroke-width=\"1.5\"/><g transform=\"translate(22,22) rotate(135)\"><line x1=\"0\" y1=\"0\" x2=\"0\" y2=\"-10\" stroke=\"black\" stroke-width=\"1.5\"/><polygon points=\"0,-10 -4,-3 4,-3\" fill=\"black\"/></g><g transform=\"translate(66,22) rotate(270)\"><line x1=\"0\" y1=\"0\" x2=\"0\" y2=\"-10\" stroke=\"black\" stroke-width=\"1.5\"/><polygon points=\"0,-10 -4,-3 4,-3\" fill=\"black\"/></g><g transform=\"translate(22,66) rotate(180)\"><line x1=\"0\" y1=\"0\" x2=\"0\" y2=\"-10\" stroke=\"black\" stroke-width=\"1.5\"/><polygon points=\"0,-10 -4,-3 4,-3\" fill=\"black\"/></g><g transform=\"translate(66,66) rotate(270)\"><line x1=\"0\" y1=\"0\" x2=\"0\" y2=\"-10\" stroke=\"black\" stroke-width=\"1.5\"/><polygon points=\"0,-10 -4,-3 4,-3\" fill=\"black\"/></g></svg>",
+        "score": 5
+      }
+    ],
+    "explanation": "Aturan yang diikuti gambar A, B, C, D: panah pada dua kuadran yang berseberangan selalu mengarah berlawanan 180° satu sama lain (kuadran kiri-atas ↔ kanan-bawah, dan kanan-atas ↔ kiri-bawah saling berlawanan). Pada pilihan E, panah di kanan-atas (↓/270°) dan kiri-bawah (↓/180°) tidak berlawanan 180°, melainkan hampir searah. Begitu pula kuadran kiri-atas (↙/135°) dan kanan-bawah (↓/270°) juga tidak berlawanan. Dengan demikian, E adalah gambar yang tidak sesuai dengan kelompoknya."
   }
 ];
-

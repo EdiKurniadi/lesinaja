@@ -130,7 +130,7 @@ export function ExamShell({
   footer,
   children,
 }: {
-  eyebrow: string;
+  eyebrow?: string;
   title: string;
   session: ActiveSession;
   questions: Question[];
@@ -148,11 +148,28 @@ export function ExamShell({
   const contentRef = useRef<HTMLDivElement>(null);
   const unanswered = questions.length - answered;
   const percentage = questions.length ? Math.round((answered / questions.length) * 100) : 0;
+  const size = Math.min(5, questions.length);
+  const maxStart = Math.max(0, questions.length - size);
+
+  const [windowStart, setWindowStart] = useState(() => {
+    return Math.min(Math.max(0, session.currentIndex - 2), maxStart);
+  });
+
+  let effectiveStart = Math.min(Math.max(0, windowStart), maxStart);
+  if (session.currentIndex < effectiveStart) {
+    effectiveStart = session.currentIndex;
+  } else if (session.currentIndex >= effectiveStart + size) {
+    effectiveStart = session.currentIndex - size + 1;
+  }
+  effectiveStart = Math.min(Math.max(0, effectiveStart), maxStart);
+
+  if (effectiveStart !== windowStart) {
+    setWindowStart(effectiveStart);
+  }
+
   const quickIndexes = useMemo(() => {
-    const size = Math.min(5, questions.length);
-    const start = Math.max(0, Math.min(session.currentIndex - 2, questions.length - size));
-    return Array.from({ length: size }, (_, offset) => start + offset);
-  }, [questions.length, session.currentIndex]);
+    return Array.from({ length: size }, (_, offset) => effectiveStart + offset);
+  }, [effectiveStart, size]);
 
   useEffect(() => {
     const htmlOverflow = document.documentElement.style.overflow;
@@ -199,10 +216,10 @@ export function ExamShell({
   return (
     <section className="fixed inset-0 z-[60] flex h-dvh min-h-0 w-screen flex-col overflow-hidden bg-background text-foreground">
       <header className="shrink-0 border-b border-black bg-warm-white">
-        <div className="flex min-h-14 items-center gap-2 px-2 sm:gap-4 sm:px-4 lg:px-6">
+        <div className="flex min-h-14 items-center gap-1.5 px-2 sm:gap-4 sm:px-4 lg:px-6">
           <AlertDialog>
             <AlertDialogTrigger asChild>
-              <Button type="button" variant="outline" size="icon" className="size-10 rounded-none border-black sm:w-auto sm:px-3" aria-label="Keluar sementara"><LogOut /><span className="hidden sm:inline">Keluar sementara</span></Button>
+              <Button type="button" variant="outline" size="icon" className="size-8 shrink-0 rounded-none border-black sm:h-9 sm:w-auto sm:px-3" aria-label="Keluar sementara"><LogOut className="size-3.5 sm:size-4" /><span className="hidden sm:inline">Keluar sementara</span></Button>
             </AlertDialogTrigger>
             <AlertDialogContent className="rounded-none border-black">
               <AlertDialogHeader>
@@ -216,8 +233,10 @@ export function ExamShell({
             </AlertDialogContent>
           </AlertDialog>
           <div className="min-w-0 flex-1">
-            <p className="font-mono text-[9px] font-bold uppercase tracking-[.12em] text-muted-foreground sm:text-[10px]">{eyebrow}</p>
-            <h1 className="truncate text-sm font-black uppercase sm:text-base">{title}</h1>
+            {eyebrow ? (
+              <p className="font-mono text-[9px] font-bold uppercase tracking-[.12em] text-muted-foreground sm:text-[10px]">{eyebrow}</p>
+            ) : null}
+            <h1 className="truncate text-[11px] font-bold uppercase tracking-tight sm:text-base sm:font-black sm:tracking-normal">{title}</h1>
           </div>
           {headerMetric}
           {headerAction}

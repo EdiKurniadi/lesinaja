@@ -2,7 +2,6 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { ArrowLeft, ArrowRight, Bookmark, Check, Clock3, Play } from "lucide-react";
-import { StaticLink as Link } from "@/components/static-link";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { EXAM_PACKAGES, MINI_TRYOUT_PACKAGES, getPackage, getQuestion } from "@/lib/content";
@@ -151,7 +150,6 @@ export function TryoutClient() {
 
   if (result) {
     const source = getPackage(result.packageId)?.questions ?? [];
-    const pkg = getPackage(result.packageId);
     return (
       <PageFrame
         eyebrow="02 / Try out"
@@ -159,32 +157,6 @@ export function TryoutClient() {
         description="Simulasi 110 soal dalam 100 menit. Pembahasan muncul setelah ujian dikumpulkan."
         showHeader={false}
       >
-        <div className="flex flex-wrap items-center justify-between gap-3 border-b-2 border-black bg-brand-blue px-4 py-3 text-white sm:px-8">
-          <div className="flex items-center gap-2 font-mono text-xs font-bold uppercase tracking-wider">
-            <span className="text-signal">Pembahasan:</span>
-            <span className="truncate max-w-[200px] sm:max-w-none">{pkg?.title ?? result.packageId}</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <Button
-              asChild
-              variant="outline"
-              size="sm"
-              className="h-8 rounded-none border border-black bg-warm-white text-black font-mono text-xs font-bold uppercase shadow-[2px_2px_0_0_#000] hover:bg-signal hover:text-black"
-            >
-              <Link href="/progres">
-                <ArrowLeft className="mr-1 size-3.5" /> Riwayat Progres
-              </Link>
-            </Button>
-            <Button
-              type="button"
-              size="sm"
-              onClick={() => setResult(null)}
-              className="h-8 rounded-none border border-black bg-black text-white font-mono text-xs font-bold uppercase shadow-[2px_2px_0_0_#000] hover:bg-neutral-800"
-            >
-              Daftar Paket
-            </Button>
-          </div>
-        </div>
         <ResultView result={result} questions={source} onClose={() => setResult(null)} />
       </PageFrame>
     );
@@ -260,7 +232,7 @@ export function TryoutClient() {
                     <div className="flex items-start justify-between gap-4"><span className="font-mono text-xs">/MINI</span><span className="border border-black px-2 py-1 font-mono text-xs">{item.durationMinutes} MENIT</span></div>
                     <h3 className="mt-8 text-3xl font-black tracking-[-.05em]">{item.title}</h3>
                     <p className="mt-3 max-w-lg leading-relaxed">{item.description}</p>
-                    <ul className="mt-6 space-y-2 text-sm"><li>✓ 30 soal TIU: verbal dan numerik</li><li>✓ Nilai maksimum {maximum} · target latihan TIU 80</li><li>✓ Pembahasan muncul setelah selesai</li></ul>
+                    <ul className="mt-6 space-y-2 text-sm"><li>✓ {item.questions.length} soal TIU: verbal, numerik, dan figural</li><li>✓ Nilai maksimum {maximum} · target latihan TIU 80</li><li>✓ Pembahasan muncul setelah selesai</li></ul>
                     {attempts[0] && (
                       <div className="mt-6 flex flex-col gap-2">
                         <p className="border-l-4 border-signal pl-3 text-sm">
@@ -302,9 +274,9 @@ export function TryoutClient() {
                 <h3 className="font-bold uppercase">Komposisi dan skor</h3>
                 {pendingIsMini ? (
                   <ul className="mt-2 list-disc space-y-1 pl-5">
-                    <li>TIU: 30 soal verbal dan numerik.</li>
+                    <li>TIU: {pendingPackage?.questions.length ?? 35} soal verbal, numerik, dan figural.</li>
                     <li>Jawaban benar bernilai 5; salah atau kosong bernilai 0.</li>
-                    <li>Nilai maksimum 150; target latihan TIU adalah 80.</li>
+                    <li>Nilai maksimum {pendingMaximum}; target latihan TIU adalah 80.</li>
                   </ul>
                 ) : (
                   <ul className="mt-2 list-disc space-y-1 pl-5">
@@ -349,7 +321,6 @@ export function TryoutClient() {
 
   return (
     <ExamShell
-      eyebrow="Mode try out"
       title={examPackage.title}
       session={session}
       questions={questions}
@@ -357,10 +328,23 @@ export function TryoutClient() {
       flagged={session.flagged.length}
       onMove={move}
       groupedPalette
-      headerMetric={<div className="flex h-10 items-center gap-1.5 bg-brand-blue px-2 font-mono text-xs font-bold text-white sm:px-3 sm:text-sm"><Clock3 className="size-4 text-signal" /><span aria-label={`Sisa waktu ${timeLabel(remaining)}`}>{timeLabel(remaining)}</span></div>}
+      headerMetric={
+        <div className="flex h-8 shrink-0 items-center gap-1 sm:gap-1.5 bg-brand-blue px-2 font-mono text-[11px] font-bold text-white sm:px-2.5 sm:text-xs">
+          <Clock3 className="size-3.5 text-signal shrink-0" />
+          <span aria-label={`Sisa waktu ${timeLabel(remaining)}`}>{timeLabel(remaining)}</span>
+        </div>
+      }
       headerAction={
         <AlertDialog>
-          <AlertDialogTrigger asChild><Button className="h-10 rounded-none bg-signal px-2 text-black hover:bg-signal/80 sm:px-3"><Check /><span className="hidden sm:inline">Kumpulkan</span></Button></AlertDialogTrigger>
+          <AlertDialogTrigger asChild>
+            <Button
+              className="h-8 shrink-0 gap-1 rounded-none border border-black bg-signal/90 px-2 sm:px-2.5 text-xs font-medium text-black hover:bg-signal shadow-none"
+              aria-label="Kumpulkan try out"
+            >
+              <Check className="size-3.5 stroke-2" aria-hidden="true" />
+              <span>Kumpulkan</span>
+            </Button>
+          </AlertDialogTrigger>
           <AlertDialogContent className="rounded-none border-black">
             <AlertDialogHeader><AlertDialogTitle>Kumpulkan try out sekarang?</AlertDialogTitle><AlertDialogDescription>{questions.length - answered} soal masih belum dijawab dan {session.flagged.length} soal ditandai ragu-ragu. Setelah dikumpulkan, jawaban tidak dapat diubah.</AlertDialogDescription></AlertDialogHeader>
             <AlertDialogFooter><AlertDialogCancel className="rounded-none border-black">Kembali mengerjakan</AlertDialogCancel><AlertDialogAction className="rounded-none" onClick={finish}>Ya, lihat hasil</AlertDialogAction></AlertDialogFooter>
@@ -371,15 +355,14 @@ export function TryoutClient() {
         <div className="mx-auto flex max-w-5xl items-center justify-between gap-2">
           <Button variant="outline" className="h-11 rounded-none border-black px-3 sm:px-5" aria-keyshortcuts="ArrowLeft" disabled={session.currentIndex === 0} onClick={() => move(session.currentIndex - 1)}><ArrowLeft /><span className="hidden min-[420px]:inline">Sebelumnya</span></Button>
           <Button variant="outline" aria-pressed={isFlagged} aria-keyshortcuts="R" onClick={toggleFlag} className={`h-11 rounded-none border-black px-3 sm:px-5 ${isFlagged ? "bg-signal" : ""}`}><Bookmark className={isFlagged ? "fill-current" : ""} /><span className="hidden min-[420px]:inline">Ragu-ragu</span></Button>
-          <span className="hidden font-mono text-xs font-bold sm:block">{session.currentIndex + 1} / {questions.length}</span>
+          <div className="hidden flex-col items-center sm:flex">
+            <span className="font-mono text-xs font-bold">{session.currentIndex + 1} / {questions.length}</span>
+            <span className="font-mono text-[9px] uppercase text-muted-foreground">A–E pilih · R ragu · ← → navigasi</span>
+          </div>
           <Button className="h-11 rounded-none px-3 sm:px-5" aria-keyshortcuts="ArrowRight" disabled={session.currentIndex === questions.length - 1} onClick={() => move(session.currentIndex + 1)}><span className="hidden min-[420px]:inline">Berikutnya</span><ArrowRight /></Button>
         </div>
       }
     >
-      <div className="mb-4 flex items-center justify-between gap-3">
-        <p className="font-mono text-xs font-bold uppercase tracking-[.14em]">Soal {session.currentIndex + 1} / {questions.length}</p>
-        <p className="hidden font-mono text-[10px] uppercase text-muted-foreground sm:block">A–E pilih · R ragu · ← → navigasi</p>
-      </div>
       <QuestionCard question={current} selectedId={session.answers[current.id]} onSelect={select} />
     </ExamShell>
   );

@@ -12,6 +12,7 @@ import { updateLearningState } from "@/lib/storage";
 import type { ActiveSession, Category, DrillPackage, Question } from "@/lib/types";
 import { useLearningState } from "@/hooks/use-learning-state";
 import { ExamShell, useExamKeyboard } from "./exam-shell";
+import { MathText } from "./math-text";
 import { QuestionCard } from "./question-card";
 
 type DrillSummary = {
@@ -352,8 +353,8 @@ export function DrillClient() {
                   </div>
                 </div>
 
-                <div className="mt-6 whitespace-pre-line text-xl font-black leading-relaxed tracking-[-.02em] sm:text-2xl">
-                  {currentReview.question.prompt}
+                <div className="mt-6 text-base font-normal leading-relaxed text-foreground sm:text-lg">
+                  <MathText text={currentReview.question.prompt} />
                 </div>
 
                 <div className="mt-6 space-y-2">
@@ -396,7 +397,7 @@ export function DrillClient() {
                           <span className="font-mono text-base font-black shrink-0 w-6 text-foreground">
                             {choice.id.toUpperCase()}.
                           </span>
-                          <span className="text-base font-medium leading-relaxed">{choice.label}</span>
+                          <span className="text-base font-normal leading-relaxed"><MathText text={choice.label} /></span>
                         </div>
                         <div className="flex shrink-0 items-center gap-3 pl-9 sm:pl-0">
                           <span className="font-mono text-xs font-bold text-muted-foreground">
@@ -413,9 +414,9 @@ export function DrillClient() {
                   <div className="flex items-center gap-2 font-mono text-xs font-bold uppercase tracking-[.14em] text-brand-blue">
                     <Info className="size-4" /> Pembahasan Soal
                   </div>
-                  <p className="mt-3 whitespace-pre-line text-base leading-8 text-foreground sm:text-lg">
-                    {currentReview.question.explanation}
-                  </p>
+                  <div className="mt-3 text-base leading-relaxed text-foreground sm:text-lg">
+                    <MathText text={currentReview.question.explanation} />
+                  </div>
                 </div>
 
                 <div className="mt-8 flex flex-wrap items-center justify-between gap-4 border-t-2 border-black pt-5">
@@ -685,10 +686,6 @@ export function DrillClient() {
         </div>
       }
     >
-      <div className="mb-4 flex items-center justify-between gap-3">
-        <p className="font-mono text-xs font-bold uppercase tracking-[.14em]">Soal {session.currentIndex + 1} / {questions.length}</p>
-        <p className="hidden font-mono text-[10px] uppercase text-muted-foreground sm:block">Pilih A–E · → lanjut setelah menjawab</p>
-      </div>
       <QuestionCard question={current} selectedId={selectedId} onSelect={select} />
     </ExamShell>
   );

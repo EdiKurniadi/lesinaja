@@ -442,16 +442,19 @@ test("mengganti jawaban drill memperbarui skor tanpa menambah percobaan", () => 
   assert.deepEqual(replaced, { attempts: 1, earned: 0, possible: 5, lastAnsweredAt: 2000 });
 });
 
-test("mini TO TIU Kedinasan terdiri dari 30 soal dan target latihan 80", () => {
-  const mini = MINI_TRYOUT_PACKAGES[0];
-  assert.equal(mini.durationMinutes, 35);
-  assert.equal(mini.questions.length, 30);
-  assert.ok(mini.questions.every((question) => question.category === "TIU"));
+test("paket-paket mini TO TIU berdurasi 35 menit dan terdiri dari soal TIU dengan target latihan 80", () => {
+  assert.equal(MINI_TRYOUT_PACKAGES.length, 2);
+  for (const mini of MINI_TRYOUT_PACKAGES) {
+    assert.equal(mini.durationMinutes, 35);
+    assert.equal(mini.questions.length, 35);
+    assert.ok(mini.questions.every((question) => question.category === "TIU"));
+    assert.ok(mini.questions.every((question) => getQuestion(question.id) !== undefined));
 
-  const answers = Object.fromEntries(mini.questions.slice(0, 16).map((question) => [question.id, answerWithScore(question, 5)!]));
-  const result = scoreAttempt(mini.questions, answers, { id: "mini-target", packageId: mini.id, startedAt: 0, completedAt: 1000 });
-  assert.equal(result.scores.TIU.score, 80);
-  assert.equal(result.scores.TIU.maximum, 150);
-  assert.equal(result.totalScore, 80);
-  assert.equal(result.passed, true);
+    const answers = Object.fromEntries(mini.questions.slice(0, 16).map((question) => [question.id, answerWithScore(question, 5)!]));
+    const result = scoreAttempt(mini.questions, answers, { id: `mini-target-${mini.id}`, packageId: mini.id, startedAt: 0, completedAt: 1000 });
+    assert.equal(result.scores.TIU.score, 80);
+    assert.equal(result.scores.TIU.maximum, 175);
+    assert.equal(result.totalScore, 80);
+    assert.equal(result.passed, true);
+  }
 });
