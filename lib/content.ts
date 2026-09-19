@@ -4,6 +4,7 @@ import { INTEGRITAS_DRILL_QUESTIONS } from "./integritas-drill-content";
 import { JEJARING_KERJA_DRILL_QUESTIONS } from "./jejaring-kerja-drill-content";
 import { MINI_TIU_QUESTIONS } from "./mini-tiu-content";
 import { MINI_TIU_2_QUESTIONS } from "./mini-tiu-2-content";
+import { MINI_TIU_3_QUESTIONS } from "./mini-tiu-3-content";
 import { NASIONALISME_DRILL_QUESTIONS } from "./nasionalisme-drill-content";
 import { PELAYANAN_PUBLIK_DRILL_QUESTIONS } from "./pelayanan-publik-drill-content";
 import { PROFESIONALISME_DRILL_QUESTIONS } from "./profesionalisme-drill-content";
@@ -215,6 +216,14 @@ export const MINI_TRYOUT_PACKAGES: ExamPackage[] = [
     questions: MINI_TIU_2_QUESTIONS,
     durationMinutes: 35,
   },
+  {
+    id: "mini-tiu-lanjutan",
+    kind: "mini",
+    title: "Mini TO TIU — Simulasi Lanjutan",
+    description: "35 soal verbal, numerik, dan figural paket simulasi lanjutan dengan variasi kasus baru.",
+    questions: MINI_TIU_3_QUESTIONS,
+    durationMinutes: 35,
+  },
 ];
 
 export const ALL_TRYOUT_PACKAGES = [...EXAM_PACKAGES, ...MINI_TRYOUT_PACKAGES];
@@ -277,7 +286,7 @@ export const DRILL_PACKAGES: DrillPackage[] = (Object.entries(DRILL_TOPICS) as [
 
 export const DRILL_QUESTIONS: Question[] = DRILL_PACKAGES.flatMap((drillPackage) => drillPackage.questions);
 
-export const ALL_QUESTIONS = [...DRILL_QUESTIONS, ...packageA, ...packageB, ...MINI_TIU_QUESTIONS, ...MINI_TIU_2_QUESTIONS];
+export const ALL_QUESTIONS = [...DRILL_QUESTIONS, ...packageA, ...packageB, ...MINI_TIU_QUESTIONS, ...MINI_TIU_2_QUESTIONS, ...MINI_TIU_3_QUESTIONS];
 const questionMap = new Map(ALL_QUESTIONS.map((question) => [question.id, question]));
 
 export function getQuestion(questionId: string): Question | undefined {

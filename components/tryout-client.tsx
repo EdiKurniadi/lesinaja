@@ -223,7 +223,7 @@ export function TryoutClient() {
               <div><p className="font-mono text-xs font-bold uppercase tracking-[.14em] text-brand-red">Paket singkat</p><h2 className="mt-2 text-3xl font-black">MINI TRY OUT</h2></div>
               <p className="font-mono text-xs uppercase">Fokus satu kemampuan</p>
             </div>
-            <div className="grid gap-4 lg:grid-cols-2">
+            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
               {MINI_TRYOUT_PACKAGES.map((item) => {
                 const attempts = state.attempts.filter((attempt) => attempt.packageId === item.id);
                 const maximum = packageMaximum(item);

@@ -443,7 +443,7 @@ test("mengganti jawaban drill memperbarui skor tanpa menambah percobaan", () => 
 });
 
 test("paket-paket mini TO TIU berdurasi 35 menit dan terdiri dari soal TIU dengan target latihan 80", () => {
-  assert.equal(MINI_TRYOUT_PACKAGES.length, 2);
+  assert.equal(MINI_TRYOUT_PACKAGES.length, 3);
   for (const mini of MINI_TRYOUT_PACKAGES) {
     assert.equal(mini.durationMinutes, 35);
     assert.equal(mini.questions.length, 35);
