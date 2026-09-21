@@ -1,9 +1,10 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { ArrowLeft, ArrowRight, Bookmark, Check, Clock3, Play } from "lucide-react";
+import { ArrowLeft, ArrowRight, Bookmark, Check, Clock3, Key, Lock, Play, X } from "lucide-react";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
+import { validatePackageAccessCode } from "@/lib/access-codes";
 import { EXAM_PACKAGES, MINI_TRYOUT_PACKAGES, getPackage, getQuestion } from "@/lib/content";
 import { CATEGORIES, EXAM_RULES } from "@/lib/exam-rules";
 import { bestScore, scoreAttempt } from "@/lib/scoring";
@@ -38,11 +39,21 @@ export function TryoutClient() {
   const [result, setResult] = useState<AttemptResult | null>(null);
   const [sessionOpen, setSessionOpen] = useState(false);
   const [pendingPackageId, setPendingPackageId] = useState<string | null>(null);
+  const [accessCodeInput, setAccessCodeInput] = useState("");
+  const [accessCodeError, setAccessCodeError] = useState<string | null>(null);
   const session = state.activeTryout;
   const examPackage = session?.packageId ? getPackage(session.packageId) : undefined;
   const pendingPackage = pendingPackageId ? getPackage(pendingPackageId) : undefined;
   const pendingIsMini = pendingPackage?.kind === "mini";
+  const pendingIsTwk = pendingIsMini && pendingPackage?.questions.every((question) => question.category === "TWK");
+  const isPendingUnlocked = pendingPackage ? Boolean(state.unlockedPackages?.includes(pendingPackage.id)) : false;
   const pendingMaximum = pendingPackage ? packageMaximum(pendingPackage) : 0;
+
+  function openPackageModal(packageId: string) {
+    setPendingPackageId(packageId);
+    setAccessCodeInput("");
+    setAccessCodeError(null);
+  }
   const questions = useMemo(() => session?.questionIds.map(getQuestion).filter((question): question is Question => Boolean(question)) ?? [], [session]);
   const current = session ? questions[session.currentIndex] : undefined;
 
@@ -110,6 +121,23 @@ export function TryoutClient() {
     markSessionOpen("tryout");
     setSessionOpen(true);
     updateLearningState((learning) => ({ ...learning, activeTryout: next, activeDrill: null }));
+  }
+
+  function handleStartExam() {
+    if (!pendingPackage) return;
+    if (isPendingUnlocked) {
+      start(pendingPackage.id);
+      return;
+    }
+    if (!validatePackageAccessCode(pendingPackage.id, accessCodeInput)) {
+      setAccessCodeError("Kode akses tidak valid. Silakan periksa kembali.");
+      return;
+    }
+    updateLearningState((learning) => ({
+      ...learning,
+      unlockedPackages: Array.from(new Set([...(learning.unlockedPackages ?? []), pendingPackage.id])),
+    }));
+    start(pendingPackage.id);
   }
 
   function resume() {
@@ -193,9 +221,20 @@ export function TryoutClient() {
           <div className="grid lg:grid-cols-2">
             {EXAM_PACKAGES.map((item, index) => {
               const attempts = state.attempts.filter((attempt) => attempt.packageId === item.id);
+              const isFullUnlocked = Boolean(state.unlockedPackages?.includes(item.id));
               return (
                 <article key={item.id} className="border-b border-black p-5 last:border-b-0 lg:border-b-0 lg:border-r lg:last:border-r-0 sm:p-8 lg:p-10">
-                  <div className="flex items-start justify-between gap-4"><span className="font-mono text-xs">/{String(index + 1).padStart(2, "0")}</span><span className="border border-black px-2 py-1 font-mono text-xs">100 MENIT</span></div>
+                  <div className="flex items-start justify-between gap-4">
+                    <span className="font-mono text-xs">/{String(index + 1).padStart(2, "0")}</span>
+                    <div className="flex items-center gap-2">
+                      {isFullUnlocked ? (
+                        <span className="border border-black bg-signal px-2 py-0.5 font-mono text-[10px] font-bold uppercase">Terbuka</span>
+                      ) : (
+                        <span className="border border-black bg-secondary px-2 py-0.5 font-mono text-[10px] font-bold uppercase">Perlu Kode</span>
+                      )}
+                      <span className="border border-black px-2 py-1 font-mono text-xs">100 MENIT</span>
+                    </div>
+                  </div>
                   <h2 className="mt-12 text-4xl font-black tracking-[-.05em]">{item.title}</h2>
                   <p className="mt-3 max-w-lg leading-relaxed">{item.description}</p>
                   <ul className="mt-7 space-y-2 text-sm"><li>✓ 110 soal sesuai komposisi SKD</li><li>✓ Timer tetap berjalan setelah halaman ditutup</li><li>✓ Pembahasan muncul setelah selesai</li></ul>
@@ -213,7 +252,7 @@ export function TryoutClient() {
                       </Button>
                     </div>
                   )}
-                  <Button onClick={() => setPendingPackageId(item.id)} className="mt-8 h-12 w-full rounded-none text-base"><Play /> Mulai {item.title.split(" — ")[0]}</Button>
+                  <Button onClick={() => openPackageModal(item.id)} className="mt-8 h-12 w-full rounded-none text-base"><Play /> Mulai {item.title.split(" — ")[0]}</Button>
                 </article>
               );
             })}
@@ -223,16 +262,36 @@ export function TryoutClient() {
               <div><p className="font-mono text-xs font-bold uppercase tracking-[.14em] text-brand-red">Paket singkat</p><h2 className="mt-2 text-3xl font-black">MINI TRY OUT</h2></div>
               <p className="font-mono text-xs uppercase">Fokus satu kemampuan</p>
             </div>
-            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+            <div className="grid gap-6 md:grid-cols-2">
               {MINI_TRYOUT_PACKAGES.map((item) => {
                 const attempts = state.attempts.filter((attempt) => attempt.packageId === item.id);
                 const maximum = packageMaximum(item);
+                const isTwk = item.questions.every((q) => q.category === "TWK");
+                const isMiniUnlocked = Boolean(state.unlockedPackages?.includes(item.id));
+                const targetScore = isTwk ? 65 : 80;
+                const subtestSummary = isTwk
+                  ? "Bahasa Indonesia, Pilar Negara, Bela Negara, Integritas, Nasionalisme"
+                  : "verbal, numerik, dan figural";
                 return (
                   <article key={item.id} className="border border-black bg-warm-white p-5 sm:p-7">
-                    <div className="flex items-start justify-between gap-4"><span className="font-mono text-xs">/MINI</span><span className="border border-black px-2 py-1 font-mono text-xs">{item.durationMinutes} MENIT</span></div>
+                    <div className="flex items-start justify-between gap-4">
+                      <span className="font-mono text-xs">/MINI</span>
+                      <div className="flex items-center gap-2">
+                        {isMiniUnlocked ? (
+                          <span className="border border-black bg-signal px-2 py-0.5 font-mono text-[10px] font-bold uppercase">Terbuka</span>
+                        ) : (
+                          <span className="border border-black bg-secondary px-2 py-0.5 font-mono text-[10px] font-bold uppercase">Perlu Kode</span>
+                        )}
+                        <span className="border border-black px-2 py-1 font-mono text-xs">{item.durationMinutes} MENIT</span>
+                      </div>
+                    </div>
                     <h3 className="mt-8 text-3xl font-black tracking-[-.05em]">{item.title}</h3>
                     <p className="mt-3 max-w-lg leading-relaxed">{item.description}</p>
-                    <ul className="mt-6 space-y-2 text-sm"><li>✓ {item.questions.length} soal TIU: verbal, numerik, dan figural</li><li>✓ Nilai maksimum {maximum} · target latihan TIU 80</li><li>✓ Pembahasan muncul setelah selesai</li></ul>
+                    <ul className="mt-6 space-y-2 text-sm">
+                      <li>✓ {item.questions.length} soal {isTwk ? "TWK" : "TIU"}: {subtestSummary}</li>
+                      <li>✓ Nilai maksimum {maximum} · target latihan {isTwk ? "TWK" : "TIU"} {targetScore}</li>
+                      <li>✓ Pembahasan muncul setelah selesai</li>
+                    </ul>
                     {attempts[0] && (
                       <div className="mt-6 flex flex-col gap-2">
                         <p className="border-l-4 border-signal pl-3 text-sm">
@@ -247,7 +306,7 @@ export function TryoutClient() {
                         </Button>
                       </div>
                     )}
-                    <Button onClick={() => setPendingPackageId(item.id)} className="mt-8 h-12 w-full rounded-none text-base"><Play /> Mulai Mini TO</Button>
+                    <Button onClick={() => openPackageModal(item.id)} className="mt-8 h-12 w-full rounded-none text-base"><Play /> Mulai Mini TO</Button>
                   </article>
                 );
               })}
@@ -258,7 +317,9 @@ export function TryoutClient() {
         <AlertDialog open={Boolean(pendingPackage)} onOpenChange={(open) => { if (!open) setPendingPackageId(null); }}>
           <AlertDialogContent className="max-h-[calc(100dvh-2rem)] overflow-y-auto rounded-none border-black sm:!max-w-2xl">
             <AlertDialogHeader>
-              <p className="font-mono text-[11px] font-bold uppercase tracking-[.14em] text-brand-red">{pendingIsMini ? "Simulasi TIU Kedinasan" : "Simulasi CAT SKD CPNS"}</p>
+              <p className="font-mono text-[11px] font-bold uppercase tracking-[.14em] text-brand-red">
+                {pendingIsTwk ? "Simulasi TWK Pemahaman Kebangsaan" : pendingIsMini ? "Simulasi TIU Kedinasan" : "Simulasi CAT SKD CPNS"}
+              </p>
               <AlertDialogTitle className="text-2xl font-black sm:text-3xl">KONFIRMASI MULAI UJIAN</AlertDialogTitle>
               <AlertDialogDescription>{pendingPackage?.title}. Pastikan kamu sudah siap sebelum waktu ujian dimulai.</AlertDialogDescription>
             </AlertDialogHeader>
@@ -269,14 +330,71 @@ export function TryoutClient() {
               <div className="p-3"><span className="block font-mono text-[10px] uppercase">Nilai maksimum</span><strong className="mt-1 block text-xl">{pendingMaximum}</strong></div>
             </div>
 
+            <div className="border-2 border-black bg-warm-white p-4">
+              <div className="flex items-center justify-between gap-2">
+                <span className="flex items-center gap-1.5 font-mono text-xs font-bold uppercase tracking-[.14em] text-brand-blue">
+                  <Key className="size-3.5" /> Kode Akses Ujian
+                </span>
+                {isPendingUnlocked ? (
+                  <span className="inline-flex items-center gap-1 border border-black bg-signal px-2 py-0.5 font-mono text-[10px] font-bold text-black uppercase">
+                    <Check className="size-3" /> Paket Terbuka
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center gap-1 border border-black bg-secondary px-2 py-0.5 font-mono text-[10px] font-bold uppercase text-brand-red">
+                    <Lock className="size-3" /> Terkunci
+                  </span>
+                )}
+              </div>
+              {isPendingUnlocked ? (
+                <p className="mt-2 text-xs text-muted-foreground leading-relaxed">
+                  Paket ini sudah terverifikasi dan terbuka pada perangkat ini. Kamu dapat langsung menekan tombol mulai ujian.
+                </p>
+              ) : (
+                <div className="mt-3 space-y-2">
+                  <input
+                    id="access-code-input"
+                    type="text"
+                    value={accessCodeInput}
+                    onChange={(e) => {
+                      setAccessCodeInput(e.target.value.toUpperCase());
+                      if (accessCodeError) setAccessCodeError(null);
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault();
+                        handleStartExam();
+                      }
+                    }}
+                    placeholder="Masukkan kode akses (cth: MTTWKNIPSQUAD)"
+                    className="h-11 w-full border-2 border-black bg-background px-3 font-mono text-sm font-bold uppercase tracking-wider placeholder:normal-case placeholder:font-normal placeholder:tracking-normal focus:outline-none focus:ring-2 focus:ring-brand-blue"
+                  />
+                  {accessCodeError && (
+                    <p className="flex items-center gap-1 font-mono text-xs font-bold text-brand-red">
+                      <X className="size-3.5 shrink-0" /> {accessCodeError}
+                    </p>
+                  )}
+                </div>
+              )}
+            </div>
+
             <div className="grid gap-4 text-sm leading-relaxed sm:grid-cols-2">
               <section>
                 <h3 className="font-bold uppercase">Komposisi dan skor</h3>
                 {pendingIsMini ? (
                   <ul className="mt-2 list-disc space-y-1 pl-5">
-                    <li>TIU: {pendingPackage?.questions.length ?? 35} soal verbal, numerik, dan figural.</li>
-                    <li>Jawaban benar bernilai 5; salah atau kosong bernilai 0.</li>
-                    <li>Nilai maksimum {pendingMaximum}; target latihan TIU adalah 80.</li>
+                    {pendingIsTwk ? (
+                      <>
+                        <li>TWK: {pendingPackage?.questions.length ?? 30} soal Bahasa Indonesia, Pilar Negara, Bela Negara, Integritas, dan Nasionalisme.</li>
+                        <li>Jawaban benar bernilai 5; salah atau kosong bernilai 0.</li>
+                        <li>Nilai maksimum {pendingMaximum}; target latihan TWK adalah 65.</li>
+                      </>
+                    ) : (
+                      <>
+                        <li>TIU: {pendingPackage?.questions.length ?? 35} soal verbal, numerik, dan figural.</li>
+                        <li>Jawaban benar bernilai 5; salah atau kosong bernilai 0.</li>
+                        <li>Nilai maksimum {pendingMaximum}; target latihan TIU adalah 80.</li>
+                      </>
+                    )}
                   </ul>
                 ) : (
                   <ul className="mt-2 list-disc space-y-1 pl-5">
@@ -303,7 +421,9 @@ export function TryoutClient() {
             )}
 
             <p className="border-l-4 border-brand-blue bg-secondary p-3 text-xs leading-relaxed">
-              {pendingIsMini ? "Mini TO ini adalah latihan mandiri TIU. Target 80 digunakan untuk evaluasi latihan, bukan ambang kelulusan resmi." : "Acuan pelamar umum CPNS TA 2024."} LesinAja tidak berafiliasi dengan BKN dan tidak memuat soal resmi.
+              {pendingIsMini
+                ? `Mini TO ini adalah latihan mandiri ${pendingIsTwk ? "TWK" : "TIU"}. Target ${pendingIsTwk ? "65" : "80"} digunakan untuk evaluasi latihan, bukan ambang kelulusan resmi.`
+                : "Acuan pelamar umum CPNS TA 2024."} LesinAja tidak berafiliasi dengan BKN dan tidak memuat soal resmi.
             </p>
             <p className="text-xs leading-relaxed text-muted-foreground">
               Acuan: <a className="font-bold underline" href="https://jdih.menpan.go.id/dokumen-hukum/keputusan-menteri-pendayagunaan-aparatur-negara-dan-reformasi-birokrasi-nomor-321-tahun-2024-tentang-1851" target="_blank" rel="noopener noreferrer">Kepmen PANRB 321/2024</a> dan <a className="font-bold underline" href="https://www.bkn.go.id/storage/2024/08/Peraturan-BKN-Nomor-5-Tahun-2024-tentang-Pedoman-CAT.pdf" target="_blank" rel="noopener noreferrer">Peraturan BKN 5/2024</a>.
@@ -311,7 +431,7 @@ export function TryoutClient() {
 
             <AlertDialogFooter>
               <AlertDialogCancel className="rounded-none border-black" onClick={() => setPendingPackageId(null)}>Kembali</AlertDialogCancel>
-              <AlertDialogAction className="rounded-none" onClick={() => pendingPackage && start(pendingPackage.id)}>Mulai ujian</AlertDialogAction>
+              <AlertDialogAction className="rounded-none" onClick={(e) => { e.preventDefault(); handleStartExam(); }}>Mulai ujian</AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>

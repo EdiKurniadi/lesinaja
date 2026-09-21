@@ -109,12 +109,16 @@ button, a { -webkit-tap-highlight-color: transparent; }
 
 .material-chapter-tabs {
   display: flex !important;
+  justify-content: flex-start !important;
   width: 100% !important;
   height: auto !important;
   min-height: 2.75rem;
   align-items: stretch !important;
   gap: .25rem !important;
   overflow-x: auto !important;
+  overscroll-behavior-x: contain !important;
+  -webkit-overflow-scrolling: touch !important;
+  scroll-behavior: smooth !important;
   scrollbar-width: none !important;
   border-radius: 0 !important;
   padding: 0 !important;
@@ -169,8 +173,9 @@ button, a { -webkit-tap-highlight-color: transparent; }
   .page-shell { width: calc(100% - 16px); }
   .text-stroke { -webkit-text-stroke-width: 1.5px; }
   .material-chapter-tabs [data-slot="tabs-trigger"] {
-    flex: 1 0 3.5rem !important;
-    min-width: 3.5rem !important;
+    flex: 0 0 auto !important;
+    min-width: 4.5rem !important;
+    padding: .5rem .75rem !important;
   }
 }
 

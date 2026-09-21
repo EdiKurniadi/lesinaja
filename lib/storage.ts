@@ -11,6 +11,7 @@ export function createDefaultState(): PersistedLearningState {
     attempts: [],
     drillStats: {},
     topicProgress: {},
+    unlockedPackages: [],
     updatedAt: Date.now(),
   };
 }
@@ -57,6 +58,9 @@ function sanitize(value: unknown): PersistedLearningState {
     attempts: Array.isArray(input.attempts) ? input.attempts.filter(validAttempt).slice(0, 30) : [],
     drillStats: isRecord(input.drillStats) ? Object.fromEntries(Object.entries(input.drillStats).filter(([, stat]) => validDrillStat(stat))) : {},
     topicProgress: isRecord(input.topicProgress) ? Object.fromEntries(Object.entries(input.topicProgress).filter(([, progress]) => validTopicProgress(progress))) : {},
+    unlockedPackages: Array.isArray(input.unlockedPackages)
+      ? input.unlockedPackages.filter((id): id is string => typeof id === "string")
+      : [],
     updatedAt: typeof input.updatedAt === "number" ? input.updatedAt : Date.now(),
   };
 }

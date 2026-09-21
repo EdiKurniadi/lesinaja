@@ -48,6 +48,7 @@ export function ResultView({
     [questions]
   );
   const isMiniTiu = activeCategories.length === 1 && activeCategories[0] === "TIU";
+  const isMiniTwk = activeCategories.length === 1 && activeCategories[0] === "TWK";
   const maximum = useMemo(
     () => questions.reduce((sum, question) => sum + bestScore(question), 0),
     [questions]
@@ -308,9 +309,13 @@ export function ResultView({
             {result.passed
               ? isMiniTiu
                 ? "Memenuhi target latihan TIU"
+                : isMiniTwk
+                ? "Memenuhi target latihan TWK"
                 : "Memenuhi seluruh ambang batas"
               : isMiniTiu
               ? "Belum mencapai target latihan TIU"
+              : isMiniTwk
+              ? "Belum mencapai target latihan TWK"
               : "Belum memenuhi seluruh ambang batas"}
           </p>
           <div className="mt-4 flex flex-wrap items-center gap-3 font-mono text-xs uppercase text-muted-foreground">

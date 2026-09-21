@@ -442,12 +442,14 @@ test("mengganti jawaban drill memperbarui skor tanpa menambah percobaan", () => 
   assert.deepEqual(replaced, { attempts: 1, earned: 0, possible: 5, lastAnsweredAt: 2000 });
 });
 
-test("paket-paket mini TO TIU berdurasi 35 menit dan terdiri dari soal TIU dengan target latihan 80", () => {
-  assert.equal(MINI_TRYOUT_PACKAGES.length, 3);
-  for (const mini of MINI_TRYOUT_PACKAGES) {
+test("paket-paket mini TO TIU dan TWK memenuhi kontrak durasi, jumlah soal, dan target skor", () => {
+  assert.equal(MINI_TRYOUT_PACKAGES.length, 4);
+
+  const tiuPackages = MINI_TRYOUT_PACKAGES.filter((p) => p.questions.every((q) => q.category === "TIU"));
+  assert.equal(tiuPackages.length, 3);
+  for (const mini of tiuPackages) {
     assert.equal(mini.durationMinutes, 35);
     assert.equal(mini.questions.length, 35);
-    assert.ok(mini.questions.every((question) => question.category === "TIU"));
     assert.ok(mini.questions.every((question) => getQuestion(question.id) !== undefined));
 
     const answers = Object.fromEntries(mini.questions.slice(0, 16).map((question) => [question.id, answerWithScore(question, 5)!]));
@@ -457,4 +459,26 @@ test("paket-paket mini TO TIU berdurasi 35 menit dan terdiri dari soal TIU denga
     assert.equal(result.totalScore, 80);
     assert.equal(result.passed, true);
   }
+
+  const twkPackages = MINI_TRYOUT_PACKAGES.filter((p) => p.questions.every((q) => q.category === "TWK"));
+  assert.equal(twkPackages.length, 1);
+  const twkMini = twkPackages[0];
+  assert.equal(twkMini.id, "mini-twk-kebangsaan");
+  assert.equal(twkMini.durationMinutes, 30);
+  assert.equal(twkMini.questions.length, 30);
+  assert.ok(twkMini.questions.every((question) => getQuestion(question.id) !== undefined));
+
+  // Ambang batas TWK 65 (13 benar x 5 = 65)
+  const twkAnswersPass = Object.fromEntries(twkMini.questions.slice(0, 13).map((question) => [question.id, answerWithScore(question, 5)!]));
+  const twkResultPass = scoreAttempt(twkMini.questions, twkAnswersPass, { id: "mini-twk-pass", packageId: twkMini.id, startedAt: 0, completedAt: 1000 });
+  assert.equal(twkResultPass.scores.TWK.score, 65);
+  assert.equal(twkResultPass.scores.TWK.maximum, 150);
+  assert.equal(twkResultPass.totalScore, 65);
+  assert.equal(twkResultPass.passed, true);
+
+  // 12 benar x 5 = 60 (gagal target TWK)
+  const twkAnswersFail = Object.fromEntries(twkMini.questions.slice(0, 12).map((question) => [question.id, answerWithScore(question, 5)!]));
+  const twkResultFail = scoreAttempt(twkMini.questions, twkAnswersFail, { id: "mini-twk-fail", packageId: twkMini.id, startedAt: 0, completedAt: 1000 });
+  assert.equal(twkResultFail.scores.TWK.score, 60);
+  assert.equal(twkResultFail.passed, false);
 });

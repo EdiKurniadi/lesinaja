@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
-import { ArrowLeft, ArrowUpRight, Check, CheckCircle2, ChevronRight } from "lucide-react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { ArrowLeft, ArrowUpRight, Check, CheckCircle2, ChevronLeft, ChevronRight } from "lucide-react";
 import { StaticLink as Link } from "@/components/static-link";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -126,6 +126,44 @@ export function MaterialReaderClient({ material }: { material: MaterialTopic }) 
   const progress = state.topicProgress[material.id];
   const drillPackage = DRILL_PACKAGES.find((item) => item.category === material.category && item.topic === material.title);
   const isInitialMount = useRef(true);
+  const tabsListRef = useRef<HTMLDivElement | null>(null);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(false);
+
+  const updateScrollState = useCallback(() => {
+    const el = tabsListRef.current;
+    if (!el) return;
+    setCanScrollLeft(el.scrollLeft > 4);
+    setCanScrollRight(el.scrollLeft + el.clientWidth < el.scrollWidth - 4);
+  }, []);
+
+  useEffect(() => {
+    const el = tabsListRef.current;
+    if (!el) return;
+    updateScrollState();
+    el.addEventListener("scroll", updateScrollState, { passive: true });
+    window.addEventListener("resize", updateScrollState);
+    return () => {
+      el.removeEventListener("scroll", updateScrollState);
+      window.removeEventListener("resize", updateScrollState);
+    };
+  }, [updateScrollState, chapters.length]);
+
+  useEffect(() => {
+    if (!tabsListRef.current) return;
+    const activeEl = tabsListRef.current.querySelector<HTMLElement>('[data-state="active"]');
+    if (activeEl) {
+      activeEl.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
+    }
+    updateScrollState();
+  }, [activeChapter, updateScrollState]);
+
+  function scrollTabs(direction: "left" | "right") {
+    const el = tabsListRef.current;
+    if (!el) return;
+    const amount = direction === "left" ? -180 : 180;
+    el.scrollBy({ left: amount, behavior: "smooth" });
+  }
 
   useEffect(() => {
     if (isInitialMount.current) {
@@ -154,19 +192,41 @@ export function MaterialReaderClient({ material }: { material: MaterialTopic }) 
   return (
     <section className="border-b border-black">
       <Tabs value={activeChapter} onValueChange={setActiveChapter}>
-        <div className="sticky top-0 z-20 border-b-2 border-black bg-brand-blue px-5 py-3 sm:px-8 lg:px-10">
-          <TabsList className="material-chapter-tabs">
-            {chapters.map((chapter, index) => (
-              <TabsTrigger
-                key={chapter.title}
-                value={`chapter-${index}`}
-                className="shrink-0 rounded-none font-mono text-xs font-bold tracking-[.12em]"
+        <div className="sticky top-0 z-20 border-b-2 border-black bg-brand-blue px-2 py-2.5 sm:px-8 sm:py-3 lg:px-10">
+          <div className="relative flex items-center gap-1.5">
+            {canScrollLeft && (
+              <button
+                type="button"
+                onClick={() => scrollTabs("left")}
+                aria-label="Geser ke bab sebelumnya"
+                className="flex size-9 shrink-0 items-center justify-center border-2 border-black bg-warm-white text-black shadow-[2px_2px_0_0_#000] transition-transform active:translate-x-0.5 active:translate-y-0.5 hover:bg-signal sm:hidden"
               >
-                <span className={chapters.length > 3 ? "hidden sm:inline" : "inline"}>BAB </span>
-                <span>{numerals[index] ?? index + 1}</span>
-              </TabsTrigger>
-            ))}
-          </TabsList>
+                <ChevronLeft className="size-5" />
+              </button>
+            )}
+            <TabsList ref={tabsListRef} className="material-chapter-tabs flex-1">
+              {chapters.map((chapter, index) => (
+                <TabsTrigger
+                  key={chapter.title}
+                  value={`chapter-${index}`}
+                  className="shrink-0 rounded-none font-mono text-xs font-bold tracking-[.12em]"
+                >
+                  <span className="inline">BAB </span>
+                  <span>{numerals[index] ?? index + 1}</span>
+                </TabsTrigger>
+              ))}
+            </TabsList>
+            {canScrollRight && (
+              <button
+                type="button"
+                onClick={() => scrollTabs("right")}
+                aria-label="Geser ke bab berikutnya"
+                className="flex size-9 shrink-0 items-center justify-center border-2 border-black bg-warm-white text-black shadow-[2px_2px_0_0_#000] transition-transform active:translate-x-0.5 active:translate-y-0.5 hover:bg-signal sm:hidden"
+              >
+                <ChevronRight className="size-5" />
+              </button>
+            )}
+          </div>
         </div>
 
         <div className="flex flex-wrap items-center justify-between gap-3 border-b-2 border-black bg-warm-white px-5 py-3 sm:px-8 lg:px-10">

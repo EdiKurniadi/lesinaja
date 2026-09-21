@@ -102,6 +102,7 @@ export interface PersistedLearningState {
   attempts: AttemptResult[];
   drillStats: Record<string, DrillStat>;
   topicProgress: Record<string, TopicProgress>;
+  unlockedPackages?: string[];
   updatedAt: number;
 }
 

@@ -1,10 +1,11 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { ArrowRight, ArrowUpRight, Check, ChevronLeft, ChevronRight, Info, RotateCcw, X } from "lucide-react";
+import { ArrowRight, ArrowUpRight, Check, ChevronLeft, ChevronRight, Info, Key, Lock, RotateCcw, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { PageFrame } from "@/components/page-frame";
+import { validatePackageAccessCode } from "@/lib/access-codes";
 import { DRILL_PACKAGES, categoryTopics, getDrillPackage, getQuestion } from "@/lib/content";
 import { bestScore, choiceScore, updateDrillStat } from "@/lib/scoring";
 import { clearSessionOpen, markSessionOpen, shouldOpenSession } from "@/lib/session-navigation";
@@ -38,6 +39,9 @@ export function DrillClient() {
   const [sessionOpen, setSessionOpen] = useState(false);
   const [activeReviewIndex, setActiveReviewIndex] = useState(0);
   const [reviewFilter, setReviewFilter] = useState<"all" | "incorrect" | "correct">("all");
+  const [pendingDrillPackage, setPendingDrillPackage] = useState<DrillPackage | null>(null);
+  const [drillAccessCodeInput, setDrillAccessCodeInput] = useState("");
+  const [drillAccessCodeError, setDrillAccessCodeError] = useState<string | null>(null);
   const session = state.activeDrill;
   const invalidSessionId = session?.questionIds.some((questionId) => !getQuestion(questionId)) ? session.id : null;
 
@@ -96,6 +100,38 @@ export function DrillClient() {
     markSessionOpen("drill");
     setSessionOpen(true);
     setSummary(null);
+  }
+
+  function handleInitiateDrill(drillPackage: DrillPackage) {
+    const isUnlocked = (state.unlockedPackages ?? []).includes(drillPackage.id);
+    if (isUnlocked) {
+      start(drillPackage);
+      return;
+    }
+    setPendingDrillPackage(drillPackage);
+    setDrillAccessCodeInput("");
+    setDrillAccessCodeError(null);
+  }
+
+  function handleConfirmDrillCode() {
+    if (!pendingDrillPackage) return;
+    const isValid = validatePackageAccessCode(pendingDrillPackage.id, drillAccessCodeInput);
+    if (!isValid) {
+      setDrillAccessCodeError("Kode akses tidak valid. Silakan periksa kembali.");
+      return;
+    }
+    updateLearningState((learning) => {
+      const currentUnlocked = learning.unlockedPackages ?? [];
+      if (!currentUnlocked.includes(pendingDrillPackage.id)) {
+        return { ...learning, unlockedPackages: [...currentUnlocked, pendingDrillPackage.id] };
+      }
+      return learning;
+    });
+    const target = pendingDrillPackage;
+    setPendingDrillPackage(null);
+    setDrillAccessCodeInput("");
+    setDrillAccessCodeError(null);
+    start(target);
   }
 
   function resume() {
@@ -645,21 +681,125 @@ export function DrillClient() {
               <p className="mb-3 font-bold">Pilih paket</p>
               <div className="grid gap-3 sm:grid-cols-2">
                 {packages.map((drillPackage) => {
+                  const isUnlocked = (state.unlockedPackages ?? []).includes(drillPackage.id);
                   const stats = drillPackage.questions.map((question) => state.drillStats[question.id]).filter(Boolean);
                   const earned = stats.reduce((sum, item) => sum + item.earned, 0);
                   const possible = stats.reduce((sum, item) => sum + item.possible, 0);
                   const percentage = possible ? Math.round((earned / possible) * 100) : 0;
                   return (
                     <article key={drillPackage.id} className="border border-black bg-warm-white p-5">
-                      <div className="flex items-start justify-between gap-4"><span className="font-mono text-xs">/{String(drillPackage.sequence).padStart(2, "0")}</span><span className="bg-secondary px-2 py-1 font-mono text-[10px] font-bold">10 SOAL</span></div>
+                      <div className="flex items-start justify-between gap-4">
+                        <span className="font-mono text-xs">/{String(drillPackage.sequence).padStart(2, "0")}</span>
+                        <div className="flex items-center gap-1.5">
+                          <span className={`inline-flex items-center gap-1 border border-black px-2 py-0.5 font-mono text-[10px] font-bold ${isUnlocked ? "bg-emerald-100 text-emerald-950" : "bg-signal text-black"}`}>
+                            {isUnlocked ? <Key className="size-3" /> : <Lock className="size-3" />}
+                            {isUnlocked ? "TERBUKA" : "PERLU KODE"}
+                          </span>
+                          <span className="bg-secondary px-2 py-1 font-mono text-[10px] font-bold">10 SOAL</span>
+                        </div>
+                      </div>
                       <h3 className="mt-7 text-2xl font-black tracking-[-.04em]">{drillPackage.title}</h3>
                       <p className="mt-2 font-mono text-[11px] uppercase tracking-wider">{stats.length ? `${stats.length}/10 dicoba · ${percentage}%` : "Belum dikerjakan"}</p>
-                      <Button type="button" onClick={() => start(drillPackage)} className="mt-5 h-11 w-full rounded-none">Mulai paket <ArrowRight /></Button>
+                      <Button type="button" onClick={() => handleInitiateDrill(drillPackage)} className="mt-5 h-11 w-full rounded-none">
+                        {isUnlocked ? "Mulai paket" : "Buka & Mulai"} <ArrowRight />
+                      </Button>
                     </article>
                   );
                 })}
               </div>
             </div>
+
+            {/* Drill Access Code Dialog */}
+            <Dialog open={Boolean(pendingDrillPackage)} onOpenChange={(open) => {
+              if (!open) {
+                setPendingDrillPackage(null);
+                setDrillAccessCodeInput("");
+                setDrillAccessCodeError(null);
+              }
+            }}>
+              <DialogContent
+                showCloseButton={false}
+                className="flex flex-col w-[min(94vw,28rem)] gap-0 rounded-none border-2 border-black bg-background p-0 text-foreground shadow-[8px_8px_0_0_#2143d8] overflow-hidden sm:max-w-md"
+              >
+                <DialogHeader className="grid min-h-20 grid-cols-[1fr_4rem] items-stretch gap-0 border-b-2 border-black bg-brand-blue p-0 text-white shrink-0 text-left">
+                  <div className="flex min-w-0 flex-col justify-center px-5 py-3">
+                    <span className="font-mono text-[11px] uppercase tracking-[.18em] text-signal">Akses Terkunci</span>
+                    <DialogTitle className="mt-0.5 text-xl font-black uppercase tracking-[-.03em] text-white">Masukkan Kode Drill</DialogTitle>
+                    <DialogDescription className="sr-only">Masukkan kode akses untuk membuka paket drill {pendingDrillPackage?.title}</DialogDescription>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setPendingDrillPackage(null);
+                      setDrillAccessCodeInput("");
+                      setDrillAccessCodeError(null);
+                    }}
+                    className="flex min-h-16 items-center justify-center border-l-2 border-black bg-brand-red text-white transition-colors hover:bg-red-700"
+                    aria-label="Tutup dialog kode akses"
+                  >
+                    <X className="size-6" aria-hidden="true" />
+                  </button>
+                </DialogHeader>
+
+                <div className="p-5 space-y-4 bg-warm-white">
+                  <p className="text-sm font-medium">
+                    Paket <strong>{pendingDrillPackage?.title}</strong> membutuhkan kode akses sebelum mulai mengerjakan.
+                  </p>
+
+                  <div className="space-y-1.5">
+                    <label htmlFor="drill-access-code-input" className="font-mono text-xs font-bold uppercase tracking-wider text-black flex items-center gap-1.5">
+                      <Key className="size-3.5 text-brand-blue" />
+                      Kode Akses Drill
+                    </label>
+                    <input
+                      id="drill-access-code-input"
+                      type="text"
+                      value={drillAccessCodeInput}
+                      onChange={(e) => {
+                        setDrillAccessCodeInput(e.target.value);
+                        if (drillAccessCodeError) setDrillAccessCodeError(null);
+                      }}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          e.preventDefault();
+                          handleConfirmDrillCode();
+                        }
+                      }}
+                      placeholder="Contoh: TWKPANCASILAX7K2"
+                      className="w-full border-2 border-black bg-white px-3 py-2.5 font-mono text-base font-bold uppercase tracking-widest text-black placeholder:font-sans placeholder:text-xs placeholder:normal-case placeholder:tracking-normal placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-brand-blue"
+                      autoFocus
+                    />
+                    {drillAccessCodeError && (
+                      <p className="font-mono text-xs font-bold text-brand-red">
+                        {drillAccessCodeError}
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="flex gap-2 pt-2">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="flex-1 rounded-none border-2 border-black font-mono text-xs font-bold uppercase"
+                      onClick={() => {
+                        setPendingDrillPackage(null);
+                        setDrillAccessCodeInput("");
+                        setDrillAccessCodeError(null);
+                      }}
+                    >
+                      Batal
+                    </Button>
+                    <Button
+                      type="button"
+                      className="flex-1 rounded-none border-2 border-black bg-brand-blue text-white font-mono text-xs font-bold uppercase hover:bg-blue-700"
+                      onClick={handleConfirmDrillCode}
+                    >
+                      Buka & Mulai
+                    </Button>
+                  </div>
+                </div>
+              </DialogContent>
+            </Dialog>
           </div>
         </section>
       </PageFrame>
