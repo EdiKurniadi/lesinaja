@@ -5,6 +5,7 @@ import { JEJARING_KERJA_DRILL_QUESTIONS } from "./jejaring-kerja-drill-content";
 import { MINI_TIU_QUESTIONS } from "./mini-tiu-content";
 import { MINI_TIU_2_QUESTIONS } from "./mini-tiu-2-content";
 import { MINI_TIU_3_QUESTIONS } from "./mini-tiu-3-content";
+import { MINI_TIU_4_QUESTIONS } from "./mini-tiu-4-content";
 import { MINI_TWK_QUESTIONS } from "./mini-twk-content";
 import { NASIONALISME_DRILL_QUESTIONS } from "./nasionalisme-drill-content";
 import { PELAYANAN_PUBLIK_DRILL_QUESTIONS } from "./pelayanan-publik-drill-content";
@@ -226,6 +227,14 @@ export const MINI_TRYOUT_PACKAGES: ExamPackage[] = [
     durationMinutes: 35,
   },
   {
+    id: "mini-tiu-skd-casn",
+    kind: "mini",
+    title: "Mini TO TIU — SKD CASN",
+    description: "35 soal verbal, numerik, dan figural paket SKD CASN standar CAT dengan pembahasan mendalam.",
+    questions: MINI_TIU_4_QUESTIONS,
+    durationMinutes: 35,
+  },
+  {
     id: "mini-twk-kebangsaan",
     kind: "mini",
     title: "Mini TO TWK — Pemahaman Kebangsaan",
@@ -295,7 +304,7 @@ export const DRILL_PACKAGES: DrillPackage[] = (Object.entries(DRILL_TOPICS) as [
 
 export const DRILL_QUESTIONS: Question[] = DRILL_PACKAGES.flatMap((drillPackage) => drillPackage.questions);
 
-export const ALL_QUESTIONS = [...DRILL_QUESTIONS, ...packageA, ...packageB, ...MINI_TIU_QUESTIONS, ...MINI_TIU_2_QUESTIONS, ...MINI_TIU_3_QUESTIONS, ...MINI_TWK_QUESTIONS];
+export const ALL_QUESTIONS = [...DRILL_QUESTIONS, ...packageA, ...packageB, ...MINI_TIU_QUESTIONS, ...MINI_TIU_2_QUESTIONS, ...MINI_TIU_3_QUESTIONS, ...MINI_TIU_4_QUESTIONS, ...MINI_TWK_QUESTIONS];
 const questionMap = new Map(ALL_QUESTIONS.map((question) => [question.id, question]));
 
 export function getQuestion(questionId: string): Question | undefined {

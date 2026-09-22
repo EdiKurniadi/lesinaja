@@ -443,10 +443,10 @@ test("mengganti jawaban drill memperbarui skor tanpa menambah percobaan", () => 
 });
 
 test("paket-paket mini TO TIU dan TWK memenuhi kontrak durasi, jumlah soal, dan target skor", () => {
-  assert.equal(MINI_TRYOUT_PACKAGES.length, 4);
+  assert.equal(MINI_TRYOUT_PACKAGES.length, 5);
 
   const tiuPackages = MINI_TRYOUT_PACKAGES.filter((p) => p.questions.every((q) => q.category === "TIU"));
-  assert.equal(tiuPackages.length, 3);
+  assert.equal(tiuPackages.length, 4);
   for (const mini of tiuPackages) {
     assert.equal(mini.durationMinutes, 35);
     assert.equal(mini.questions.length, 35);

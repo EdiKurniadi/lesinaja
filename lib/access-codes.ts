@@ -15,6 +15,7 @@ export const PACKAGE_ACCESS_CODES: Record<string, string> = {
   "mini-tiu-kedinasan": "MINITOTIU1KD92",
   "mini-tiu-pemantapan": "MINITOTIU2PM56",
   "mini-tiu-lanjutan": "MINITOTIU3LJ81",
+  "mini-tiu-skd-casn": "MINITIUSKD4K82",
   "mini-twk-kebangsaan": "MTTWKNIPSQUAD",
 
   // === DRILL TWK ===
