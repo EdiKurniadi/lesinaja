@@ -6,7 +6,9 @@ import { MINI_TIU_QUESTIONS } from "./mini-tiu-content";
 import { MINI_TIU_2_QUESTIONS } from "./mini-tiu-2-content";
 import { MINI_TIU_3_QUESTIONS } from "./mini-tiu-3-content";
 import { MINI_TIU_4_QUESTIONS } from "./mini-tiu-4-content";
+import { MINI_TIU_5_QUESTIONS } from "./mini-tiu-5-content";
 import { MINI_TWK_QUESTIONS } from "./mini-twk-content";
+import { MINI_TKP_QUESTIONS } from "./mini-tkp-content";
 import { NASIONALISME_DRILL_QUESTIONS } from "./nasionalisme-drill-content";
 import { PELAYANAN_PUBLIK_DRILL_QUESTIONS } from "./pelayanan-publik-drill-content";
 import { PROFESIONALISME_DRILL_QUESTIONS } from "./profesionalisme-drill-content";
@@ -235,12 +237,28 @@ export const MINI_TRYOUT_PACKAGES: ExamPackage[] = [
     durationMinutes: 35,
   },
   {
+    id: "mini-tiu-skd-casn-2",
+    kind: "mini",
+    title: "Mini TO TIU — SKD CASN Paket 2",
+    description: "35 soal verbal, numerik, dan figural paket SKD CASN standar CAT dengan variasi kunci dan pembahasan mendalam.",
+    questions: MINI_TIU_5_QUESTIONS,
+    durationMinutes: 35,
+  },
+  {
     id: "mini-twk-kebangsaan",
     kind: "mini",
     title: "Mini TO TWK — Pemahaman Kebangsaan",
     description: "30 soal Bahasa Indonesia, Pilar Negara, Bela Negara, Integritas, dan Nasionalisme.",
     questions: MINI_TWK_QUESTIONS,
     durationMinutes: 30,
+  },
+  {
+    id: "mini-tkp-karakteristik",
+    kind: "mini",
+    title: "Mini TO TKP — Karakteristik Pribadi",
+    description: "45 soal pelayanan publik, jejaring kerja, sosial budaya, TIK, profesionalisme, dan anti radikalisme berbobot skor 1–5.",
+    questions: MINI_TKP_QUESTIONS,
+    durationMinutes: 45,
   },
 ];
 
@@ -304,7 +322,7 @@ export const DRILL_PACKAGES: DrillPackage[] = (Object.entries(DRILL_TOPICS) as [
 
 export const DRILL_QUESTIONS: Question[] = DRILL_PACKAGES.flatMap((drillPackage) => drillPackage.questions);
 
-export const ALL_QUESTIONS = [...DRILL_QUESTIONS, ...packageA, ...packageB, ...MINI_TIU_QUESTIONS, ...MINI_TIU_2_QUESTIONS, ...MINI_TIU_3_QUESTIONS, ...MINI_TIU_4_QUESTIONS, ...MINI_TWK_QUESTIONS];
+export const ALL_QUESTIONS = [...DRILL_QUESTIONS, ...packageA, ...packageB, ...MINI_TIU_QUESTIONS, ...MINI_TIU_2_QUESTIONS, ...MINI_TIU_3_QUESTIONS, ...MINI_TIU_4_QUESTIONS, ...MINI_TIU_5_QUESTIONS, ...MINI_TWK_QUESTIONS, ...MINI_TKP_QUESTIONS];
 const questionMap = new Map(ALL_QUESTIONS.map((question) => [question.id, question]));
 
 export function getQuestion(questionId: string): Question | undefined {
@@ -343,11 +361,16 @@ export function validateContent(): string[] {
     });
   }
   for (const item of MINI_TRYOUT_PACKAGES) {
-    if (item.durationMinutes !== 35 && item.durationMinutes !== 30) errors.push(`${item.id} harus berdurasi 30 atau 35 menit`);
-    if (item.questions.length !== 35 && item.questions.length !== 30) errors.push(`${item.id} berisi ${item.questions.length} soal`);
+    if (item.durationMinutes !== 45 && item.durationMinutes !== 35 && item.durationMinutes !== 30) {
+      errors.push(`${item.id} harus berdurasi 30, 35, atau 45 menit`);
+    }
+    if (item.questions.length !== 45 && item.questions.length !== 35 && item.questions.length !== 30) {
+      errors.push(`${item.id} berisi ${item.questions.length} soal`);
+    }
     const isAllTiu = item.questions.every((question) => question.category === "TIU");
     const isAllTwk = item.questions.every((question) => question.category === "TWK");
-    if (!isAllTiu && !isAllTwk) errors.push(`${item.id} harus hanya berisi soal TIU atau hanya soal TWK`);
+    const isAllTkp = item.questions.every((question) => question.category === "TKP");
+    if (!isAllTiu && !isAllTwk && !isAllTkp) errors.push(`${item.id} harus hanya berisi soal TIU, TWK, atau TKP`);
   }
   for (const item of DRILL_PACKAGES) {
     if (item.questions.length !== 10) errors.push(`${item.id} berisi ${item.questions.length} soal`);

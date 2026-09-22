@@ -765,7 +765,7 @@ export function DrillClient() {
                           handleConfirmDrillCode();
                         }
                       }}
-                      placeholder="Contoh: TWKPANCASILAX7K2"
+                      placeholder="Masukkan kode akses"
                       className="w-full border-2 border-black bg-white px-3 py-2.5 font-mono text-base font-bold uppercase tracking-widest text-black placeholder:font-sans placeholder:text-xs placeholder:normal-case placeholder:tracking-normal placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-brand-blue"
                       autoFocus
                     />

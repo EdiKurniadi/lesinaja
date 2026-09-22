@@ -11,12 +11,14 @@ export const PACKAGE_ACCESS_CODES: Record<string, string> = {
   "paket-a": "PAKETAFN24",
   "paket-b": "PAKETBPM38",
 
-  // === MINI TRY OUT TIU & TWK ===
+  // === MINI TRY OUT TIU, TWK, TKP ===
   "mini-tiu-kedinasan": "MINITOTIU1KD92",
   "mini-tiu-pemantapan": "MINITOTIU2PM56",
   "mini-tiu-lanjutan": "MINITOTIU3LJ81",
   "mini-tiu-skd-casn": "MINITIUSKD4K82",
+  "mini-tiu-skd-casn-2": "MINITIUSKD2M73",
   "mini-twk-kebangsaan": "MTTWKNIPSQUAD",
+  "mini-tkp-karakteristik": "MTTKPNIPSQUAD",
 
   // === DRILL TWK ===
   "twk-pancasila-1": "TWKPANCASILA1AB72",

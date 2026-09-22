@@ -1,12 +1,13 @@
 "use client";
 
+import { memo } from "react";
 import { Check, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { MathText } from "@/components/math-text";
 import { bestScore, choiceScore } from "@/lib/scoring";
 import type { Question } from "@/lib/types";
 
-export function QuestionCard({
+function QuestionCardComponent({
   question,
   selectedId,
   onSelect,
@@ -76,3 +77,5 @@ export function QuestionCard({
     </article>
   );
 }
+
+export const QuestionCard = memo(QuestionCardComponent);

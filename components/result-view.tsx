@@ -49,6 +49,8 @@ export function ResultView({
   );
   const isMiniTiu = activeCategories.length === 1 && activeCategories[0] === "TIU";
   const isMiniTwk = activeCategories.length === 1 && activeCategories[0] === "TWK";
+  const isMiniTkp = activeCategories.length === 1 && activeCategories[0] === "TKP";
+  const isMini = isMiniTiu || isMiniTwk || isMiniTkp;
   const maximum = useMemo(
     () => questions.reduce((sum, question) => sum + bestScore(question), 0),
     [questions]
@@ -311,11 +313,15 @@ export function ResultView({
                 ? "Memenuhi target latihan TIU"
                 : isMiniTwk
                 ? "Memenuhi target latihan TWK"
+                : isMiniTkp
+                ? "Memenuhi target latihan TKP"
                 : "Memenuhi seluruh ambang batas"
               : isMiniTiu
               ? "Belum mencapai target latihan TIU"
               : isMiniTwk
               ? "Belum mencapai target latihan TWK"
+              : isMiniTkp
+              ? "Belum mencapai target latihan TKP"
               : "Belum memenuhi seluruh ambang batas"}
           </p>
           <div className="mt-4 flex flex-wrap items-center gap-3 font-mono text-xs uppercase text-muted-foreground">
@@ -373,7 +379,7 @@ export function ResultView({
               </div>
               <p className="mt-1 sm:mt-3 text-2xl sm:text-4xl font-black tracking-tight">{score.score}</p>
               <div className="mt-1 font-mono text-[10px] sm:text-xs text-muted-foreground leading-tight sm:leading-normal">
-                <span className="block sm:inline">{isMiniTiu ? "Target" : "Ambang"} {EXAM_RULES.passingScores[category]}</span>
+                <span className="block sm:inline">{isMini ? "Target" : "Ambang"} {EXAM_RULES.passingScores[category]}</span>
                 <span className="hidden sm:inline"> · </span>
                 <span className="block sm:inline">Maks {score.maximum}</span>
               </div>

@@ -442,11 +442,11 @@ test("mengganti jawaban drill memperbarui skor tanpa menambah percobaan", () => 
   assert.deepEqual(replaced, { attempts: 1, earned: 0, possible: 5, lastAnsweredAt: 2000 });
 });
 
-test("paket-paket mini TO TIU dan TWK memenuhi kontrak durasi, jumlah soal, dan target skor", () => {
-  assert.equal(MINI_TRYOUT_PACKAGES.length, 5);
+test("paket-paket mini TO TIU, TWK, dan TKP memenuhi kontrak durasi, jumlah soal, dan target skor", () => {
+  assert.equal(MINI_TRYOUT_PACKAGES.length, 7);
 
   const tiuPackages = MINI_TRYOUT_PACKAGES.filter((p) => p.questions.every((q) => q.category === "TIU"));
-  assert.equal(tiuPackages.length, 4);
+  assert.equal(tiuPackages.length, 5);
   for (const mini of tiuPackages) {
     assert.equal(mini.durationMinutes, 35);
     assert.equal(mini.questions.length, 35);
@@ -459,6 +459,16 @@ test("paket-paket mini TO TIU dan TWK memenuhi kontrak durasi, jumlah soal, dan 
     assert.equal(result.totalScore, 80);
     assert.equal(result.passed, true);
   }
+
+  const tiu2Pkg = MINI_TRYOUT_PACKAGES.find((p) => p.id === "mini-tiu-skd-casn-2");
+  assert.ok(tiu2Pkg);
+  const tiu2Keys = { A: 0, B: 0, C: 0, D: 0, E: 0 };
+  for (const q of tiu2Pkg.questions) {
+    const best = q.choices.find((c) => c.score === 5);
+    assert.ok(best);
+    tiu2Keys[best.id.toUpperCase() as keyof typeof tiu2Keys]++;
+  }
+  assert.deepEqual(tiu2Keys, { A: 8, B: 7, C: 7, D: 7, E: 6 });
 
   const twkPackages = MINI_TRYOUT_PACKAGES.filter((p) => p.questions.every((q) => q.category === "TWK"));
   assert.equal(twkPackages.length, 1);
@@ -481,4 +491,32 @@ test("paket-paket mini TO TIU dan TWK memenuhi kontrak durasi, jumlah soal, dan 
   const twkResultFail = scoreAttempt(twkMini.questions, twkAnswersFail, { id: "mini-twk-fail", packageId: twkMini.id, startedAt: 0, completedAt: 1000 });
   assert.equal(twkResultFail.scores.TWK.score, 60);
   assert.equal(twkResultFail.passed, false);
+
+  const tkpPackages = MINI_TRYOUT_PACKAGES.filter((p) => p.questions.every((q) => q.category === "TKP"));
+  assert.equal(tkpPackages.length, 1);
+  const tkpMini = tkpPackages[0];
+  assert.equal(tkpMini.id, "mini-tkp-karakteristik");
+  assert.equal(tkpMini.durationMinutes, 45);
+  assert.equal(tkpMini.questions.length, 45);
+  assert.ok(tkpMini.questions.every((question) => getQuestion(question.id) !== undefined));
+
+  for (const q of tkpMini.questions) {
+    assert.equal(q.choices.length, 5);
+    const scores = q.choices.map((c) => c.score).sort((a, b) => a - b);
+    assert.deepEqual(scores, [1, 2, 3, 4, 5], `Question ${q.id} must have scores 1 through 5`);
+  }
+
+  // Ambang batas TKP 166 (34 soal x 5 = 170 -> lolos)
+  const tkpAnswersPass = Object.fromEntries(tkpMini.questions.slice(0, 34).map((question) => [question.id, answerWithScore(question, 5)!]));
+  const tkpResultPass = scoreAttempt(tkpMini.questions, tkpAnswersPass, { id: "mini-tkp-pass", packageId: tkpMini.id, startedAt: 0, completedAt: 1000 });
+  assert.equal(tkpResultPass.scores.TKP.score, 170);
+  assert.equal(tkpResultPass.scores.TKP.maximum, 225);
+  assert.equal(tkpResultPass.totalScore, 170);
+  assert.equal(tkpResultPass.passed, true);
+
+  // 33 soal x 5 = 165 (gagal target TKP 166)
+  const tkpAnswersFail = Object.fromEntries(tkpMini.questions.slice(0, 33).map((question) => [question.id, answerWithScore(question, 5)!]));
+  const tkpResultFail = scoreAttempt(tkpMini.questions, tkpAnswersFail, { id: "mini-tkp-fail", packageId: tkpMini.id, startedAt: 0, completedAt: 1000 });
+  assert.equal(tkpResultFail.scores.TKP.score, 165);
+  assert.equal(tkpResultFail.passed, false);
 });

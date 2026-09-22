@@ -1,8 +1,7 @@
 "use client";
 
-import { type ReactNode } from "react";
+import { memo, type ReactNode } from "react";
 import katex from "katex";
-
 
 type Token =
   | { type: "text"; content: string }
@@ -10,6 +9,12 @@ type Token =
   | { type: "sup"; content: string }
   | { type: "fraction"; num: string; den: string }
   | { type: "mixed-fraction"; whole: string; num: string; den: string };
+
+const MATH_SYNTAX_REGEX = /[\$\^/]|sqrt\(|<=>|->|<=|>=|\*|\bpi\b/;
+
+function hasMathSyntax(str: string): boolean {
+  return MATH_SYNTAX_REGEX.test(str);
+}
 
 function preprocessMathString(text: string): string {
   if (!text) return "";
@@ -99,6 +104,16 @@ function parseMathTokens(rawText: string): Token[] {
   return tokens;
 }
 
+const tokenCache = new Map<string, Token[]>();
+
+function parseMathTokensCached(rawText: string): Token[] {
+  const cached = tokenCache.get(rawText);
+  if (cached) return cached;
+  const tokens = parseMathTokens(rawText);
+  if (tokenCache.size < 1000) tokenCache.set(rawText, tokens);
+  return tokens;
+}
+
 function renderTokens(tokens: Token[]): ReactNode[] {
   return tokens.map((token, index) => {
     switch (token.type) {
@@ -176,7 +191,7 @@ function renderLatexOrText(textSegment: string, keyPrefix: string): ReactNode {
       const plain = textSegment.slice(lastIndex, match.index);
       parts.push(
         <span key={`${keyPrefix}-plain-${lastIndex}`}>
-          {renderTokens(parseMathTokens(plain))}
+          {renderTokens(parseMathTokensCached(plain))}
         </span>
       );
     }
@@ -221,7 +236,7 @@ function renderLatexOrText(textSegment: string, keyPrefix: string): ReactNode {
     const trailing = textSegment.slice(lastIndex);
     parts.push(
       <span key={`${keyPrefix}-plain-end`}>
-        {renderTokens(parseMathTokens(trailing))}
+        {renderTokens(parseMathTokensCached(trailing))}
       </span>
     );
   }
@@ -229,7 +244,7 @@ function renderLatexOrText(textSegment: string, keyPrefix: string): ReactNode {
   return parts.length > 0 ? parts : null;
 }
 
-export function MathText({
+function MathTextComponent({
   text,
   className = "",
 }: {
@@ -246,6 +261,23 @@ export function MathText({
         className={`block w-full overflow-x-auto ${className}`}
         dangerouslySetInnerHTML={{ __html: svgContent }}
       />
+    );
+  }
+
+  // Fast-path: if text contains no math syntax or LaTeX delimiters, render directly
+  if (!hasMathSyntax(text)) {
+    if (!text.includes("\n")) {
+      return <span className={className}>{text}</span>;
+    }
+    const lines = text.split("\n");
+    return (
+      <span className={className}>
+        {lines.map((line, lineIndex) => (
+          <span key={`line-${lineIndex}`} className="block">
+            {line}
+          </span>
+        ))}
+      </span>
     );
   }
 
@@ -268,3 +300,5 @@ export function MathText({
     </span>
   );
 }
+
+export const MathText = memo(MathTextComponent);

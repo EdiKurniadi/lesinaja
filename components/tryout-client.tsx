@@ -12,10 +12,15 @@ import { clearSessionOpen, markSessionOpen, shouldOpenSession } from "@/lib/sess
 import { readLearningState, updateLearningState } from "@/lib/storage";
 import type { ActiveSession, AttemptResult, Question } from "@/lib/types";
 import { useLearningState } from "@/hooks/use-learning-state";
+import dynamic from "next/dynamic";
 import { ExamShell, useExamKeyboard } from "./exam-shell";
 import { PageFrame } from "./page-frame";
 import { QuestionCard } from "./question-card";
-import { ResultView } from "./result-view";
+
+const ResultView = dynamic(
+  () => import("./result-view").then((mod) => mod.ResultView),
+  { ssr: false }
+);
 
 function timeLabel(milliseconds: number) {
   const total = Math.max(0, Math.ceil(milliseconds / 1000));
@@ -23,6 +28,42 @@ function timeLabel(milliseconds: number) {
   const minutes = Math.floor((total % 3600) / 60);
   const seconds = total % 60;
   return [hours, minutes, seconds].map((item) => String(item).padStart(2, "0")).join(":");
+}
+
+function PendingSessionRemaining({ deadlineAt }: { deadlineAt?: number }) {
+  const [remaining] = useState(() => (deadlineAt ? Math.max(0, deadlineAt - Date.now()) : 0));
+  return <>{timeLabel(remaining)}</>;
+}
+
+function TryoutCountdown({
+  deadlineAt,
+  onExpire,
+}: {
+  deadlineAt: number;
+  onExpire: () => void;
+}) {
+  const [now, setNow] = useState(Date.now);
+
+  useEffect(() => {
+    const update = () => {
+      const current = Date.now();
+      setNow(current);
+      if (current >= deadlineAt) {
+        onExpire();
+      }
+    };
+    const timer = window.setInterval(update, 1000);
+    return () => window.clearInterval(timer);
+  }, [deadlineAt, onExpire]);
+
+  const remaining = Math.max(0, deadlineAt - now);
+
+  return (
+    <div className="flex h-8 shrink-0 items-center gap-1 sm:gap-1.5 bg-brand-blue px-2 font-mono text-[11px] font-bold text-white sm:px-2.5 sm:text-xs">
+      <Clock3 className="size-3.5 text-signal shrink-0" />
+      <span aria-label={`Sisa waktu ${timeLabel(remaining)}`}>{timeLabel(remaining)}</span>
+    </div>
+  );
 }
 
 function currentTime() {
@@ -35,7 +76,6 @@ function packageMaximum(item: { questions: Question[] }) {
 
 export function TryoutClient() {
   const state = useLearningState();
-  const [now, setNow] = useState(currentTime);
   const [result, setResult] = useState<AttemptResult | null>(null);
   const [sessionOpen, setSessionOpen] = useState(false);
   const [pendingPackageId, setPendingPackageId] = useState<string | null>(null);
@@ -46,6 +86,7 @@ export function TryoutClient() {
   const pendingPackage = pendingPackageId ? getPackage(pendingPackageId) : undefined;
   const pendingIsMini = pendingPackage?.kind === "mini";
   const pendingIsTwk = pendingIsMini && pendingPackage?.questions.every((question) => question.category === "TWK");
+  const pendingIsTkp = pendingIsMini && pendingPackage?.questions.every((question) => question.category === "TKP");
   const isPendingUnlocked = pendingPackage ? Boolean(state.unlockedPackages?.includes(pendingPackage.id)) : false;
   const pendingMaximum = pendingPackage ? packageMaximum(pendingPackage) : 0;
 
@@ -89,16 +130,12 @@ export function TryoutClient() {
   }, [examPackage, questions, session]);
 
   useEffect(() => {
-    if (!session?.deadlineAt) return;
-    const timer = window.setInterval(() => setNow(Date.now()), 1000);
-    return () => window.clearInterval(timer);
-  }, [session?.deadlineAt]);
-
-  useEffect(() => {
-    if (!sessionOpen || !session?.deadlineAt || now < session.deadlineAt) return;
-    const automaticSubmit = window.setTimeout(finish, 0);
-    return () => window.clearTimeout(automaticSubmit);
-  }, [finish, now, session?.deadlineAt, sessionOpen]);
+    if (!sessionOpen || !session?.deadlineAt) return;
+    if (Date.now() >= session.deadlineAt) {
+      const automaticSubmit = window.setTimeout(finish, 0);
+      return () => window.clearTimeout(automaticSubmit);
+    }
+  }, [finish, session?.deadlineAt, sessionOpen]);
 
   function start(packageId: string) {
     const selected = getPackage(packageId);
@@ -116,7 +153,6 @@ export function TryoutClient() {
       deadlineAt: startedAt + selected.durationMinutes * 60_000,
     };
     setResult(null);
-    setNow(startedAt);
     setPendingPackageId(null);
     markSessionOpen("tryout");
     setSessionOpen(true);
@@ -165,7 +201,6 @@ export function TryoutClient() {
   }
 
   const answered = session ? Object.keys(session.answers).length : 0;
-  const remaining = Math.max(0, (session?.deadlineAt ?? now) - now);
   const isFlagged = Boolean(session && current && session.flagged.includes(current.id));
 
   useExamKeyboard({
@@ -213,7 +248,7 @@ export function TryoutClient() {
               <div>
                 <p className="font-mono text-[11px] font-bold uppercase tracking-[.14em] text-brand-blue">Sesi try out tertunda</p>
                 <h2 className="mt-1 text-2xl font-black">{examPackage.title}</h2>
-                <p className="mt-1 text-sm">{answered}/{questions.length} soal dijawab · sisa waktu {timeLabel(remaining)}. Memulai paket baru akan menghapus sesi ini.</p>
+                <p className="mt-1 text-sm">{answered}/{questions.length} soal dijawab · sisa waktu <PendingSessionRemaining deadlineAt={session.deadlineAt} />. Memulai paket baru akan menghapus sesi ini.</p>
               </div>
               <Button type="button" onClick={resume} className="h-11 rounded-none">Lanjutkan sesi</Button>
             </div>
@@ -267,10 +302,14 @@ export function TryoutClient() {
                 const attempts = state.attempts.filter((attempt) => attempt.packageId === item.id);
                 const maximum = packageMaximum(item);
                 const isTwk = item.questions.every((q) => q.category === "TWK");
+                const isTkp = item.questions.every((q) => q.category === "TKP");
                 const isMiniUnlocked = Boolean(state.unlockedPackages?.includes(item.id));
-                const targetScore = isTwk ? 65 : 80;
+                const targetScore = isTwk ? 65 : isTkp ? 166 : 80;
+                const categoryLabel = isTwk ? "TWK" : isTkp ? "TKP" : "TIU";
                 const subtestSummary = isTwk
                   ? "Bahasa Indonesia, Pilar Negara, Bela Negara, Integritas, Nasionalisme"
+                  : isTkp
+                  ? "Pelayanan Publik, Jejaring Kerja, Sosial Budaya, TIK, Profesionalisme, Anti Radikalisme"
                   : "verbal, numerik, dan figural";
                 return (
                   <article key={item.id} className="border border-black bg-warm-white p-5 sm:p-7">
@@ -288,8 +327,8 @@ export function TryoutClient() {
                     <h3 className="mt-8 text-3xl font-black tracking-[-.05em]">{item.title}</h3>
                     <p className="mt-3 max-w-lg leading-relaxed">{item.description}</p>
                     <ul className="mt-6 space-y-2 text-sm">
-                      <li>✓ {item.questions.length} soal {isTwk ? "TWK" : "TIU"}: {subtestSummary}</li>
-                      <li>✓ Nilai maksimum {maximum} · target latihan {isTwk ? "TWK" : "TIU"} {targetScore}</li>
+                      <li>✓ {item.questions.length} soal {categoryLabel}: {subtestSummary}</li>
+                      <li>✓ Nilai maksimum {maximum} · target latihan {categoryLabel} {targetScore}</li>
                       <li>✓ Pembahasan muncul setelah selesai</li>
                     </ul>
                     {attempts[0] && (
@@ -318,7 +357,7 @@ export function TryoutClient() {
           <AlertDialogContent className="max-h-[calc(100dvh-2rem)] overflow-y-auto rounded-none border-black sm:!max-w-2xl">
             <AlertDialogHeader>
               <p className="font-mono text-[11px] font-bold uppercase tracking-[.14em] text-brand-red">
-                {pendingIsTwk ? "Simulasi TWK Pemahaman Kebangsaan" : pendingIsMini ? "Simulasi TIU Kedinasan" : "Simulasi CAT SKD CPNS"}
+                {pendingIsTwk ? "Simulasi TWK Pemahaman Kebangsaan" : pendingIsTkp ? "Simulasi TKP Karakteristik Pribadi" : pendingIsMini ? "Simulasi TIU Kedinasan" : "Simulasi CAT SKD CPNS"}
               </p>
               <AlertDialogTitle className="text-2xl font-black sm:text-3xl">KONFIRMASI MULAI UJIAN</AlertDialogTitle>
               <AlertDialogDescription>{pendingPackage?.title}. Pastikan kamu sudah siap sebelum waktu ujian dimulai.</AlertDialogDescription>
@@ -365,7 +404,7 @@ export function TryoutClient() {
                         handleStartExam();
                       }
                     }}
-                    placeholder="Masukkan kode akses (cth: MTTWKNIPSQUAD)"
+                    placeholder="Masukkan kode akses"
                     className="h-11 w-full border-2 border-black bg-background px-3 font-mono text-sm font-bold uppercase tracking-wider placeholder:normal-case placeholder:font-normal placeholder:tracking-normal focus:outline-none focus:ring-2 focus:ring-brand-blue"
                   />
                   {accessCodeError && (
@@ -387,6 +426,12 @@ export function TryoutClient() {
                         <li>TWK: {pendingPackage?.questions.length ?? 30} soal Bahasa Indonesia, Pilar Negara, Bela Negara, Integritas, dan Nasionalisme.</li>
                         <li>Jawaban benar bernilai 5; salah atau kosong bernilai 0.</li>
                         <li>Nilai maksimum {pendingMaximum}; target latihan TWK adalah 65.</li>
+                      </>
+                    ) : pendingIsTkp ? (
+                      <>
+                        <li>TKP: {pendingPackage?.questions.length ?? 45} soal Pelayanan Publik, Jejaring Kerja, Sosial Budaya, TIK, Profesionalisme, dan Anti Radikalisme.</li>
+                        <li>Setiap pilihan jawaban bernilai 1–5 poin; kosong bernilai 0.</li>
+                        <li>Nilai maksimum {pendingMaximum}; target latihan TKP adalah 166.</li>
                       </>
                     ) : (
                       <>
@@ -422,7 +467,7 @@ export function TryoutClient() {
 
             <p className="border-l-4 border-brand-blue bg-secondary p-3 text-xs leading-relaxed">
               {pendingIsMini
-                ? `Mini TO ini adalah latihan mandiri ${pendingIsTwk ? "TWK" : "TIU"}. Target ${pendingIsTwk ? "65" : "80"} digunakan untuk evaluasi latihan, bukan ambang kelulusan resmi.`
+                ? `Mini TO ini adalah latihan mandiri ${pendingIsTwk ? "TWK" : pendingIsTkp ? "TKP" : "TIU"}. Target ${pendingIsTwk ? "65" : pendingIsTkp ? "166" : "80"} digunakan untuk evaluasi latihan, bukan ambang kelulusan resmi.`
                 : "Acuan pelamar umum CPNS TA 2024."} LesinAja tidak berafiliasi dengan BKN dan tidak memuat soal resmi.
             </p>
             <p className="text-xs leading-relaxed text-muted-foreground">
@@ -449,10 +494,9 @@ export function TryoutClient() {
       onMove={move}
       groupedPalette
       headerMetric={
-        <div className="flex h-8 shrink-0 items-center gap-1 sm:gap-1.5 bg-brand-blue px-2 font-mono text-[11px] font-bold text-white sm:px-2.5 sm:text-xs">
-          <Clock3 className="size-3.5 text-signal shrink-0" />
-          <span aria-label={`Sisa waktu ${timeLabel(remaining)}`}>{timeLabel(remaining)}</span>
-        </div>
+        session?.deadlineAt ? (
+          <TryoutCountdown deadlineAt={session.deadlineAt} onExpire={finish} />
+        ) : null
       }
       headerAction={
         <AlertDialog>
