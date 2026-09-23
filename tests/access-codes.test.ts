@@ -11,7 +11,7 @@ import {
 import { ALL_TRYOUT_PACKAGES, DRILL_PACKAGES } from "../lib/content";
 
 test("seluruh paket tryout dan drill memiliki kode akses terdaftar", () => {
-  assert.equal(ALL_TRYOUT_PACKAGES.length, 9);
+  assert.equal(ALL_TRYOUT_PACKAGES.length, 10);
   assert.equal(DRILL_PACKAGES.length, 54);
 
   for (const pkg of ALL_TRYOUT_PACKAGES) {
@@ -26,7 +26,7 @@ test("seluruh paket tryout dan drill memiliki kode akses terdaftar", () => {
     assert.match(code, /^[A-Z0-9]{5,35}$/, `Format kode ${code} tidak valid`);
   }
 
-  assert.equal(Object.keys(PACKAGE_ACCESS_CODES).length, 63);
+  assert.equal(Object.keys(PACKAGE_ACCESS_CODES).length, 64);
 });
 
 test("kode akses Mini TO TIU SKD CASN, Mini TO TWK, dan Mini TO TKP sesuai spesifikasi", () => {
@@ -41,6 +41,13 @@ test("kode akses Mini TO TIU SKD CASN, Mini TO TWK, dan Mini TO TKP sesuai spesi
   assert.equal(validatePackageAccessCode("mini-tiu-skd-casn-2", "minitiuskd2m73"), true);
   assert.equal(validatePackageAccessCode("mini-tiu-skd-casn-2", "  minitiuskd2m73  "), true);
   assert.equal(validatePackageAccessCode("mini-tiu-skd-casn-2", "WRONGCODE88"), false);
+
+  const tiu3Code = getPackageAccessCode("mini-tiu-skd-casn-3");
+  assert.equal(tiu3Code, "MINITIUSKD3V85");
+  assert.equal(validatePackageAccessCode("mini-tiu-skd-casn-3", "MINITIUSKD3V85"), true);
+  assert.equal(validatePackageAccessCode("mini-tiu-skd-casn-3", "minitiuskd3v85"), true);
+  assert.equal(validatePackageAccessCode("mini-tiu-skd-casn-3", "  minitiuskd3v85  "), true);
+  assert.equal(validatePackageAccessCode("mini-tiu-skd-casn-3", "WRONGCODE99"), false);
 
   const twkCode = getPackageAccessCode("mini-twk-kebangsaan");
   assert.equal(twkCode, "MTTWKNIPSQUAD");

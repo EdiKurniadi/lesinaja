@@ -443,10 +443,10 @@ test("mengganti jawaban drill memperbarui skor tanpa menambah percobaan", () => 
 });
 
 test("paket-paket mini TO TIU, TWK, dan TKP memenuhi kontrak durasi, jumlah soal, dan target skor", () => {
-  assert.equal(MINI_TRYOUT_PACKAGES.length, 7);
+  assert.equal(MINI_TRYOUT_PACKAGES.length, 8);
 
   const tiuPackages = MINI_TRYOUT_PACKAGES.filter((p) => p.questions.every((q) => q.category === "TIU"));
-  assert.equal(tiuPackages.length, 5);
+  assert.equal(tiuPackages.length, 6);
   for (const mini of tiuPackages) {
     assert.equal(mini.durationMinutes, 35);
     assert.equal(mini.questions.length, 35);
@@ -469,6 +469,16 @@ test("paket-paket mini TO TIU, TWK, dan TKP memenuhi kontrak durasi, jumlah soal
     tiu2Keys[best.id.toUpperCase() as keyof typeof tiu2Keys]++;
   }
   assert.deepEqual(tiu2Keys, { A: 8, B: 7, C: 7, D: 7, E: 6 });
+
+  const tiu3Pkg = MINI_TRYOUT_PACKAGES.find((p) => p.id === "mini-tiu-skd-casn-3");
+  assert.ok(tiu3Pkg);
+  const tiu3Keys = { A: 0, B: 0, C: 0, D: 0, E: 0 };
+  for (const q of tiu3Pkg.questions) {
+    const best = q.choices.find((c) => c.score === 5);
+    assert.ok(best);
+    tiu3Keys[best.id.toUpperCase() as keyof typeof tiu3Keys]++;
+  }
+  assert.deepEqual(tiu3Keys, { A: 8, B: 7, C: 7, D: 7, E: 6 });
 
   const twkPackages = MINI_TRYOUT_PACKAGES.filter((p) => p.questions.every((q) => q.category === "TWK"));
   assert.equal(twkPackages.length, 1);
