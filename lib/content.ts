@@ -258,7 +258,7 @@ export const MINI_TRYOUT_PACKAGES: ExamPackage[] = [
     id: "mini-tiu-skd-casn-4",
     kind: "mini",
     title: "Mini TO TIU — SKD CASN Paket 4",
-    description: "35 soal verbal, numerik, dan figural paket SKD CASN dengan konsep aljabar dasar, visual SVG figural, serta kunci jawaban seimbang.",
+    description: "35 soal verbal dan numerik (termasuk deret pola angka bentuk tabel FR Kedinasan/CPNS) paket SKD CASN dengan konsep aljabar dasar serta kunci jawaban seimbang.",
     questions: MINI_TIU_7_QUESTIONS,
     durationMinutes: 35,
   },
