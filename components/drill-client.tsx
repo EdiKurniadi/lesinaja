@@ -13,8 +13,10 @@ import { clearSessionOpen, markSessionOpen, shouldOpenSession } from "@/lib/sess
 import { updateLearningState } from "@/lib/storage";
 import type { ActiveSession, Category, DrillPackage, Question } from "@/lib/types";
 import { useLearningState } from "@/hooks/use-learning-state";
+import { extractQuestionImageUrls, preloadQuestionAssets } from "@/lib/asset-preload";
 import { ExamShell, useExamKeyboard } from "./exam-shell";
 import { MathText } from "./math-text";
+import { PreparingExamOverlay } from "./preparing-exam-overlay";
 import { QuestionCard } from "./question-card";
 
 type DrillSummary = {
@@ -44,6 +46,7 @@ export function DrillClient() {
   const [drillAccessCodeInput, setDrillAccessCodeInput] = useState("");
   const [drillAccessCodeError, setDrillAccessCodeError] = useState<string | null>(null);
   const [resumePromptDrillPackage, setResumePromptDrillPackage] = useState<DrillPackage | null>(null);
+  const [isPreparing, setIsPreparing] = useState(false);
   const session = state.activeDrill;
   const isDrillActive = Boolean(
     session &&
@@ -51,6 +54,11 @@ export function DrillClient() {
     (!session.deadlineAt || Date.now() < session.deadlineAt)
   );
   const invalidSessionId = session?.questionIds.some((questionId) => !getQuestion(questionId)) ? session.id : null;
+
+  useEffect(() => {
+    if (!pendingDrillPackage) return;
+    preloadQuestionAssets(pendingDrillPackage.questions, 15000).catch(() => {});
+  }, [pendingDrillPackage]);
 
   useEffect(() => {
     const initialize = window.setTimeout(() => {
@@ -91,7 +99,14 @@ export function DrillClient() {
   const selectedId = current && session ? session.answers[current.id] : undefined;
   const answered = session ? Object.keys(session.answers).length : 0;
 
-  function start(drillPackage: DrillPackage) {
+  async function start(drillPackage: DrillPackage) {
+    const urls = extractQuestionImageUrls(drillPackage.questions);
+    if (urls.length > 0) {
+      setIsPreparing(true);
+      await preloadQuestionAssets(drillPackage.questions, 15000);
+      setIsPreparing(false);
+    }
+
     const nextSession: ActiveSession = {
       id: `drill-${drillPackage.id}-${currentTime()}`,
       kind: "drill",
@@ -109,14 +124,14 @@ export function DrillClient() {
     setSummary(null);
   }
 
-  function handleInitiateDrill(drillPackage: DrillPackage) {
+  async function handleInitiateDrill(drillPackage: DrillPackage) {
     if (isDrillActive && session?.packageId === drillPackage.id) {
       setResumePromptDrillPackage(drillPackage);
       return;
     }
     const isUnlocked = (state.unlockedPackages ?? []).includes(drillPackage.id);
     if (isUnlocked) {
-      start(drillPackage);
+      await start(drillPackage);
       return;
     }
     setPendingDrillPackage(drillPackage);
@@ -124,7 +139,7 @@ export function DrillClient() {
     setDrillAccessCodeError(null);
   }
 
-  function handleConfirmDrillCode() {
+  async function handleConfirmDrillCode() {
     if (!pendingDrillPackage) return;
     const isValid = validatePackageAccessCode(pendingDrillPackage.id, drillAccessCodeInput);
     if (!isValid) {
@@ -146,10 +161,18 @@ export function DrillClient() {
       setResumePromptDrillPackage(target);
       return;
     }
-    start(target);
+    await start(target);
   }
 
-  function resume() {
+  async function resume() {
+    if (questions.length > 0) {
+      const urls = extractQuestionImageUrls(questions);
+      if (urls.length > 0) {
+        setIsPreparing(true);
+        await preloadQuestionAssets(questions, 15000);
+        setIsPreparing(false);
+      }
+    }
     markSessionOpen("drill");
     setSessionOpen(true);
     setSummary(null);
@@ -525,12 +548,14 @@ export function DrillClient() {
     const topics = categoryTopics(category);
     const packages = DRILL_PACKAGES.filter((item) => item.category === category && item.topic === topic);
     return (
-      <PageFrame
-        eyebrow="01 / Drill"
-        title="LATIH. PAHAM. ULANG."
-        description="Pilih topik dan tuntaskan 10 soal secara berurutan. Nilai dan pembahasan lengkap muncul setelah paket selesai."
-        showHeader={true}
-      >
+      <>
+        <PreparingExamOverlay open={isPreparing} />
+        <PageFrame
+          eyebrow="01 / Drill"
+          title="LATIH. PAHAM. ULANG."
+          description="Pilih topik dan tuntaskan 10 soal secara berurutan. Nilai dan pembahasan lengkap muncul setelah paket selesai."
+          showHeader={true}
+        >
         <section className="grid border-b border-black lg:grid-cols-[.7fr_1.3fr]">
           <div className="hidden border-b border-black bg-black p-5 text-white sm:p-8 lg:block lg:border-b-0 lg:border-r lg:p-10">
             <p className="font-mono text-xs uppercase tracking-[.14em] text-signal">Atur sesi</p>
@@ -846,7 +871,7 @@ export function DrillClient() {
                     type="button"
                     onClick={() => {
                       setResumePromptDrillPackage(null);
-                      resume();
+                      void resume();
                     }}
                     className="h-12 w-full rounded-none bg-brand-blue text-white font-bold hover:bg-brand-blue-hover"
                   >
@@ -858,7 +883,7 @@ export function DrillClient() {
                     onClick={() => {
                       const target = resumePromptDrillPackage!;
                       setResumePromptDrillPackage(null);
-                      start(target);
+                      void start(target);
                     }}
                     className="h-12 w-full rounded-none border-2 border-black font-bold hover:bg-secondary"
                   >
@@ -878,7 +903,8 @@ export function DrillClient() {
           </div>
         </section>
       </PageFrame>
-    );
+    </>
+  );
   }
 
   return (

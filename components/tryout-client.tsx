@@ -13,8 +13,10 @@ import { readLearningState, updateLearningState } from "@/lib/storage";
 import type { ActiveSession, AttemptResult, Question } from "@/lib/types";
 import { useLearningState } from "@/hooks/use-learning-state";
 import dynamic from "next/dynamic";
+import { extractQuestionImageUrls, preloadQuestionAssets } from "@/lib/asset-preload";
 import { ExamShell, useExamKeyboard } from "./exam-shell";
 import { PageFrame } from "./page-frame";
+import { PreparingExamOverlay } from "./preparing-exam-overlay";
 import { QuestionCard } from "./question-card";
 
 const ResultView = dynamic(
@@ -82,6 +84,7 @@ export function TryoutClient() {
   const [accessCodeInput, setAccessCodeInput] = useState("");
   const [accessCodeError, setAccessCodeError] = useState<string | null>(null);
   const [resumePromptPackageId, setResumePromptPackageId] = useState<string | null>(null);
+  const [isPreparing, setIsPreparing] = useState(false);
   const session = state.activeTryout;
   const examPackage = session?.packageId ? getPackage(session.packageId) : undefined;
   const isSessionActive = Boolean(
@@ -95,6 +98,11 @@ export function TryoutClient() {
   const pendingIsTkp = pendingIsMini && pendingPackage?.questions.every((question) => question.category === "TKP");
   const isPendingUnlocked = pendingPackage ? Boolean(state.unlockedPackages?.includes(pendingPackage.id)) : false;
   const pendingMaximum = pendingPackage ? packageMaximum(pendingPackage) : 0;
+
+  useEffect(() => {
+    if (!pendingPackage) return;
+    preloadQuestionAssets(pendingPackage.questions, 15000).catch(() => {});
+  }, [pendingPackage]);
 
   function openPackageModal(packageId: string) {
     if (isSessionActive && session?.packageId === packageId) {
@@ -147,9 +155,17 @@ export function TryoutClient() {
     }
   }, [finish, session?.deadlineAt, sessionOpen]);
 
-  function start(packageId: string) {
+  async function start(packageId: string) {
     const selected = getPackage(packageId);
     if (!selected) return;
+
+    const urls = extractQuestionImageUrls(selected.questions);
+    if (urls.length > 0) {
+      setIsPreparing(true);
+      await preloadQuestionAssets(selected.questions, 15000);
+      setIsPreparing(false);
+    }
+
     const startedAt = currentTime();
     const next: ActiveSession = {
       id: `tryout-${startedAt}`,
@@ -169,7 +185,7 @@ export function TryoutClient() {
     updateLearningState((learning) => ({ ...learning, activeTryout: next, activeDrill: null }));
   }
 
-  function handleStartExam() {
+  async function handleStartExam() {
     if (!pendingPackage) return;
     if (isSessionActive && session?.packageId === pendingPackage.id) {
       const targetId = pendingPackage.id;
@@ -178,7 +194,7 @@ export function TryoutClient() {
       return;
     }
     if (isPendingUnlocked) {
-      start(pendingPackage.id);
+      await start(pendingPackage.id);
       return;
     }
     if (!validatePackageAccessCode(pendingPackage.id, accessCodeInput)) {
@@ -189,10 +205,18 @@ export function TryoutClient() {
       ...learning,
       unlockedPackages: Array.from(new Set([...(learning.unlockedPackages ?? []), pendingPackage.id])),
     }));
-    start(pendingPackage.id);
+    await start(pendingPackage.id);
   }
 
-  function resume() {
+  async function resume() {
+    if (questions.length > 0) {
+      const urls = extractQuestionImageUrls(questions);
+      if (urls.length > 0) {
+        setIsPreparing(true);
+        await preloadQuestionAssets(questions, 15000);
+        setIsPreparing(false);
+      }
+    }
     markSessionOpen("tryout");
     setResult(null);
     setSessionOpen(true);
@@ -243,12 +267,14 @@ export function TryoutClient() {
 
   if (!sessionOpen || !session || !examPackage || !current) {
     return (
-      <PageFrame
-        eyebrow="02 / Try out"
-        title="UKUR KESIAPANMU."
-        description="Simulasi 110 soal dalam 100 menit. Pembahasan muncul setelah ujian dikumpulkan."
-        showHeader={true}
-      >
+      <>
+        <PreparingExamOverlay open={isPreparing} />
+        <PageFrame
+          eyebrow="02 / Try out"
+          title="UKUR KESIAPANMU."
+          description="Simulasi 110 soal dalam 100 menit. Pembahasan muncul setelah ujian dikumpulkan."
+          showHeader={true}
+        >
         <section className="border-b border-black">
           <div className="hidden border-b border-black md:grid md:grid-cols-3">
             {CATEGORIES.map((category) => (
@@ -500,7 +526,7 @@ export function TryoutClient() {
 
             <AlertDialogFooter>
               <AlertDialogCancel className="rounded-none border-black" onClick={() => setPendingPackageId(null)}>Kembali</AlertDialogCancel>
-              <AlertDialogAction className="rounded-none" onClick={(e) => { e.preventDefault(); handleStartExam(); }}>Mulai ujian</AlertDialogAction>
+              <AlertDialogAction className="rounded-none" onClick={(e) => { e.preventDefault(); void handleStartExam(); }}>Mulai ujian</AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
@@ -519,7 +545,7 @@ export function TryoutClient() {
                 type="button"
                 onClick={() => {
                   setResumePromptPackageId(null);
-                  resume();
+                  void resume();
                 }}
                 className="h-12 w-full rounded-none bg-brand-blue font-bold text-white hover:bg-brand-blue-hover"
               >
@@ -531,7 +557,7 @@ export function TryoutClient() {
                 onClick={() => {
                   const targetId = resumePromptPackageId!;
                   setResumePromptPackageId(null);
-                  start(targetId);
+                  void start(targetId);
                 }}
                 className="h-12 w-full rounded-none border-2 border-black font-bold hover:bg-secondary"
               >
@@ -549,7 +575,8 @@ export function TryoutClient() {
           </AlertDialogContent>
         </AlertDialog>
       </PageFrame>
-    );
+    </>
+  );
   }
 
   return (
