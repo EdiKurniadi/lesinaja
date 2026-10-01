@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { ArrowRight, ArrowUpRight, Check, ChevronLeft, ChevronRight, Info, Key, Lock, RotateCcw, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogContent, AlertDialogDescription, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { PageFrame } from "@/components/page-frame";
 import { validatePackageAccessCode } from "@/lib/access-codes";
 import { DRILL_PACKAGES, categoryTopics, getDrillPackage, getQuestion } from "@/lib/content";
@@ -42,7 +43,13 @@ export function DrillClient() {
   const [pendingDrillPackage, setPendingDrillPackage] = useState<DrillPackage | null>(null);
   const [drillAccessCodeInput, setDrillAccessCodeInput] = useState("");
   const [drillAccessCodeError, setDrillAccessCodeError] = useState<string | null>(null);
+  const [resumePromptDrillPackage, setResumePromptDrillPackage] = useState<DrillPackage | null>(null);
   const session = state.activeDrill;
+  const isDrillActive = Boolean(
+    session &&
+    session.packageId &&
+    (!session.deadlineAt || Date.now() < session.deadlineAt)
+  );
   const invalidSessionId = session?.questionIds.some((questionId) => !getQuestion(questionId)) ? session.id : null;
 
   useEffect(() => {
@@ -103,6 +110,10 @@ export function DrillClient() {
   }
 
   function handleInitiateDrill(drillPackage: DrillPackage) {
+    if (isDrillActive && session?.packageId === drillPackage.id) {
+      setResumePromptDrillPackage(drillPackage);
+      return;
+    }
     const isUnlocked = (state.unlockedPackages ?? []).includes(drillPackage.id);
     if (isUnlocked) {
       start(drillPackage);
@@ -131,6 +142,10 @@ export function DrillClient() {
     setPendingDrillPackage(null);
     setDrillAccessCodeInput("");
     setDrillAccessCodeError(null);
+    if (isDrillActive && session?.packageId === target.id) {
+      setResumePromptDrillPackage(target);
+      return;
+    }
     start(target);
   }
 
@@ -800,6 +815,59 @@ export function DrillClient() {
                 </div>
               </DialogContent>
             </Dialog>
+
+            <AlertDialog
+              open={Boolean(resumePromptDrillPackage)}
+              onOpenChange={(open) => {
+                if (!open) setResumePromptDrillPackage(null);
+              }}
+            >
+              <AlertDialogContent className="rounded-none border-2 border-black bg-warm-white sm:max-w-md">
+                <AlertDialogHeader>
+                  <p className="font-mono text-[11px] font-bold uppercase tracking-[.14em] text-brand-blue">
+                    Sesi Masih Berjalan
+                  </p>
+                  <AlertDialogTitle className="text-xl font-black uppercase sm:text-2xl">
+                    Lanjutkan atau Mulai Ulang?
+                  </AlertDialogTitle>
+                  <AlertDialogDescription className="text-foreground text-sm leading-relaxed">
+                    Kamu memiliki sesi drill untuk <strong>{resumePromptDrillPackage?.title}</strong> yang masih aktif ({answered}/{questions.length} soal telah dijawab, posisi terakhir soal {(session?.currentIndex ?? 0) + 1}). Apakah kamu ingin melanjutkan sesi sebelumnya atau memulai kembali dari awal?
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <div className="mt-4 flex flex-col gap-2.5">
+                  <Button
+                    type="button"
+                    onClick={() => {
+                      setResumePromptDrillPackage(null);
+                      resume();
+                    }}
+                    className="h-12 w-full rounded-none bg-brand-blue text-white font-bold hover:bg-brand-blue-hover"
+                  >
+                    Lanjutkan sesi sebelumnya
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => {
+                      const target = resumePromptDrillPackage!;
+                      setResumePromptDrillPackage(null);
+                      start(target);
+                    }}
+                    className="h-12 w-full rounded-none border-2 border-black font-bold hover:bg-secondary"
+                  >
+                    Mulai dari awal
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    onClick={() => setResumePromptDrillPackage(null)}
+                    className="h-10 w-full rounded-none text-muted-foreground hover:text-black font-mono text-xs uppercase"
+                  >
+                    Batal
+                  </Button>
+                </div>
+              </AlertDialogContent>
+            </AlertDialog>
           </div>
         </section>
       </PageFrame>
@@ -814,6 +882,7 @@ export function DrillClient() {
       questions={questions}
       answered={answered}
       onMove={move}
+      onExit={() => setSessionOpen(false)}
       navigationMode="sequential"
       footer={
         <div className="mx-auto flex max-w-4xl items-center justify-between gap-4">

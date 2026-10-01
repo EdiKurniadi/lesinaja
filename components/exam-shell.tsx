@@ -127,6 +127,7 @@ export function ExamShell({
   navigationMode = "free",
   headerMetric,
   headerAction,
+  onExit,
   footer,
   children,
 }: {
@@ -141,6 +142,7 @@ export function ExamShell({
   navigationMode?: "free" | "sequential";
   headerMetric?: ReactNode;
   headerAction?: ReactNode;
+  onExit?: () => void;
   footer: ReactNode;
   children: ReactNode;
 }) {
@@ -228,7 +230,19 @@ export function ExamShell({
               </AlertDialogHeader>
               <AlertDialogFooter>
                 <AlertDialogCancel className="rounded-none border-black">Tetap di sini</AlertDialogCancel>
-                <AlertDialogAction className="rounded-none" onClick={() => { clearSessionOpen(); window.location.assign("/"); }}>Ya, keluar</AlertDialogAction>
+                <AlertDialogAction
+                  className="rounded-none"
+                  onClick={() => {
+                    clearSessionOpen();
+                    if (onExit) {
+                      onExit();
+                    } else {
+                      window.location.assign("/");
+                    }
+                  }}
+                >
+                  Ya, keluar
+                </AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialog>

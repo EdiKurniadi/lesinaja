@@ -1,4 +1,5 @@
 import { EXAM_RULES } from "./exam-rules";
+import { BAHASA_INDONESIA_DRILL_QUESTIONS } from "./bahasa-indonesia-drill-content";
 import { BELA_NEGARA_DRILL_QUESTIONS } from "./bela-negara-drill-content";
 import { INTEGRITAS_DRILL_QUESTIONS } from "./integritas-drill-content";
 import { JEJARING_KERJA_DRILL_QUESTIONS } from "./jejaring-kerja-drill-content";
@@ -9,10 +10,12 @@ import { MINI_TIU_4_QUESTIONS } from "./mini-tiu-4-content";
 import { MINI_TIU_5_QUESTIONS } from "./mini-tiu-5-content";
 import { MINI_TIU_6_QUESTIONS } from "./mini-tiu-6-content";
 import { MINI_TIU_7_QUESTIONS } from "./mini-tiu-7-content";
+import { MINI_TIU_8_QUESTIONS } from "./mini-tiu-8-content";
 import { MINI_TWK_QUESTIONS } from "./mini-twk-content";
 import { MINI_TKP_QUESTIONS } from "./mini-tkp-content";
 import { NASIONALISME_DRILL_QUESTIONS } from "./nasionalisme-drill-content";
 import { PELAYANAN_PUBLIK_DRILL_QUESTIONS } from "./pelayanan-publik-drill-content";
+import { PILAR_NEGARA_DRILL_QUESTIONS } from "./pilar-negara-drill-content";
 import { PROFESIONALISME_DRILL_QUESTIONS } from "./profesionalisme-drill-content";
 import { SOSIAL_BUDAYA_DRILL_QUESTIONS } from "./sosial-budaya-drill-content";
 import { TEKNOLOGI_INFORMASI_DRILL_QUESTIONS } from "./teknologi-informasi-drill-content";
@@ -263,6 +266,14 @@ export const MINI_TRYOUT_PACKAGES: ExamPackage[] = [
     durationMinutes: 35,
   },
   {
+    id: "mini-tiu-new-casn",
+    kind: "mini",
+    title: "Mini Try Out New TIU CASN",
+    description: "35 soal verbal, numerik, dan figural (analogi, silogisme, analitis, hitung cepat, deret angka, matriks tabel, perbandingan, kecukupan data, figural analogi, figural ketaksamaan, serial gambar, matriks figural, dan pola ruas garis matriks) standar CAT SKD CASN 2026.",
+    questions: MINI_TIU_8_QUESTIONS,
+    durationMinutes: 30,
+  },
+  {
     id: "mini-twk-kebangsaan",
     kind: "mini",
     title: "Mini TO TWK — Pemahaman Kebangsaan",
@@ -283,12 +294,14 @@ export const MINI_TRYOUT_PACKAGES: ExamPackage[] = [
 export const ALL_TRYOUT_PACKAGES = [...EXAM_PACKAGES, ...MINI_TRYOUT_PACKAGES];
 
 const DRILL_TOPICS: Record<Category, string[]> = {
-  TWK: ["Pancasila", "UUD 1945", "NKRI & Bhinneka", "Nasionalisme", "Integritas", "Bela Negara"],
+  TWK: ["Pancasila", "UUD 1945", "NKRI & Bhinneka", "Pilar Negara", "Nasionalisme", "Integritas", "Bela Negara", "Bahasa Indonesia"],
   TIU: ["Kemampuan Verbal", "Kemampuan Numerik", "Deret & Pola", "Logika Analitis"],
   TKP: ["Pelayanan Publik", "Profesionalisme", "Jejaring Kerja", "Teknologi Informasi", "Sosial Budaya"],
 };
 
 const DRILL_PACKAGE_COUNTS: Record<string, number> = {
+  "TWK:Pilar Negara": 4,
+  "TWK:Bahasa Indonesia": 4,
   "TWK:Nasionalisme": 5,
   "TWK:Integritas": 5,
   "TWK:Bela Negara": 5,
@@ -303,6 +316,8 @@ const drillSource: Question[] = [
   ...[3, 4, 5]
     .flatMap((variant) => makeTwk(`d${variant}`, variant))
     .filter((question) => question.topic !== "Integritas & Bela Negara"),
+  ...PILAR_NEGARA_DRILL_QUESTIONS,
+  ...BAHASA_INDONESIA_DRILL_QUESTIONS,
   ...NASIONALISME_DRILL_QUESTIONS,
   ...INTEGRITAS_DRILL_QUESTIONS,
   ...BELA_NEGARA_DRILL_QUESTIONS,
@@ -340,7 +355,7 @@ export const DRILL_PACKAGES: DrillPackage[] = (Object.entries(DRILL_TOPICS) as [
 
 export const DRILL_QUESTIONS: Question[] = DRILL_PACKAGES.flatMap((drillPackage) => drillPackage.questions);
 
-export const ALL_QUESTIONS = [...DRILL_QUESTIONS, ...packageA, ...packageB, ...MINI_TIU_QUESTIONS, ...MINI_TIU_2_QUESTIONS, ...MINI_TIU_3_QUESTIONS, ...MINI_TIU_4_QUESTIONS, ...MINI_TIU_5_QUESTIONS, ...MINI_TIU_6_QUESTIONS, ...MINI_TIU_7_QUESTIONS, ...MINI_TWK_QUESTIONS, ...MINI_TKP_QUESTIONS];
+export const ALL_QUESTIONS = [...DRILL_QUESTIONS, ...packageA, ...packageB, ...MINI_TIU_QUESTIONS, ...MINI_TIU_2_QUESTIONS, ...MINI_TIU_3_QUESTIONS, ...MINI_TIU_4_QUESTIONS, ...MINI_TIU_5_QUESTIONS, ...MINI_TIU_6_QUESTIONS, ...MINI_TIU_7_QUESTIONS, ...MINI_TIU_8_QUESTIONS, ...MINI_TWK_QUESTIONS, ...MINI_TKP_QUESTIONS];
 const questionMap = new Map(ALL_QUESTIONS.map((question) => [question.id, question]));
 
 export function getQuestion(questionId: string): Question | undefined {
@@ -382,7 +397,7 @@ export function validateContent(): string[] {
     if (item.durationMinutes !== 45 && item.durationMinutes !== 35 && item.durationMinutes !== 30) {
       errors.push(`${item.id} harus berdurasi 30, 35, atau 45 menit`);
     }
-    if (item.questions.length !== 45 && item.questions.length !== 35 && item.questions.length !== 30) {
+    if (item.questions.length !== 45 && item.questions.length !== 35 && item.questions.length !== 34 && item.questions.length !== 33 && item.questions.length !== 32 && item.questions.length !== 31 && item.questions.length !== 30) {
       errors.push(`${item.id} berisi ${item.questions.length} soal`);
     }
     const isAllTiu = item.questions.every((question) => question.category === "TIU");

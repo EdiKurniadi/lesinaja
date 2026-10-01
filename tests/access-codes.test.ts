@@ -11,8 +11,8 @@ import {
 import { ALL_TRYOUT_PACKAGES, DRILL_PACKAGES } from "../lib/content";
 
 test("seluruh paket tryout dan drill memiliki kode akses terdaftar", () => {
-  assert.equal(ALL_TRYOUT_PACKAGES.length, 11);
-  assert.equal(DRILL_PACKAGES.length, 54);
+  assert.equal(ALL_TRYOUT_PACKAGES.length, 12);
+  assert.equal(DRILL_PACKAGES.length, 62);
 
   for (const pkg of ALL_TRYOUT_PACKAGES) {
     const code = getPackageAccessCode(pkg.id);
@@ -26,7 +26,39 @@ test("seluruh paket tryout dan drill memiliki kode akses terdaftar", () => {
     assert.match(code, /^[A-Z0-9]{5,35}$/, `Format kode ${code} tidak valid`);
   }
 
-  assert.equal(Object.keys(PACKAGE_ACCESS_CODES).length, 65);
+  assert.equal(Object.keys(PACKAGE_ACCESS_CODES).length, 74);
+});
+
+test("kode akses Drill Pilar Negara sesuai spesifikasi", () => {
+  const codes: Record<string, string> = {
+    "twk-pilar-negara-1": "TWKPILARNEGARA1PN55",
+    "twk-pilar-negara-2": "TWKPILARNEGARA2AB81",
+    "twk-pilar-negara-3": "TWKPILARNEGARA3CD64",
+    "twk-pilar-negara-4": "TWKPILARNEGARA4EF92",
+  };
+  for (const [id, code] of Object.entries(codes)) {
+    assert.equal(getPackageAccessCode(id), code);
+    assert.equal(validatePackageAccessCode(id, code), true);
+    assert.equal(validatePackageAccessCode(id, code.toLowerCase()), true);
+    assert.equal(validatePackageAccessCode(id, `  ${code.toLowerCase()}  `), true);
+    assert.equal(validatePackageAccessCode(id, "SALAHKODE88"), false);
+  }
+});
+
+test("kode akses Drill Bahasa Indonesia sesuai spesifikasi", () => {
+  const codes: Record<string, string> = {
+    "twk-bahasa-indonesia-1": "TWKBAHASAINDONESIA1KL88",
+    "twk-bahasa-indonesia-2": "TWKBAHASAINDONESIA2MN45",
+    "twk-bahasa-indonesia-3": "TWKBAHASAINDONESIA3PQ92",
+    "twk-bahasa-indonesia-4": "TWKBAHASAINDONESIA4RS37",
+  };
+  for (const [id, code] of Object.entries(codes)) {
+    assert.equal(getPackageAccessCode(id), code);
+    assert.equal(validatePackageAccessCode(id, code), true);
+    assert.equal(validatePackageAccessCode(id, code.toLowerCase()), true);
+    assert.equal(validatePackageAccessCode(id, `  ${code.toLowerCase()}  `), true);
+    assert.equal(validatePackageAccessCode(id, "SALAHKODE88"), false);
+  }
 });
 
 test("kode akses Mini TO TIU SKD CASN, Mini TO TWK, dan Mini TO TKP sesuai spesifikasi", () => {
@@ -55,6 +87,13 @@ test("kode akses Mini TO TIU SKD CASN, Mini TO TWK, dan Mini TO TKP sesuai spesi
   assert.equal(validatePackageAccessCode("mini-tiu-skd-casn-4", "minitiuskd4p29"), true);
   assert.equal(validatePackageAccessCode("mini-tiu-skd-casn-4", "  minitiuskd4p29  "), true);
   assert.equal(validatePackageAccessCode("mini-tiu-skd-casn-4", "WRONGCODE77"), false);
+
+  const newTiuCode = getPackageAccessCode("mini-tiu-new-casn");
+  assert.equal(newTiuCode, "MINITIUNEWCASN26");
+  assert.equal(validatePackageAccessCode("mini-tiu-new-casn", "MINITIUNEWCASN26"), true);
+  assert.equal(validatePackageAccessCode("mini-tiu-new-casn", "minitiunewcasn26"), true);
+  assert.equal(validatePackageAccessCode("mini-tiu-new-casn", "  minitiunewcasn26  "), true);
+  assert.equal(validatePackageAccessCode("mini-tiu-new-casn", "WRONGCODE55"), false);
 
   const twkCode = getPackageAccessCode("mini-twk-kebangsaan");
   assert.equal(twkCode, "MTTWKNIPSQUAD");

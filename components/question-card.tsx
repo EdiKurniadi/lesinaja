@@ -28,13 +28,15 @@ function QuestionCardComponent({
         <span className="bg-brand-blue px-2 py-0.5 text-white">{question.category}</span>
         <span>{question.topic}</span>
       </div>
-      <h2
+      <div
+        role="heading"
+        aria-level={2}
         tabIndex={-1}
         data-exam-question-heading
         className="text-sm sm:text-base font-normal sm:font-medium leading-relaxed outline-none text-foreground"
       >
         <MathText text={question.prompt} />
-      </h2>
+      </div>
       <div className="mt-3.5 grid gap-2 sm:mt-4 sm:gap-2.5" role="radiogroup" aria-label="Pilihan jawaban">
         {question.choices.map((choice, index) => {
           const selected = selectedId === choice.id;

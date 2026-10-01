@@ -79,7 +79,19 @@ function parseMathTokens(rawText: string): Token[] {
       continue;
     }
 
-    // 4. Detect standalone fraction: e.g. "13/16", "1/2"
+    // 4. Detect fraction with parenthesized numerator: e.g. "(3:2)/5" or "(3 : 2)/5"
+    const parenFracMatch = text.slice(i).match(/^\(([^)]+)\)\s*\/\s*(\d+)(?!\w)/);
+    if (parenFracMatch) {
+      tokens.push({
+        type: "fraction",
+        num: `(${parenFracMatch[1]})`,
+        den: parenFracMatch[2],
+      });
+      i += parenFracMatch[0].length;
+      continue;
+    }
+
+    // 5. Detect standalone fraction: e.g. "13/16", "1/2"
     const fracMatch = text.slice(i).match(/^(\d+)\/(\d+)(?!\w)/);
     if (fracMatch) {
       tokens.push({
@@ -244,6 +256,187 @@ function renderLatexOrText(textSegment: string, keyPrefix: string): ReactNode {
   return parts.length > 0 ? parts : null;
 }
 
+function renderLine(line: string, lineKey: string, isMultiline: boolean): ReactNode {
+  const trimmed = line.trim();
+  if (!trimmed) {
+    return isMultiline ? <span key={lineKey} className="block h-2" /> : null;
+  }
+
+  // Markdown image syntax: ![alt](url)
+  const mdImgMatch = trimmed.match(/^!\[(.*?)\]\((.*?)\)$/);
+  if (mdImgMatch) {
+    const alt = mdImgMatch[1] || "Gambar Soal";
+    const src = mdImgMatch[2];
+    return (
+      <span key={lineKey} className="block my-2.5">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={src}
+          alt={alt}
+          className="max-h-52 sm:max-h-60 w-auto max-w-full object-contain rounded border border-neutral-200 bg-white p-2 shadow-sm"
+          loading="lazy"
+        />
+      </span>
+    );
+  }
+
+  // [img] prefix on a line
+  if (trimmed.startsWith("[img]")) {
+    const src = trimmed.slice(5).trim();
+    return (
+      <span key={lineKey} className={isMultiline ? "block my-2.5" : "inline-flex items-center justify-center p-0.5"}>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={src}
+          alt="Gambar"
+          className={
+            isMultiline
+              ? "max-h-52 sm:max-h-60 w-auto max-w-full object-contain rounded border border-neutral-200 bg-white p-2 shadow-sm"
+              : "max-h-16 sm:max-h-20 w-auto object-contain rounded bg-white p-0.5"
+          }
+          loading="lazy"
+        />
+      </span>
+    );
+  }
+
+  if (!hasMathSyntax(line)) {
+    return isMultiline ? (
+      <span key={lineKey} className="block">
+        {line}
+      </span>
+    ) : (
+      line
+    );
+  }
+
+  const rendered = renderLatexOrText(line, lineKey);
+  return isMultiline ? (
+    <span key={lineKey} className="block">
+      {rendered}
+    </span>
+  ) : (
+    rendered
+  );
+}
+
+type TextBlock =
+  | { type: "table"; lines: string[] }
+  | { type: "line"; line: string };
+
+function isSeparatorRow(line: string): boolean {
+  return /^\|(\s*:?-+:?\s*\|)+$/.test(line.trim());
+}
+
+function parseRowCells(row: string): string[] {
+  return row
+    .slice(1, -1)
+    .split("|")
+    .map((cell) => cell.trim());
+}
+
+function parseBlocks(text: string): TextBlock[] {
+  const rawLines = text.split("\n");
+  const blocks: TextBlock[] = [];
+  let tableLines: string[] = [];
+
+  for (let i = 0; i < rawLines.length; i++) {
+    const trimmed = rawLines[i].trim();
+    const isTableRow = trimmed.startsWith("|") && trimmed.endsWith("|") && trimmed.length > 2;
+
+    if (isTableRow) {
+      tableLines.push(trimmed);
+    } else {
+      if (tableLines.length > 0) {
+        blocks.push({ type: "table", lines: tableLines });
+        tableLines = [];
+      }
+      blocks.push({ type: "line", line: rawLines[i] });
+    }
+  }
+
+  if (tableLines.length > 0) {
+    blocks.push({ type: "table", lines: tableLines });
+  }
+
+  return blocks;
+}
+
+function renderTable(tableLines: string[], blockKey: string): ReactNode {
+  if (tableLines.length === 0) return null;
+
+  const hasHeader = tableLines.length > 1 && isSeparatorRow(tableLines[1]);
+  const headerCells = hasHeader ? parseRowCells(tableLines[0]) : [];
+  const bodyRows = (hasHeader ? tableLines.slice(2) : tableLines)
+    .filter((line) => !isSeparatorRow(line))
+    .map(parseRowCells);
+
+  if (hasHeader) {
+    return (
+      <div key={blockKey} className="my-3 overflow-x-auto">
+        <table
+          className="border-collapse border-2 border-solid border-black text-center text-sm sm:text-base min-w-[220px]"
+          style={{ border: "2px solid #000000", borderCollapse: "collapse" }}
+        >
+          <thead>
+            <tr>
+              {headerCells.map((cell, idx) => (
+                <th
+                  key={idx}
+                  className="border-2 border-solid border-black px-6 py-2.5 font-sans font-bold text-sm sm:text-base tracking-wide text-black whitespace-nowrap"
+                  style={{ border: "2px solid #000000" }}
+                >
+                  {renderLine(cell, `th-${idx}`, false)}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {bodyRows.map((row, rIdx) => (
+              <tr key={rIdx}>
+                {row.map((cell, cIdx) => (
+                  <td
+                    key={cIdx}
+                    className="border-2 border-solid border-black px-6 py-2.5 font-sans font-bold text-base sm:text-lg text-black"
+                    style={{ border: "2px solid #000000" }}
+                  >
+                    {renderLine(cell, `td-${rIdx}-${cIdx}`, false)}
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    );
+  }
+
+  return (
+    <div key={blockKey} className="my-3 overflow-x-auto">
+      <table
+        className="border-collapse border-2 border-solid border-black text-center"
+        style={{ border: "2px solid #000000", borderCollapse: "collapse" }}
+      >
+        <tbody>
+          {bodyRows.map((row, rIdx) => (
+            <tr key={rIdx}>
+              {row.map((cell, cIdx) => (
+                <td
+                  key={cIdx}
+                  className="border-2 border-solid border-black px-6 py-3 min-w-[60px] text-center font-sans font-bold text-base sm:text-lg text-black"
+                  style={{ border: "2px solid #000000" }}
+                >
+                  {renderLine(cell, `mtrx-${rIdx}-${cIdx}`, false)}
+                </td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
 function MathTextComponent({
   text,
   className = "",
@@ -264,40 +457,40 @@ function MathTextComponent({
     );
   }
 
-  // Fast-path: if text contains no math syntax or LaTeX delimiters, render directly
-  if (!hasMathSyntax(text)) {
-    if (!text.includes("\n")) {
-      return <span className={className}>{text}</span>;
-    }
-    const lines = text.split("\n");
+  // Standalone Image: prefix [img]
+  if (text.startsWith("[img]")) {
+    const src = text.slice(5).trim();
     return (
-      <span className={className}>
-        {lines.map((line, lineIndex) => (
-          <span key={`line-${lineIndex}`} className="block">
-            {line}
-          </span>
-        ))}
+      <span className={`inline-flex items-center justify-center p-0.5 ${className}`}>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={src}
+          alt="Pilihan Jawaban"
+          className="max-h-16 sm:max-h-20 w-auto object-contain rounded bg-white p-0.5"
+          loading="lazy"
+        />
       </span>
     );
   }
 
-  const lines = text.split("\n");
-  if (lines.length === 1) {
+  if (!text.includes("\n")) {
     return (
       <span className={className}>
-        {renderLatexOrText(text, "l0")}
+        {renderLine(text, "l0", false)}
       </span>
     );
   }
 
+  const blocks = parseBlocks(text);
   return (
-    <span className={className}>
-      {lines.map((line, lineIndex) => (
-        <span key={`line-${lineIndex}`} className="block">
-          {renderLatexOrText(line, `l${lineIndex}`)}
-        </span>
-      ))}
-    </span>
+    <div className={className}>
+      {blocks.map((block, blockIndex) => {
+        if (block.type === "table") {
+          return renderTable(block.lines, `tbl-${blockIndex}`);
+        }
+        return renderLine(block.line, `l-${blockIndex}`, true);
+      })}
+    </div>
   );
 }
 

@@ -18,8 +18,8 @@ test("seluruh bank soal memenuhi kontrak konten", () => {
   }
 });
 
-test("topik drill lama memiliki dua paket sementara delapan topik khusus memiliki lima paket", () => {
-  assert.equal(DRILL_PACKAGES.length, 54);
+test("topik drill lama memiliki dua paket sementara topik khusus memiliki jumlah paket terspesifikasi", () => {
+  assert.equal(DRILL_PACKAGES.length, 62);
   const groups = new Map<string, typeof DRILL_PACKAGES>();
   for (const drillPackage of DRILL_PACKAGES) {
     assert.equal(drillPackage.questions.length, 10);
@@ -27,7 +27,9 @@ test("topik drill lama memiliki dua paket sementara delapan topik khusus memilik
     const key = `${drillPackage.category}:${drillPackage.topic}`;
     groups.set(key, [...(groups.get(key) ?? []), drillPackage]);
   }
-  assert.equal(groups.size, 15);
+  assert.equal(groups.size, 17);
+  assert.equal(groups.get("TWK:Pilar Negara")?.length, 4);
+  assert.equal(groups.get("TWK:Bahasa Indonesia")?.length, 4);
   assert.equal(groups.get("TWK:Nasionalisme")?.length, 5);
   assert.equal(groups.get("TWK:Integritas")?.length, 5);
   assert.equal(groups.get("TWK:Bela Negara")?.length, 5);
@@ -36,11 +38,54 @@ test("topik drill lama memiliki dua paket sementara delapan topik khusus memilik
   assert.equal(groups.get("TKP:Jejaring Kerja")?.length, 5);
   assert.equal(groups.get("TKP:Teknologi Informasi")?.length, 5);
   assert.equal(groups.get("TKP:Sosial Budaya")?.length, 5);
-  assert.ok([...groups.entries()].every(([topic, packages]) => (
-    ["TWK:Nasionalisme", "TWK:Integritas", "TWK:Bela Negara", "TKP:Pelayanan Publik", "TKP:Profesionalisme", "TKP:Jejaring Kerja", "TKP:Teknologi Informasi", "TKP:Sosial Budaya"].includes(topic)
-      || packages.length === 2
-  )));
-  assert.equal(new Set(DRILL_PACKAGES.flatMap((item) => item.questions.map((question) => question.id))).size, 540);
+  assert.ok([...groups.entries()].every(([topic, packages]) => {
+    if (["TWK:Pilar Negara", "TWK:Bahasa Indonesia"].includes(topic)) return packages.length === 4;
+    if (["TWK:Nasionalisme", "TWK:Integritas", "TWK:Bela Negara", "TKP:Pelayanan Publik", "TKP:Profesionalisme", "TKP:Jejaring Kerja", "TKP:Teknologi Informasi", "TKP:Sosial Budaya"].includes(topic)) return packages.length === 5;
+    return packages.length === 2;
+  }));
+  assert.equal(new Set(DRILL_PACKAGES.flatMap((item) => item.questions.map((question) => question.id))).size, 620);
+});
+
+test("empat paket Bahasa Indonesia memuat 40 soal sumber secara berurutan", () => {
+  const packages = DRILL_PACKAGES
+    .filter((item) => item.category === "TWK" && item.topic === "Bahasa Indonesia")
+    .sort((left, right) => left.sequence - right.sequence);
+  assert.deepEqual(packages.map((item) => item.sequence), [1, 2, 3, 4]);
+  assert.deepEqual(packages.map((item) => item.id), [
+    "twk-bahasa-indonesia-1",
+    "twk-bahasa-indonesia-2",
+    "twk-bahasa-indonesia-3",
+    "twk-bahasa-indonesia-4",
+  ]);
+
+  const questions = packages.flatMap((item) => item.questions);
+  assert.equal(questions.length, 40);
+  assert.equal(new Set(questions.map((question) => question.prompt)).size, 40);
+  assert.ok(questions.every((question) => question.choices.length === 5));
+  assert.ok(questions.every((question) => question.choices.filter((choice) => choice.score === 5).length === 1));
+  assert.ok(questions.every((question) => question.choices.filter((choice) => choice.score === 0).length === 4));
+  assert.ok(questions.every((question) => question.explanation.trim().length > 0));
+});
+
+test("empat paket Pilar Negara memuat 40 soal sumber secara berurutan", () => {
+  const packages = DRILL_PACKAGES
+    .filter((item) => item.category === "TWK" && item.topic === "Pilar Negara")
+    .sort((left, right) => left.sequence - right.sequence);
+  assert.deepEqual(packages.map((item) => item.sequence), [1, 2, 3, 4]);
+  assert.deepEqual(packages.map((item) => item.id), [
+    "twk-pilar-negara-1",
+    "twk-pilar-negara-2",
+    "twk-pilar-negara-3",
+    "twk-pilar-negara-4",
+  ]);
+
+  const questions = packages.flatMap((item) => item.questions);
+  assert.equal(questions.length, 40);
+  assert.equal(new Set(questions.map((question) => question.prompt)).size, 40);
+  assert.ok(questions.every((question) => question.choices.length === 5));
+  assert.ok(questions.every((question) => question.choices.filter((choice) => choice.score === 5).length === 1));
+  assert.ok(questions.every((question) => question.choices.filter((choice) => choice.score === 0).length === 4));
+  assert.ok(questions.every((question) => question.explanation.trim().length > 0));
 });
 
 test("lima paket Nasionalisme memuat 50 soal sumber secara berurutan", () => {
@@ -443,11 +488,13 @@ test("mengganti jawaban drill memperbarui skor tanpa menambah percobaan", () => 
 });
 
 test("paket-paket mini TO TIU, TWK, dan TKP memenuhi kontrak durasi, jumlah soal, dan target skor", () => {
-  assert.equal(MINI_TRYOUT_PACKAGES.length, 9);
+  assert.equal(MINI_TRYOUT_PACKAGES.length, 10);
 
   const tiuPackages = MINI_TRYOUT_PACKAGES.filter((p) => p.questions.every((q) => q.category === "TIU"));
-  assert.equal(tiuPackages.length, 7);
-  for (const mini of tiuPackages) {
+  assert.equal(tiuPackages.length, 8);
+  const standardTiu = tiuPackages.filter((p) => p.id !== "mini-tiu-new-casn");
+  assert.equal(standardTiu.length, 7);
+  for (const mini of standardTiu) {
     assert.equal(mini.durationMinutes, 35);
     assert.equal(mini.questions.length, 35);
     assert.ok(mini.questions.every((question) => getQuestion(question.id) !== undefined));
@@ -459,6 +506,19 @@ test("paket-paket mini TO TIU, TWK, dan TKP memenuhi kontrak durasi, jumlah soal
     assert.equal(result.totalScore, 80);
     assert.equal(result.passed, true);
   }
+
+  const newTiu = tiuPackages.find((p) => p.id === "mini-tiu-new-casn");
+  assert.ok(newTiu);
+  assert.equal(newTiu.durationMinutes, 30);
+  assert.equal(newTiu.questions.length, 35);
+  assert.ok(newTiu.questions.every((question) => getQuestion(question.id) !== undefined));
+
+  const newTiuAnswers = Object.fromEntries(newTiu.questions.slice(0, 16).map((question) => [question.id, answerWithScore(question, 5)!]));
+  const newTiuResult = scoreAttempt(newTiu.questions, newTiuAnswers, { id: `mini-target-${newTiu.id}`, packageId: newTiu.id, startedAt: 0, completedAt: 1000 });
+  assert.equal(newTiuResult.scores.TIU.score, 80);
+  assert.equal(newTiuResult.scores.TIU.maximum, 175);
+  assert.equal(newTiuResult.totalScore, 80);
+  assert.equal(newTiuResult.passed, true);
 
   const tiu2Pkg = MINI_TRYOUT_PACKAGES.find((p) => p.id === "mini-tiu-skd-casn-2");
   assert.ok(tiu2Pkg);

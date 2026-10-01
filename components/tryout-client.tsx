@@ -81,8 +81,14 @@ export function TryoutClient() {
   const [pendingPackageId, setPendingPackageId] = useState<string | null>(null);
   const [accessCodeInput, setAccessCodeInput] = useState("");
   const [accessCodeError, setAccessCodeError] = useState<string | null>(null);
+  const [resumePromptPackageId, setResumePromptPackageId] = useState<string | null>(null);
   const session = state.activeTryout;
   const examPackage = session?.packageId ? getPackage(session.packageId) : undefined;
+  const isSessionActive = Boolean(
+    session &&
+    session.packageId &&
+    (!session.deadlineAt || Date.now() < session.deadlineAt)
+  );
   const pendingPackage = pendingPackageId ? getPackage(pendingPackageId) : undefined;
   const pendingIsMini = pendingPackage?.kind === "mini";
   const pendingIsTwk = pendingIsMini && pendingPackage?.questions.every((question) => question.category === "TWK");
@@ -91,6 +97,10 @@ export function TryoutClient() {
   const pendingMaximum = pendingPackage ? packageMaximum(pendingPackage) : 0;
 
   function openPackageModal(packageId: string) {
+    if (isSessionActive && session?.packageId === packageId) {
+      setResumePromptPackageId(packageId);
+      return;
+    }
     setPendingPackageId(packageId);
     setAccessCodeInput("");
     setAccessCodeError(null);
@@ -161,6 +171,12 @@ export function TryoutClient() {
 
   function handleStartExam() {
     if (!pendingPackage) return;
+    if (isSessionActive && session?.packageId === pendingPackage.id) {
+      const targetId = pendingPackage.id;
+      setPendingPackageId(null);
+      setResumePromptPackageId(targetId);
+      return;
+    }
     if (isPendingUnlocked) {
       start(pendingPackage.id);
       return;
@@ -480,6 +496,50 @@ export function TryoutClient() {
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
+
+        <AlertDialog open={Boolean(resumePromptPackageId)} onOpenChange={(open) => { if (!open) setResumePromptPackageId(null); }}>
+          <AlertDialogContent className="rounded-none border-2 border-black bg-warm-white sm:max-w-md">
+            <AlertDialogHeader>
+              <p className="font-mono text-[11px] font-bold uppercase tracking-[.14em] text-brand-blue">Sesi Masih Berjalan</p>
+              <AlertDialogTitle className="text-xl font-black uppercase sm:text-2xl">Lanjutkan atau Mulai Ulang?</AlertDialogTitle>
+              <AlertDialogDescription className="text-sm leading-relaxed text-foreground">
+                Sesi untuk <strong>{examPackage?.title ?? "paket ini"}</strong> masih aktif ({answered}/{questions.length} soal telah dijawab, sisa waktu <PendingSessionRemaining deadlineAt={session?.deadlineAt} />). Apakah kamu ingin melanjutkan sesi sebelumnya atau memulai kembali dari awal?
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <div className="mt-4 flex flex-col gap-2.5">
+              <Button
+                type="button"
+                onClick={() => {
+                  setResumePromptPackageId(null);
+                  resume();
+                }}
+                className="h-12 w-full rounded-none bg-brand-blue font-bold text-white hover:bg-brand-blue-hover"
+              >
+                Lanjutkan sesi sebelumnya
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => {
+                  const targetId = resumePromptPackageId!;
+                  setResumePromptPackageId(null);
+                  start(targetId);
+                }}
+                className="h-12 w-full rounded-none border-2 border-black font-bold hover:bg-secondary"
+              >
+                Mulai dari awal
+              </Button>
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={() => setResumePromptPackageId(null)}
+                className="h-10 w-full rounded-none font-mono text-xs uppercase text-muted-foreground hover:text-black"
+              >
+                Batal
+              </Button>
+            </div>
+          </AlertDialogContent>
+        </AlertDialog>
       </PageFrame>
     );
   }
@@ -493,6 +553,7 @@ export function TryoutClient() {
       flagged={session.flagged.length}
       onMove={move}
       groupedPalette
+      onExit={() => setSessionOpen(false)}
       headerMetric={
         session?.deadlineAt ? (
           <TryoutCountdown deadlineAt={session.deadlineAt} onExpire={finish} />
