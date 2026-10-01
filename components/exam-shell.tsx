@@ -89,9 +89,15 @@ export function useExamKeyboard({
 }) {
   useEffect(() => {
     function handleKey(event: KeyboardEvent) {
-      if (event.ctrlKey || event.metaKey || event.altKey || document.querySelector('[role="dialog"]')) return;
+      if (!questions || questions.length === 0) return;
+      if (
+        event.ctrlKey ||
+        event.metaKey ||
+        event.altKey ||
+        document.querySelector('[role="dialog"], [role="alertdialog"], [data-slot="dialog-content"], [data-slot="alert-dialog-content"]')
+      ) return;
       const target = event.target as HTMLElement | null;
-      if (target && ["INPUT", "TEXTAREA", "SELECT"].includes(target.tagName)) return;
+      if (target && (["INPUT", "TEXTAREA", "SELECT"].includes(target.tagName) || target.closest("input, textarea, select"))) return;
       if (event.key === "ArrowLeft" && canMovePrevious && currentIndex > 0) {
         event.preventDefault();
         onMove(currentIndex - 1);

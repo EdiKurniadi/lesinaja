@@ -771,15 +771,22 @@ export function DrillClient() {
                       type="text"
                       value={drillAccessCodeInput}
                       onChange={(e) => {
-                        setDrillAccessCodeInput(e.target.value);
+                        setDrillAccessCodeInput(e.target.value.toUpperCase());
                         if (drillAccessCodeError) setDrillAccessCodeError(null);
                       }}
                       onKeyDown={(e) => {
+                        e.stopPropagation();
                         if (e.key === "Enter") {
                           e.preventDefault();
                           handleConfirmDrillCode();
                         }
                       }}
+                      onKeyUp={(e) => e.stopPropagation()}
+                      onKeyPress={(e) => e.stopPropagation()}
+                      autoComplete="off"
+                      autoCorrect="off"
+                      autoCapitalize="characters"
+                      spellCheck={false}
                       placeholder="Masukkan kode akses"
                       className="w-full border-2 border-black bg-white px-3 py-2.5 font-mono text-base font-bold uppercase tracking-widest text-black placeholder:font-sans placeholder:text-xs placeholder:normal-case placeholder:tracking-normal placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-brand-blue"
                       autoFocus

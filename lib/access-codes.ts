@@ -19,7 +19,7 @@ export const PACKAGE_ACCESS_CODES: Record<string, string> = {
   "mini-tiu-skd-casn-2": "MINITIUSKD2M73",
   "mini-tiu-skd-casn-3": "MINITIUSKD3V85",
   "mini-tiu-skd-casn-4": "MINITIUSKD4P29",
-  "mini-tiu-new-casn": "MINITIUNEWCASN26",
+  "mini-tiu-new-casn": "MTTIUNIPSQUAD",
   "mini-twk-kebangsaan": "MTTWKNIPSQUAD",
   "mini-tkp-karakteristik": "MTTKPNIPSQUAD",
 

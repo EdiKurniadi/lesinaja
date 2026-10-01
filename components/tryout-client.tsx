@@ -415,11 +415,19 @@ export function TryoutClient() {
                       if (accessCodeError) setAccessCodeError(null);
                     }}
                     onKeyDown={(e) => {
+                      e.stopPropagation();
                       if (e.key === "Enter") {
                         e.preventDefault();
                         handleStartExam();
                       }
                     }}
+                    onKeyUp={(e) => e.stopPropagation()}
+                    onKeyPress={(e) => e.stopPropagation()}
+                    autoComplete="off"
+                    autoCorrect="off"
+                    autoCapitalize="characters"
+                    spellCheck={false}
+                    autoFocus
                     placeholder="Masukkan kode akses"
                     className="h-11 w-full border-2 border-black bg-background px-3 font-mono text-sm font-bold uppercase tracking-wider placeholder:normal-case placeholder:font-normal placeholder:tracking-normal focus:outline-none focus:ring-2 focus:ring-brand-blue"
                   />

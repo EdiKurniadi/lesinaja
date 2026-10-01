@@ -89,10 +89,10 @@ test("kode akses Mini TO TIU SKD CASN, Mini TO TWK, dan Mini TO TKP sesuai spesi
   assert.equal(validatePackageAccessCode("mini-tiu-skd-casn-4", "WRONGCODE77"), false);
 
   const newTiuCode = getPackageAccessCode("mini-tiu-new-casn");
-  assert.equal(newTiuCode, "MINITIUNEWCASN26");
-  assert.equal(validatePackageAccessCode("mini-tiu-new-casn", "MINITIUNEWCASN26"), true);
-  assert.equal(validatePackageAccessCode("mini-tiu-new-casn", "minitiunewcasn26"), true);
-  assert.equal(validatePackageAccessCode("mini-tiu-new-casn", "  minitiunewcasn26  "), true);
+  assert.equal(newTiuCode, "MTTIUNIPSQUAD");
+  assert.equal(validatePackageAccessCode("mini-tiu-new-casn", "MTTIUNIPSQUAD"), true);
+  assert.equal(validatePackageAccessCode("mini-tiu-new-casn", "mttiunipsquad"), true);
+  assert.equal(validatePackageAccessCode("mini-tiu-new-casn", "  mttiunipsquad  "), true);
   assert.equal(validatePackageAccessCode("mini-tiu-new-casn", "WRONGCODE55"), false);
 
   const twkCode = getPackageAccessCode("mini-twk-kebangsaan");
