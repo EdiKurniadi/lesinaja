@@ -4,7 +4,7 @@ import { ArrowUpRight, BookOpen, Clock3, Target } from "lucide-react";
 import { StaticLink as Link } from "@/components/static-link";
 import { Button } from "@/components/ui/button";
 import { CATEGORIES, EXAM_RULES } from "@/lib/exam-rules";
-import { DRILL_QUESTIONS, getPackage } from "@/lib/content";
+import { DRILL_QUESTIONS, getPackageForReview } from "@/lib/content";
 import { MATERIALS } from "@/lib/materials";
 import { bestScore } from "@/lib/scoring";
 import { useLearningState } from "@/hooks/use-learning-state";
@@ -55,7 +55,7 @@ export function ProgressClient() {
             {/* Mobile View: Cards */}
             <div className="mt-7 grid gap-3 sm:hidden">
               {state.attempts.map((attempt) => {
-                const examPackage = getPackage(attempt.packageId);
+                const examPackage = getPackageForReview(attempt.packageId);
                 const maximum = examPackage?.questions.reduce((sum, question) => sum + bestScore(question), 0) ?? 550;
                 const isMini = examPackage?.kind === "mini";
                 return (
@@ -112,7 +112,7 @@ export function ProgressClient() {
                 </thead>
                 <tbody>
                   {state.attempts.map((attempt) => {
-                    const examPackage = getPackage(attempt.packageId);
+                    const examPackage = getPackageForReview(attempt.packageId);
                     const activeCategories = new Set(examPackage?.questions.map((question) => question.category) ?? CATEGORIES);
                     const maximum = examPackage?.questions.reduce((sum, question) => sum + bestScore(question), 0) ?? 550;
                     const isMini = examPackage?.kind === "mini";

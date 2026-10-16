@@ -1,0 +1,44 @@
+{
+  "sources": [
+    {
+      "file": "TO TWK 1 DAN 2.pdf",
+      "sha256": "02c209c3fbcfec86fb8493b301c3ac4b7f22ca1b697a270aad7a223bcd7ad3bc",
+      "pages": 43,
+      "questions": 60,
+      "audit": [
+        {
+          "package": 1,
+          "number": 30,
+          "issue": "Duplicate correct text efektivitas in A and D; changed distractor A to efektifisasi and its explanation, preserving correct D."
+        }
+      ]
+    },
+    {
+      "file": "SOAL TKP 1 DAN 2.pdf",
+      "sha256": "b4233cd4acd19a378b69ea7645e092ae900932799220237cb9b3dc824f5ee894",
+      "pages": 72,
+      "questions": 90,
+      "audit": [
+        {
+          "package": 1,
+          "number": 30,
+          "issue": "PDF omits per-option explanation for E; retained complete score table and available explanation."
+        },
+        {
+          "package": 2,
+          "number": 19,
+          "issue": "Printed answer D conflicts with score table and explanation C; use C (5 points)."
+        },
+        {
+          "package": 2,
+          "number": 26,
+          "issue": "Preserved PDF weights A=3, B=2, C=4, D=3, E=5, including equal weights."
+        }
+      ]
+    }
+  ],
+  "tiu": {
+    "tryout-new-casn-1": "MINI_TIU_9_QUESTIONS",
+    "tryout-new-casn-2": "MINI_TIU_10_QUESTIONS"
+  }
+}

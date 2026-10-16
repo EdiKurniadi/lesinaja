@@ -8,8 +8,8 @@ export const MASTER_ACCESS_CODES: string[] = ["LESINAJASUPER", "LESINAJA2026"];
 
 export const PACKAGE_ACCESS_CODES: Record<string, string> = {
   // === FULL TRY OUT ===
-  "paket-a": "PAKETAFN24",
-  "paket-b": "PAKETBPM38",
+  "tryout-new-casn-1": "TOCASN1NIPSQUAD",
+  "tryout-new-casn-2": "TOCASN2NIPSQUAD",
 
   // === MINI TRY OUT TIU, TWK, TKP ===
   "mini-tiu-kedinasan": "MINITOTIU1KD92",

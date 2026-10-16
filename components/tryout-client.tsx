@@ -5,7 +5,7 @@ import { ArrowLeft, ArrowRight, Bookmark, Check, Clock3, Key, Lock, Play, X } fr
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { validatePackageAccessCode } from "@/lib/access-codes";
-import { EXAM_PACKAGES, MINI_TRYOUT_PACKAGES, getPackage, getQuestion } from "@/lib/content";
+import { EXAM_PACKAGES, MINI_TRYOUT_PACKAGES, getPackage, getPackageForReview, getQuestion } from "@/lib/content";
 import { CATEGORIES, EXAM_RULES } from "@/lib/exam-rules";
 import { bestScore, scoreAttempt } from "@/lib/scoring";
 import { clearSessionOpen, markSessionOpen, shouldOpenSession } from "@/lib/session-navigation";
@@ -86,7 +86,7 @@ export function TryoutClient() {
   const [resumePromptPackageId, setResumePromptPackageId] = useState<string | null>(null);
   const [isPreparing, setIsPreparing] = useState(false);
   const session = state.activeTryout;
-  const examPackage = session?.packageId ? getPackage(session.packageId) : undefined;
+  const examPackage = session?.packageId ? getPackageForReview(session.packageId) : undefined;
   const isSessionActive = Boolean(
     session &&
     session.packageId &&
@@ -252,7 +252,7 @@ export function TryoutClient() {
   });
 
   if (result) {
-    const source = getPackage(result.packageId)?.questions ?? [];
+    const source = getPackageForReview(result.packageId)?.questions ?? [];
     return (
       <PageFrame
         eyebrow="02 / Try out"

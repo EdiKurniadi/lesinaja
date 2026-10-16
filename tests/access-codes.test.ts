@@ -95,6 +95,9 @@ test("kode akses Mini TO TIU SKD CASN, Mini TO TWK, dan Mini TO TKP sesuai spesi
   assert.equal(validatePackageAccessCode("mini-tiu-new-casn", "  mttiunipsquad  "), true);
   assert.equal(validatePackageAccessCode("mini-tiu-new-casn", "WRONGCODE55"), false);
 
+  assert.equal(getPackageAccessCode("mini-tiu-new-casn-2"), undefined);
+  assert.equal(getPackageAccessCode("mini-tiu-new-casn-3"), undefined);
+
   const twkCode = getPackageAccessCode("mini-twk-kebangsaan");
   assert.equal(twkCode, "MTTWKNIPSQUAD");
   assert.equal(validatePackageAccessCode("mini-twk-kebangsaan", "MTTWKNIPSQUAD"), true);
@@ -120,8 +123,8 @@ test("kode master berlaku untuk seluruh paket", () => {
   for (const master of MASTER_ACCESS_CODES) {
     assert.equal(isMasterAccessCode(master), true);
     assert.equal(isMasterAccessCode(master.toLowerCase()), true);
-    assert.equal(validatePackageAccessCode("paket-a", master), true);
-    assert.equal(validatePackageAccessCode("paket-a", master.toLowerCase()), true);
+    assert.equal(validatePackageAccessCode("tryout-new-casn-1", master), true);
+    assert.equal(validatePackageAccessCode("tryout-new-casn-1", master.toLowerCase()), true);
     assert.equal(validatePackageAccessCode("mini-twk-kebangsaan", master), true);
     assert.equal(validatePackageAccessCode("mini-twk-kebangsaan", `  ${master}  `), true);
     assert.equal(validatePackageAccessCode("twk-pancasila-1", master), true);

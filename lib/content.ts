@@ -11,6 +11,12 @@ import { MINI_TIU_5_QUESTIONS } from "./mini-tiu-5-content";
 import { MINI_TIU_6_QUESTIONS } from "./mini-tiu-6-content";
 import { MINI_TIU_7_QUESTIONS } from "./mini-tiu-7-content";
 import { MINI_TIU_8_QUESTIONS } from "./mini-tiu-8-content";
+import { MINI_TIU_9_QUESTIONS } from "./mini-tiu-9-content";
+import { MINI_TIU_10_QUESTIONS } from "./mini-tiu-10-content";
+import { NEW_CASN_1_TWK_QUESTIONS } from "./new-casn-1-twk-content";
+import { NEW_CASN_2_TWK_QUESTIONS } from "./new-casn-2-twk-content";
+import { NEW_CASN_1_TKP_QUESTIONS } from "./new-casn-1-tkp-content";
+import { NEW_CASN_2_TKP_QUESTIONS } from "./new-casn-2-tkp-content";
 import { MINI_TWK_QUESTIONS } from "./mini-twk-content";
 import { MINI_TKP_QUESTIONS } from "./mini-tkp-content";
 import { NASIONALISME_DRILL_QUESTIONS } from "./nasionalisme-drill-content";
@@ -203,9 +209,28 @@ function makeTkp(prefix: string, variant: number): Question[] {
 const packageA = [...makeTwk("a", 1), ...makeTiu("a", 1), ...makeTkp("a", 1)];
 const packageB = [...makeTwk("b", 2), ...makeTiu("b", 2), ...makeTkp("b", 2)];
 
-export const EXAM_PACKAGES: ExamPackage[] = [
+const retiredFullPackages: ExamPackage[] = [
   { id: "paket-a", kind: "full", title: "Paket A — Fondasi", description: "Simulasi lengkap untuk mengukur titik awalmu.", questions: packageA, durationMinutes: EXAM_RULES.durationMinutes },
   { id: "paket-b", kind: "full", title: "Paket B — Pemantapan", description: "Simulasi kedua dengan variasi konteks dan angka baru.", questions: packageB, durationMinutes: EXAM_RULES.durationMinutes },
+];
+
+export const EXAM_PACKAGES: ExamPackage[] = [
+  {
+    id: "tryout-new-casn-1",
+    kind: "full",
+    title: "Try Out SKD Paket 1",
+    description: "30 soal TWK, 35 soal TIU dan 45 soal TKP. Pembahasan lengkap setelah ujian selesai.",
+    questions: [...NEW_CASN_1_TWK_QUESTIONS, ...MINI_TIU_9_QUESTIONS, ...NEW_CASN_1_TKP_QUESTIONS],
+    durationMinutes: 100,
+  },
+  {
+    id: "tryout-new-casn-2",
+    kind: "full",
+    title: "Try Out SKD Paket 2",
+    description: "30 soal TWK, 35 soal TIU dan 45 soal TKP. Pembahasan lengkap setelah ujian selesai.",
+    questions: [...NEW_CASN_2_TWK_QUESTIONS, ...MINI_TIU_10_QUESTIONS, ...NEW_CASN_2_TKP_QUESTIONS],
+    durationMinutes: 100,
+  },
 ];
 
 export const MINI_TRYOUT_PACKAGES: ExamPackage[] = [
@@ -355,7 +380,7 @@ export const DRILL_PACKAGES: DrillPackage[] = (Object.entries(DRILL_TOPICS) as [
 
 export const DRILL_QUESTIONS: Question[] = DRILL_PACKAGES.flatMap((drillPackage) => drillPackage.questions);
 
-export const ALL_QUESTIONS = [...DRILL_QUESTIONS, ...packageA, ...packageB, ...MINI_TIU_QUESTIONS, ...MINI_TIU_2_QUESTIONS, ...MINI_TIU_3_QUESTIONS, ...MINI_TIU_4_QUESTIONS, ...MINI_TIU_5_QUESTIONS, ...MINI_TIU_6_QUESTIONS, ...MINI_TIU_7_QUESTIONS, ...MINI_TIU_8_QUESTIONS, ...MINI_TWK_QUESTIONS, ...MINI_TKP_QUESTIONS];
+export const ALL_QUESTIONS = [...DRILL_QUESTIONS, ...ALL_TRYOUT_PACKAGES.flatMap((item) => item.questions), ...retiredFullPackages.flatMap((item) => item.questions)];
 const questionMap = new Map(ALL_QUESTIONS.map((question) => [question.id, question]));
 
 export function getQuestion(questionId: string): Question | undefined {
@@ -364,6 +389,18 @@ export function getQuestion(questionId: string): Question | undefined {
 
 export function getPackage(packageId: string): ExamPackage | undefined {
   return ALL_TRYOUT_PACKAGES.find((item) => item.id === packageId);
+}
+
+// Retired packages remain readable for saved results and sessions only.
+export function getPackageForReview(packageId: string): ExamPackage | undefined {
+  const current = getPackage(packageId) ?? retiredFullPackages.find((item) => item.id === packageId);
+  if (current) return current;
+  const retiredPackages: Record<string, Pick<ExamPackage, "title" | "questions">> = {
+    "mini-tiu-new-casn-2": { title: "Mini Try Out New TIU CASN Paket 2", questions: MINI_TIU_9_QUESTIONS },
+    "mini-tiu-new-casn-3": { title: "Mini Try Out New TIU CASN Paket 3", questions: MINI_TIU_10_QUESTIONS },
+  };
+  const retired = retiredPackages[packageId];
+  return retired ? { id: packageId, kind: "mini", description: "Paket telah dipindahkan ke try out lengkap.", durationMinutes: 30, ...retired } : undefined;
 }
 
 export function getDrillPackage(packageId: string): DrillPackage | undefined {
@@ -382,7 +419,7 @@ export function validateContent(): string[] {
     ids.add(question.id);
     if (question.choices.length !== 5) errors.push(`${question.id} tidak memiliki 5 pilihan`);
     const scores = question.choices.map((choice) => choice.score);
-    if (question.category === "TKP" && [...scores].sort().join(",") !== "1,2,3,4,5") errors.push(`${question.id} skor TKP tidak valid`);
+    if (question.category === "TKP" && (scores.some((score) => !Number.isInteger(score) || score < 1 || score > 5) || !scores.includes(5))) errors.push(`${question.id} skor TKP tidak valid`);
     if (question.category !== "TKP" && (scores.filter((score) => score === 5).length !== 1 || scores.some((score) => ![0, 5].includes(score)))) errors.push(`${question.id} skor objektif tidak valid`);
     if (!question.explanation.trim()) errors.push(`${question.id} tidak memiliki pembahasan`);
   }
