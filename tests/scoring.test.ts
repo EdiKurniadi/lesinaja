@@ -488,10 +488,10 @@ test("mengganti jawaban drill memperbarui skor tanpa menambah percobaan", () => 
 });
 
 test("paket-paket mini TO TIU, TWK, dan TKP memenuhi kontrak durasi, jumlah soal, dan target skor", () => {
-  assert.equal(MINI_TRYOUT_PACKAGES.length, 10);
+  assert.equal(MINI_TRYOUT_PACKAGES.length, 11);
 
   const tiuPackages = MINI_TRYOUT_PACKAGES.filter((p) => p.questions.every((q) => q.category === "TIU"));
-  assert.equal(tiuPackages.length, 8);
+  assert.equal(tiuPackages.length, 9);
   const standardTiu = tiuPackages.filter((p) => !p.id.startsWith("mini-tiu-new-casn"));
   assert.equal(standardTiu.length, 7);
   for (const mini of standardTiu) {

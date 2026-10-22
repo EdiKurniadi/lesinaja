@@ -11,7 +11,7 @@ import {
 import { ALL_TRYOUT_PACKAGES, DRILL_PACKAGES } from "../lib/content";
 
 test("seluruh paket tryout dan drill memiliki kode akses terdaftar", () => {
-  assert.equal(ALL_TRYOUT_PACKAGES.length, 12);
+  assert.equal(ALL_TRYOUT_PACKAGES.length, 13);
   assert.equal(DRILL_PACKAGES.length, 62);
 
   for (const pkg of ALL_TRYOUT_PACKAGES) {
@@ -26,7 +26,7 @@ test("seluruh paket tryout dan drill memiliki kode akses terdaftar", () => {
     assert.match(code, /^[A-Z0-9]{5,35}$/, `Format kode ${code} tidak valid`);
   }
 
-  assert.equal(Object.keys(PACKAGE_ACCESS_CODES).length, 74);
+  assert.equal(Object.keys(PACKAGE_ACCESS_CODES).length, 75);
 });
 
 test("kode akses Drill Pilar Negara sesuai spesifikasi", () => {

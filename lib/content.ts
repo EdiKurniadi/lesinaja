@@ -13,6 +13,7 @@ import { MINI_TIU_7_QUESTIONS } from "./mini-tiu-7-content";
 import { MINI_TIU_8_QUESTIONS } from "./mini-tiu-8-content";
 import { MINI_TIU_9_QUESTIONS } from "./mini-tiu-9-content";
 import { MINI_TIU_10_QUESTIONS } from "./mini-tiu-10-content";
+import { MINI_TIU_11_QUESTIONS } from "./mini-tiu-11-content";
 import { NEW_CASN_1_TWK_QUESTIONS } from "./new-casn-1-twk-content";
 import { NEW_CASN_2_TWK_QUESTIONS } from "./new-casn-2-twk-content";
 import { NEW_CASN_1_TKP_QUESTIONS } from "./new-casn-1-tkp-content";
@@ -296,6 +297,14 @@ export const MINI_TRYOUT_PACKAGES: ExamPackage[] = [
     title: "Mini Try Out New TIU CASN",
     description: "35 soal verbal, numerik, dan figural (analogi, silogisme, analitis, hitung cepat, deret angka, matriks tabel, perbandingan, kecukupan data, figural analogi, figural ketaksamaan, serial gambar, matriks figural, dan pola ruas garis matriks) standar CAT SKD CASN 2026.",
     questions: MINI_TIU_8_QUESTIONS,
+    durationMinutes: 30,
+  },
+  {
+    id: "mini-tiu-new-casn-paket-2",
+    kind: "mini",
+    title: "Mini Try Out New TIU CASN Paket 2",
+    description: "35 soal verbal, numerik, dan figural. Pembahasan lengkap setelah ujian selesai.",
+    questions: MINI_TIU_11_QUESTIONS,
     durationMinutes: 30,
   },
   {
