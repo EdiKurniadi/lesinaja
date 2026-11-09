@@ -18,6 +18,7 @@ const nav = [
   ["/tryout", "Try out"],
   ["/materi", "Materi"],
   ["/les-privat", "Les Privat"],
+  ["/game", "Game"],
   ["/progres", "Progres"],
 ] as const;
 

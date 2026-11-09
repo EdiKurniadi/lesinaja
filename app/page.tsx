@@ -1,4 +1,4 @@
-import { ArrowUpRight, Clock3, MapPin, Target } from "lucide-react";
+import { ArrowUpRight, Clock3, Gamepad2, MapPin, Target } from "lucide-react";
 import { BrandFooter } from "@/components/brand-footer";
 import { SiteHeader } from "@/components/site-header";
 import { HomeProgress } from "@/components/home-progress";
@@ -62,6 +62,10 @@ export default function Home() {
               </Link>
               <Link className="action-row group" href="/tryout">
                 <span><Clock3 aria-hidden="true" /> Try out penuh</span>
+                <ArrowUpRight className="transition-transform group-hover:translate-x-1 group-hover:-translate-y-1" aria-hidden="true" />
+              </Link>
+              <Link className="action-row group" href="/game">
+                <span><Gamepad2 aria-hidden="true" /> Game Hitung Cepat</span>
                 <ArrowUpRight className="transition-transform group-hover:translate-x-1 group-hover:-translate-y-1" aria-hidden="true" />
               </Link>
               <Link className="action-row group border-b-0" href="/materi">
