@@ -709,17 +709,18 @@ export function AritmatikaGameClient({
                   )}
 
                   {/* Auto Advance Toggle */}
-                  <div className="mt-4 flex items-center justify-between p-3 border border-black/30 bg-warm-white">
-                    <div className="font-mono text-xs">
-                      <div className="font-bold uppercase">Lanjut Otomatis (Auto-Advance)</div>
-                      <div className="text-[11px] text-muted-foreground">
+                  <div className="mt-4 flex items-center justify-between gap-3 p-3 border border-black/30 bg-warm-white w-full min-w-0">
+                    <div className="font-mono text-xs flex-1 min-w-0">
+                      <div className="font-bold uppercase tracking-tight">Lanjut Otomatis</div>
+                      <div className="text-[11px] text-muted-foreground leading-tight break-words mt-0.5">
                         Pindah ke soal berikutnya otomatis setelah menjawab
                       </div>
                     </div>
                     <button
                       type="button"
                       onClick={() => setAutoAdvance(!autoAdvance)}
-                      className={`relative inline-flex h-6 w-11 items-center border border-black transition-colors ${
+                      aria-label="Toggle Lanjut Otomatis"
+                      className={`relative inline-flex h-6 w-11 shrink-0 items-center border border-black transition-colors ${
                         autoAdvance ? "bg-emerald-500" : "bg-neutral-300"
                       }`}
                     >

@@ -621,9 +621,9 @@ export function PerbandinganGameClient({
                       <div className="font-mono text-xs font-black uppercase">Level 1: Dasar</div>
                     </button>
 
-                    <div className="p-3 border-2 border-black/40 bg-neutral-100 text-neutral-500 text-left relative cursor-not-allowed flex items-center justify-between min-w-0">
+                    <div className="p-3 border-2 border-black/40 bg-neutral-100 text-neutral-500 text-left relative cursor-not-allowed flex flex-col justify-center gap-1 min-w-0">
                       <span className="font-mono text-xs font-black uppercase">Level 2: Lanjutan</span>
-                      <span className="inline-flex items-center gap-1 text-[10px] bg-neutral-200 px-1.5 py-0.5 border border-black/30">
+                      <span className="inline-flex items-center gap-1 text-[10px] bg-neutral-200 px-1.5 py-0.5 border border-black/30 w-fit">
                         <Lock className="size-2.5" /> Coming Soon
                       </span>
                     </div>
@@ -727,17 +727,18 @@ export function PerbandinganGameClient({
                   )}
 
                   {/* Auto Advance Toggle */}
-                  <div className="mt-4 flex items-center justify-between p-3 border border-black/30 bg-warm-white">
-                    <div className="font-mono text-xs">
-                      <div className="font-bold uppercase">Lanjut Otomatis (Auto-Advance)</div>
-                      <div className="text-[11px] text-muted-foreground">
+                  <div className="mt-4 flex items-center justify-between gap-3 p-3 border border-black/30 bg-warm-white w-full min-w-0">
+                    <div className="font-mono text-xs flex-1 min-w-0">
+                      <div className="font-bold uppercase tracking-tight">Lanjut Otomatis</div>
+                      <div className="text-[11px] text-muted-foreground leading-tight break-words mt-0.5">
                         Pindah ke soal berikutnya otomatis setelah menjawab
                       </div>
                     </div>
                     <button
                       type="button"
                       onClick={() => setAutoAdvance(!autoAdvance)}
-                      className={`relative inline-flex h-6 w-11 items-center border border-black transition-colors ${
+                      aria-label="Toggle Lanjut Otomatis"
+                      className={`relative inline-flex h-6 w-11 shrink-0 items-center border border-black transition-colors ${
                         autoAdvance ? "bg-cyan-600" : "bg-neutral-300"
                       }`}
                     >
@@ -756,7 +757,7 @@ export function PerbandinganGameClient({
                   onClick={startGame}
                   className="w-full h-14 border-2 border-black bg-cyan-700 hover:bg-cyan-800 text-white font-black text-lg uppercase tracking-wider shadow-[4px_4px_0_#10100f]"
                 >
-                  <Play className="size-5 mr-2 fill-current" /> Mulai Arena Perbandingan
+                  <Play className="size-5 mr-2 fill-current" /> Mulai
                 </Button>
               </div>
 
