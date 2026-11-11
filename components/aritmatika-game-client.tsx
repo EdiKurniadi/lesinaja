@@ -493,7 +493,7 @@ export function AritmatikaGameClient({
             </div>
 
             {/* Philosophy Banner: Prinsip Emas 100% */}
-            <div className="border-2 border-black bg-amber-50 p-5 sm:p-6 shadow-[5px_5px_0_#10100f] space-y-3">
+            <div className="border-2 border-black bg-amber-50 p-4 sm:p-6 shadow-[4px_4px_0_#10100f] sm:shadow-[5px_5px_0_#10100f] space-y-3 min-w-0">
               <div className="flex items-center gap-2 font-mono text-xs font-black uppercase text-amber-900 tracking-wider">
                 <Lightbulb className="size-4 text-amber-600 fill-amber-500" />
                 Kaidah Emas Aritmatika Sosial
@@ -524,7 +524,7 @@ export function AritmatikaGameClient({
             {/* Configuration & Highscores */}
             <div className="grid md:grid-cols-[1.3fr_1fr] gap-6 items-start">
               {/* Left Column: Form & Level Settings */}
-              <div className="border-2 border-black bg-card p-5 sm:p-8 shadow-[6px_6px_0_#10100f] space-y-6">
+              <div className="border-2 border-black bg-card p-4 sm:p-7 shadow-[4px_4px_0_#10100f] sm:shadow-[6px_6px_0_#10100f] space-y-6 min-w-0">
                 <div>
                   <span className="font-mono text-xs uppercase tracking-wider text-muted-foreground">
                     Langkah 1
@@ -534,97 +534,77 @@ export function AritmatikaGameClient({
                   </h3>
                 </div>
 
-                <div className="space-y-2.5">
+                <div className="space-y-2">
                   {/* Level 1 */}
                   <label
-                    className={`block border-2 border-black p-3.5 cursor-pointer transition-colors ${
+                    className={`flex items-center gap-3 border-2 border-black p-3 cursor-pointer transition-colors w-full min-w-0 ${
                       level === 1 ? "bg-emerald-100/70 border-emerald-900 shadow-[2px_2px_0_#10100f]" : "bg-card hover:bg-secondary/40"
                     }`}
                   >
-                    <div className="flex items-start gap-3">
-                      <input
-                        type="radio"
-                        name="aritm-level"
-                        checked={level === 1}
-                        onChange={() => setLevel(1)}
-                        className="mt-1 size-4 accent-emerald-600"
-                      />
-                      <div>
-                        <div className="font-black text-sm uppercase">Level 1: Konsep Dasar (Logika 100%)</div>
-                        <div className="text-xs text-muted-foreground mt-0.5 leading-relaxed">
-                          Refleks penalaran tanpa angka nominal rupiah. Menguji pemahaman murni perbandingan nilai awal vs nilai akhir (diskon, laba-rugi, pajak, tara).
-                        </div>
-                      </div>
-                    </div>
+                    <input
+                      type="radio"
+                      name="aritm-level"
+                      checked={level === 1}
+                      onChange={() => setLevel(1)}
+                      className="size-4 shrink-0 accent-emerald-600"
+                    />
+                    <span className="font-black text-xs sm:text-sm uppercase tracking-tight break-words">
+                      Level 1: Konsep Dasar (Logika 100%)
+                    </span>
                   </label>
 
                   {/* Level 2 */}
                   <label
-                    className={`block border-2 border-black p-3.5 cursor-pointer transition-colors ${
+                    className={`flex items-center gap-3 border-2 border-black p-3 cursor-pointer transition-colors w-full min-w-0 ${
                       level === 2 ? "bg-emerald-100/70 border-emerald-900 shadow-[2px_2px_0_#10100f]" : "bg-card hover:bg-secondary/40"
                     }`}
                   >
-                    <div className="flex items-start gap-3">
-                      <input
-                        type="radio"
-                        name="aritm-level"
-                        checked={level === 2}
-                        onChange={() => setLevel(2)}
-                        className="mt-1 size-4 accent-emerald-600"
-                      />
-                      <div>
-                        <div className="font-black text-sm uppercase">Level 2: Hitung Cepat Variatif</div>
-                        <div className="text-xs text-muted-foreground mt-0.5 leading-relaxed">
-                          Kalkulasi nominal cepat dengan variasi target: mencari nilai kondisi awal (100%), besar potongan/keuntungan (delta), atau kondisi akhir.
-                        </div>
-                      </div>
-                    </div>
+                    <input
+                      type="radio"
+                      name="aritm-level"
+                      checked={level === 2}
+                      onChange={() => setLevel(2)}
+                      className="size-4 shrink-0 accent-emerald-600"
+                    />
+                    <span className="font-black text-xs sm:text-sm uppercase tracking-tight break-words">
+                      Level 2: Hitung Cepat Variatif
+                    </span>
                   </label>
 
                   {/* Level 3 */}
                   <label
-                    className={`block border-2 border-black p-3.5 cursor-pointer transition-colors ${
+                    className={`flex items-center gap-3 border-2 border-black p-3 cursor-pointer transition-colors w-full min-w-0 ${
                       level === 3 ? "bg-emerald-100/70 border-emerald-900 shadow-[2px_2px_0_#10100f]" : "bg-card hover:bg-secondary/40"
                     }`}
                   >
-                    <div className="flex items-start gap-3">
-                      <input
-                        type="radio"
-                        name="aritm-level"
-                        checked={level === 3}
-                        onChange={() => setLevel(3)}
-                        className="mt-1 size-4 accent-emerald-600"
-                      />
-                      <div>
-                        <div className="font-black text-sm uppercase">Level 3: Kasus Kompleks TIU SKD</div>
-                        <div className="text-xs text-muted-foreground mt-0.5 leading-relaxed">
-                          Soal cerita analitis HOTS CAT CPNS/Kedinasan: multi-karung eceran, cicilan pinjaman, selisih bunga, susut barang busuk, margin berjenjang, promo grosir, hingga PPh ber-PTKP.
-                        </div>
-                      </div>
-                    </div>
+                    <input
+                      type="radio"
+                      name="aritm-level"
+                      checked={level === 3}
+                      onChange={() => setLevel(3)}
+                      className="size-4 shrink-0 accent-emerald-600"
+                    />
+                    <span className="font-black text-xs sm:text-sm uppercase tracking-tight break-words">
+                      Level 3: Kasus Kompleks TIU SKD
+                    </span>
                   </label>
 
                   {/* Campuran */}
                   <label
-                    className={`block border-2 border-black p-3.5 cursor-pointer transition-colors ${
+                    className={`flex items-center gap-3 border-2 border-black p-3 cursor-pointer transition-colors w-full min-w-0 ${
                       level === "all" ? "bg-emerald-100/70 border-emerald-900 shadow-[2px_2px_0_#10100f]" : "bg-card hover:bg-secondary/40"
                     }`}
                   >
-                    <div className="flex items-start gap-3">
-                      <input
-                        type="radio"
-                        name="aritm-level"
-                        checked={level === "all"}
-                        onChange={() => setLevel("all")}
-                        className="mt-1 size-4 accent-emerald-600"
-                      />
-                      <div>
-                        <div className="font-black text-sm uppercase">Campuran (Semua Level)</div>
-                        <div className="text-xs text-muted-foreground mt-0.5 leading-relaxed">
-                          Simulasi komprehensif menguji refleks konsep, hitung cepat nominal, hingga penalaran soal cerita berbobot tinggi.
-                        </div>
-                      </div>
-                    </div>
+                    <input
+                      type="radio"
+                      name="aritm-level"
+                      checked={level === "all"}
+                      onChange={() => setLevel("all")}
+                      className="size-4 shrink-0 accent-emerald-600"
+                    />
+                    <span className="font-black text-xs sm:text-sm uppercase tracking-tight break-words">
+                      Campuran (Semua Level)
+                    </span>
                   </label>
                 </div>
 

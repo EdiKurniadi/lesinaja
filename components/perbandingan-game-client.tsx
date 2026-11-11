@@ -475,7 +475,7 @@ export function PerbandinganGameClient({
             </div>
 
             {/* Philosophy Banner: Tiga Pilar Perbandingan */}
-            <div className="border-2 border-black bg-cyan-50 p-5 sm:p-6 shadow-[5px_5px_0_#10100f] space-y-3">
+            <div className="border-2 border-black bg-cyan-50 p-4 sm:p-6 shadow-[4px_4px_0_#10100f] sm:shadow-[5px_5px_0_#10100f] space-y-3 min-w-0">
               <div className="flex items-center gap-2 font-mono text-xs font-black uppercase text-cyan-950 tracking-wider">
                 <Scale className="size-4 text-cyan-700" />
                 Kaidah Emas Perbandingan TIU
@@ -508,7 +508,7 @@ export function PerbandinganGameClient({
             {/* Form Settings & Highscores */}
             <div className="grid md:grid-cols-[1.3fr_1fr] gap-6 items-start">
               {/* Left Column: Form & Topik */}
-              <div className="border-2 border-black bg-card p-5 sm:p-8 shadow-[6px_6px_0_#10100f] space-y-6">
+              <div className="border-2 border-black bg-card p-4 sm:p-7 shadow-[4px_4px_0_#10100f] sm:shadow-[6px_6px_0_#10100f] space-y-6 min-w-0">
                 <div>
                   <span className="font-mono text-xs uppercase tracking-wider text-muted-foreground">
                     Langkah 1
@@ -518,105 +518,85 @@ export function PerbandinganGameClient({
                   </h3>
                 </div>
 
-                <div className="space-y-2.5">
+                <div className="space-y-2">
                   {/* Topik 1: Konsep Rasio */}
                   <label
-                    className={`block border-2 border-black p-3.5 cursor-pointer transition-colors ${
+                    className={`flex items-center gap-3 border-2 border-black p-3 cursor-pointer transition-colors w-full min-w-0 ${
                       topic === "konsep"
                         ? "bg-cyan-100/70 border-cyan-900 shadow-[2px_2px_0_#10100f]"
                         : "bg-card hover:bg-secondary/40"
                     }`}
                   >
-                    <div className="flex items-start gap-3">
-                      <input
-                        type="radio"
-                        name="prop-topic"
-                        checked={topic === "konsep"}
-                        onChange={() => setTopic("konsep")}
-                        className="mt-1 size-4 accent-cyan-600"
-                      />
-                      <div>
-                        <div className="font-black text-sm uppercase">Konsep Rasio</div>
-                        <div className="text-xs text-muted-foreground mt-0.5 leading-relaxed">
-                          Informasi jumlah total, jumlah 2 objek, atau selisih 2 objek diketahui untuk menentukan nilai salah satu objek.
-                        </div>
-                      </div>
-                    </div>
+                    <input
+                      type="radio"
+                      name="prop-topic"
+                      checked={topic === "konsep"}
+                      onChange={() => setTopic("konsep")}
+                      className="size-4 shrink-0 accent-cyan-600"
+                    />
+                    <span className="font-black text-xs sm:text-sm uppercase tracking-tight break-words">
+                      Konsep Rasio
+                    </span>
                   </label>
 
                   {/* Topik 2: Perbandingan Senilai */}
                   <label
-                    className={`block border-2 border-black p-3.5 cursor-pointer transition-colors ${
+                    className={`flex items-center gap-3 border-2 border-black p-3 cursor-pointer transition-colors w-full min-w-0 ${
                       topic === "senilai"
                         ? "bg-cyan-100/70 border-cyan-900 shadow-[2px_2px_0_#10100f]"
                         : "bg-card hover:bg-secondary/40"
                     }`}
                   >
-                    <div className="flex items-start gap-3">
-                      <input
-                        type="radio"
-                        name="prop-topic"
-                        checked={topic === "senilai"}
-                        onChange={() => setTopic("senilai")}
-                        className="mt-1 size-4 accent-cyan-600"
-                      />
-                      <div>
-                        <div className="font-black text-sm uppercase">Perbandingan Senilai</div>
-                        <div className="text-xs text-muted-foreground mt-0.5 leading-relaxed">
-                          Pekerja vs hasil produksi, konsumsi bensin vs jarak tempuh, durasi mesin vs output, porsi vs bahan baku.
-                        </div>
-                      </div>
-                    </div>
+                    <input
+                      type="radio"
+                      name="prop-topic"
+                      checked={topic === "senilai"}
+                      onChange={() => setTopic("senilai")}
+                      className="size-4 shrink-0 accent-cyan-600"
+                    />
+                    <span className="font-black text-xs sm:text-sm uppercase tracking-tight break-words">
+                      Perbandingan Senilai
+                    </span>
                   </label>
 
                   {/* Topik 3: Perbandingan Berbalik Nilai */}
                   <label
-                    className={`block border-2 border-black p-3.5 cursor-pointer transition-colors ${
+                    className={`flex items-center gap-3 border-2 border-black p-3 cursor-pointer transition-colors w-full min-w-0 ${
                       topic === "berbalik"
                         ? "bg-cyan-100/70 border-cyan-900 shadow-[2px_2px_0_#10100f]"
                         : "bg-card hover:bg-secondary/40"
                     }`}
                   >
-                    <div className="flex items-start gap-3">
-                      <input
-                        type="radio"
-                        name="prop-topic"
-                        checked={topic === "berbalik"}
-                        onChange={() => setTopic("berbalik")}
-                        className="mt-1 size-4 accent-cyan-600"
-                      />
-                      <div>
-                        <div className="font-black text-sm uppercase">Perbandingan Berbalik Nilai</div>
-                        <div className="text-xs text-muted-foreground mt-0.5 leading-relaxed">
-                          Banyak hewan vs waktu pakan habis, kecepatan vs waktu tempuh, jumlah pekerja vs hari selesai, debit keran vs pengisian.
-                        </div>
-                      </div>
-                    </div>
+                    <input
+                      type="radio"
+                      name="prop-topic"
+                      checked={topic === "berbalik"}
+                      onChange={() => setTopic("berbalik")}
+                      className="size-4 shrink-0 accent-cyan-600"
+                    />
+                    <span className="font-black text-xs sm:text-sm uppercase tracking-tight break-words">
+                      Perbandingan Berbalik Nilai
+                    </span>
                   </label>
 
                   {/* Topik 4: Campuran Semua */}
                   <label
-                    className={`block border-2 border-black p-3.5 cursor-pointer transition-colors ${
+                    className={`flex items-center gap-3 border-2 border-black p-3 cursor-pointer transition-colors w-full min-w-0 ${
                       topic === "all"
                         ? "bg-cyan-100/70 border-cyan-900 shadow-[2px_2px_0_#10100f]"
                         : "bg-card hover:bg-secondary/40"
                     }`}
                   >
-                    <div className="flex items-start gap-3">
-                      <input
-                        type="radio"
-                        name="prop-topic"
-                        checked={topic === "all"}
-                        onChange={() => setTopic("all")}
-                        className="mt-1 size-4 accent-cyan-600"
-                      />
-                      <div>
-                        <div className="font-black text-sm uppercase">Campuran (Semua Topik Dasar)</div>
-                        <div className="text-xs text-muted-foreground mt-0.5 leading-relaxed">
-                          Simulasi acak menguji refleks membedakan konsep rasio, senilai, dan berbalik nilai secara komprehensif.
-                        </div>
-                      </div>
-                    </div>
+                    <input
+                      type="radio"
+                      name="prop-topic"
+                      checked={topic === "all"}
+                      onChange={() => setTopic("all")}
+                      className="size-4 shrink-0 accent-cyan-600"
+                    />
+                    <span className="font-black text-xs sm:text-sm uppercase tracking-tight break-words">
+                      Campuran (Semua Topik)
+                    </span>
                   </label>
                 </div>
 
@@ -632,25 +612,20 @@ export function PerbandinganGameClient({
                     <button
                       type="button"
                       onClick={() => setLevel("dasar")}
-                      className={`p-3.5 border-2 border-black text-left transition-all ${
+                      className={`p-3 border-2 border-black text-left transition-all flex flex-col justify-center min-w-0 ${
                         level === "dasar"
                           ? "bg-cyan-600 text-white shadow-[3px_3px_0_#10100f]"
                           : "bg-card hover:bg-secondary"
                       }`}
                     >
                       <div className="font-mono text-xs font-black uppercase">Level 1: Dasar</div>
-                      <div className="text-xs mt-1 opacity-90">
-                        Rasio, senilai & berbalik nilai dasar
-                      </div>
                     </button>
 
-                    <div className="p-3.5 border-2 border-black/40 bg-neutral-100 text-neutral-500 text-left relative cursor-not-allowed flex flex-col justify-center">
-                      <div className="flex items-center justify-between font-mono text-xs font-black uppercase">
-                        <span>Level 2: Lanjutan</span>
-                        <span className="inline-flex items-center gap-1 text-[10px] bg-neutral-200 px-1.5 py-0.5 border border-black/30">
-                          <Lock className="size-2.5" /> Coming Soon
-                        </span>
-                      </div>
+                    <div className="p-3 border-2 border-black/40 bg-neutral-100 text-neutral-500 text-left relative cursor-not-allowed flex items-center justify-between min-w-0">
+                      <span className="font-mono text-xs font-black uppercase">Level 2: Lanjutan</span>
+                      <span className="inline-flex items-center gap-1 text-[10px] bg-neutral-200 px-1.5 py-0.5 border border-black/30">
+                        <Lock className="size-2.5" /> Coming Soon
+                      </span>
                     </div>
                   </div>
                 </div>
