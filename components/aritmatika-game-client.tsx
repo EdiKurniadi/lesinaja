@@ -814,21 +814,23 @@ export function AritmatikaGameClient({
                   <ul className="space-y-2 text-muted-foreground list-disc pl-4">
                     <li>
                       <strong className="text-foreground">Diskon & Diskon Bertingkat:</strong>{" "}
-                      Harga dibayar selalu $100\% - D\%$.
+                      Harga dibayar selalu (100% - %Diskon) dari harga awal.
                     </li>
                     <li>
-                      <strong className="text-foreground">Untung & Rugi:</strong> Penjualan laba ={" "}
-                      $100\% + U\%$, penjualan rugi = $100\% - R\%$.
+                      <strong className="text-foreground">Untung & Rugi:</strong>{" "}
+                      Jual untung = (100% + %Untung), jual rugi = (100% - %Rugi).
                     </li>
                     <li>
-                      <strong className="text-foreground">Pajak (PPN/PPh/Resto):</strong> Nilai akhir ={" "}
-                      $100\% + P\%$ dari dasar pengenaan.
+                      <strong className="text-foreground">Pajak (PPN/PPh/Resto):</strong>{" "}
+                      Nilai akhir = (100% + %Pajak) dari dasar pengenaan.
                     </li>
                     <li>
-                      <strong className="text-foreground">Bruto, Tara & Neto:</strong> Neto = $100\% - \text{Tara}\%$ dari berat kotor.
+                      <strong className="text-foreground">Bruto, Tara & Neto:</strong>{" "}
+                      Neto bersih = (100% - %Tara) dari berat kotor.
                     </li>
                     <li>
-                      <strong className="text-foreground">Bunga Bank & Angsuran:</strong> Pokok tabungan = $100\%$.
+                      <strong className="text-foreground">Bunga Bank & Angsuran:</strong>{" "}
+                      Pokok tabungan atau pinjaman awal selalu 100%.
                     </li>
                   </ul>
                 </div>
