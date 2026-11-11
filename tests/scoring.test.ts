@@ -488,7 +488,7 @@ test("mengganti jawaban drill memperbarui skor tanpa menambah percobaan", () => 
 });
 
 test("paket-paket mini TO TIU, TWK, dan TKP memenuhi kontrak durasi, jumlah soal, dan target skor", () => {
-  assert.equal(MINI_TRYOUT_PACKAGES.length, 11);
+  assert.equal(MINI_TRYOUT_PACKAGES.length, 12);
 
   const tiuPackages = MINI_TRYOUT_PACKAGES.filter((p) => p.questions.every((q) => q.category === "TIU"));
   assert.equal(tiuPackages.length, 9);
@@ -599,4 +599,41 @@ test("paket-paket mini TO TIU, TWK, dan TKP memenuhi kontrak durasi, jumlah soal
   const tkpResultFail = scoreAttempt(tkpMini.questions, tkpAnswersFail, { id: "mini-tkp-fail", packageId: tkpMini.id, startedAt: 0, completedAt: 1000 });
   assert.equal(tkpResultFail.scores.TKP.score, 165);
   assert.equal(tkpResultFail.passed, false);
+
+  const twkTkpMini = MINI_TRYOUT_PACKAGES.find((p) => p.id === "mini-twk-tkp");
+  assert.ok(twkTkpMini);
+  assert.equal(twkTkpMini.durationMinutes, 70);
+  assert.equal(twkTkpMini.questions.length, 75);
+  assert.ok(twkTkpMini.questions.every((question) => getQuestion(question.id) !== undefined));
+
+  const twkQuestions = twkTkpMini.questions.filter((q) => q.category === "TWK");
+  const tkpQuestions = twkTkpMini.questions.filter((q) => q.category === "TKP");
+  assert.equal(twkQuestions.length, 30);
+  assert.equal(tkpQuestions.length, 45);
+
+  for (const q of tkpQuestions) {
+    assert.equal(q.choices.length, 5);
+    const scores = q.choices.map((c) => c.score).sort((a, b) => a - b);
+    assert.deepEqual(scores, [1, 2, 3, 4, 5]);
+  }
+
+  // Lolos kedua ambang (TWK 65, TKP 170)
+  const twkTkpAnswersPass = {
+    ...Object.fromEntries(twkQuestions.slice(0, 13).map((q) => [q.id, answerWithScore(q, 5)!])),
+    ...Object.fromEntries(tkpQuestions.slice(0, 34).map((q) => [q.id, answerWithScore(q, 5)!])),
+  };
+  const twkTkpResultPass = scoreAttempt(twkTkpMini.questions, twkTkpAnswersPass, { id: "mini-twk-tkp-pass", packageId: twkTkpMini.id, startedAt: 0, completedAt: 1000 });
+  assert.equal(twkTkpResultPass.scores.TWK.score, 65);
+  assert.equal(twkTkpResultPass.scores.TKP.score, 170);
+  assert.equal(twkTkpResultPass.passed, true);
+
+  // Gagal jika TWK < 65 meskipun TKP lolos
+  const twkTkpAnswersFail = {
+    ...Object.fromEntries(twkQuestions.slice(0, 12).map((q) => [q.id, answerWithScore(q, 5)!])),
+    ...Object.fromEntries(tkpQuestions.slice(0, 34).map((q) => [q.id, answerWithScore(q, 5)!])),
+  };
+  const twkTkpResultFail = scoreAttempt(twkTkpMini.questions, twkTkpAnswersFail, { id: "mini-twk-tkp-fail", packageId: twkTkpMini.id, startedAt: 0, completedAt: 1000 });
+  assert.equal(twkTkpResultFail.scores.TWK.score, 60);
+  assert.equal(twkTkpResultFail.scores.TKP.score, 170);
+  assert.equal(twkTkpResultFail.passed, false);
 });

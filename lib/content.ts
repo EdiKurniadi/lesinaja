@@ -20,6 +20,7 @@ import { NEW_CASN_1_TKP_QUESTIONS } from "./new-casn-1-tkp-content";
 import { NEW_CASN_2_TKP_QUESTIONS } from "./new-casn-2-tkp-content";
 import { MINI_TWK_QUESTIONS } from "./mini-twk-content";
 import { MINI_TKP_QUESTIONS } from "./mini-tkp-content";
+import { MINI_TWK_TKP_QUESTIONS } from "./mini-twk-tkp-content";
 import { NASIONALISME_DRILL_QUESTIONS } from "./nasionalisme-drill-content";
 import { PELAYANAN_PUBLIK_DRILL_QUESTIONS } from "./pelayanan-publik-drill-content";
 import { PILAR_NEGARA_DRILL_QUESTIONS } from "./pilar-negara-drill-content";
@@ -323,6 +324,14 @@ export const MINI_TRYOUT_PACKAGES: ExamPackage[] = [
     questions: MINI_TKP_QUESTIONS,
     durationMinutes: 45,
   },
+  {
+    id: "mini-twk-tkp",
+    kind: "mini",
+    title: "Mini TO TWK & TKP",
+    description: "75 soal (30 TWK & 45 TKP) simulasi penalaran kebangsaan dan karakteristik pribadi standar CAT SKD CASN.",
+    questions: MINI_TWK_TKP_QUESTIONS,
+    durationMinutes: 70,
+  },
 ];
 
 export const ALL_TRYOUT_PACKAGES = [...EXAM_PACKAGES, ...MINI_TRYOUT_PACKAGES];
@@ -440,16 +449,17 @@ export function validateContent(): string[] {
     });
   }
   for (const item of MINI_TRYOUT_PACKAGES) {
-    if (item.durationMinutes !== 45 && item.durationMinutes !== 35 && item.durationMinutes !== 30) {
-      errors.push(`${item.id} harus berdurasi 30, 35, atau 45 menit`);
+    if (item.durationMinutes !== 70 && item.durationMinutes !== 45 && item.durationMinutes !== 35 && item.durationMinutes !== 30) {
+      errors.push(`${item.id} harus berdurasi 30, 35, 45, atau 70 menit`);
     }
-    if (item.questions.length !== 45 && item.questions.length !== 35 && item.questions.length !== 34 && item.questions.length !== 33 && item.questions.length !== 32 && item.questions.length !== 31 && item.questions.length !== 30) {
+    if (item.questions.length !== 75 && item.questions.length !== 45 && item.questions.length !== 35 && item.questions.length !== 34 && item.questions.length !== 33 && item.questions.length !== 32 && item.questions.length !== 31 && item.questions.length !== 30) {
       errors.push(`${item.id} berisi ${item.questions.length} soal`);
     }
     const isAllTiu = item.questions.every((question) => question.category === "TIU");
     const isAllTwk = item.questions.every((question) => question.category === "TWK");
     const isAllTkp = item.questions.every((question) => question.category === "TKP");
-    if (!isAllTiu && !isAllTwk && !isAllTkp) errors.push(`${item.id} harus hanya berisi soal TIU, TWK, atau TKP`);
+    const isTwkTkp = item.questions.some((q) => q.category === "TWK") && item.questions.some((q) => q.category === "TKP") && !item.questions.some((q) => q.category === "TIU");
+    if (!isAllTiu && !isAllTwk && !isAllTkp && !isTwkTkp) errors.push(`${item.id} harus hanya berisi soal TIU, TWK, TKP, atau kombinasi TWK-TKP`);
   }
   for (const item of DRILL_PACKAGES) {
     if (item.questions.length !== 10) errors.push(`${item.id} berisi ${item.questions.length} soal`);

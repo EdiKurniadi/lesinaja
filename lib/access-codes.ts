@@ -23,6 +23,7 @@ export const PACKAGE_ACCESS_CODES: Record<string, string> = {
   "mini-tiu-new-casn-paket-2": "MTTIU2NIPSQUAD",
   "mini-twk-kebangsaan": "MTTWKNIPSQUAD",
   "mini-tkp-karakteristik": "MTTKPNIPSQUAD",
+  "mini-twk-tkp": "MTTWKTKPNIPSQUAD",
 
   // === DRILL TWK ===
   "twk-pancasila-1": "TWKPANCASILA1AB72",

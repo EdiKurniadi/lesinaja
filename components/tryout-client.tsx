@@ -76,6 +76,14 @@ function packageMaximum(item: { questions: Question[] }) {
   return item.questions.reduce((sum, question) => sum + bestScore(question), 0);
 }
 
+function isExamSessionActive(session: ActiveSession | null | undefined): boolean {
+  return Boolean(
+    session &&
+    session.packageId &&
+    (!session.deadlineAt || Date.now() < session.deadlineAt)
+  );
+}
+
 export function TryoutClient() {
   const state = useLearningState();
   const [result, setResult] = useState<AttemptResult | null>(null);
@@ -87,15 +95,11 @@ export function TryoutClient() {
   const [isPreparing, setIsPreparing] = useState(false);
   const session = state.activeTryout;
   const examPackage = session?.packageId ? getPackageForReview(session.packageId) : undefined;
-  const isSessionActive = Boolean(
-    session &&
-    session.packageId &&
-    (!session.deadlineAt || Date.now() < session.deadlineAt)
-  );
   const pendingPackage = pendingPackageId ? getPackage(pendingPackageId) : undefined;
   const pendingIsMini = pendingPackage?.kind === "mini";
   const pendingIsTwk = pendingIsMini && pendingPackage?.questions.every((question) => question.category === "TWK");
   const pendingIsTkp = pendingIsMini && pendingPackage?.questions.every((question) => question.category === "TKP");
+  const pendingIsTwkTkp = pendingIsMini && pendingPackage?.questions.some((q) => q.category === "TWK") && pendingPackage?.questions.some((q) => q.category === "TKP");
   const isPendingUnlocked = pendingPackage ? Boolean(state.unlockedPackages?.includes(pendingPackage.id)) : false;
   const pendingMaximum = pendingPackage ? packageMaximum(pendingPackage) : 0;
 
@@ -105,7 +109,7 @@ export function TryoutClient() {
   }, [pendingPackage]);
 
   function openPackageModal(packageId: string) {
-    if (isSessionActive && session?.packageId === packageId) {
+    if (isExamSessionActive(session) && session?.packageId === packageId) {
       setResumePromptPackageId(packageId);
       return;
     }
@@ -187,7 +191,7 @@ export function TryoutClient() {
 
   async function handleStartExam() {
     if (!pendingPackage) return;
-    if (isSessionActive && session?.packageId === pendingPackage.id) {
+    if (isExamSessionActive(session) && session?.packageId === pendingPackage.id) {
       const targetId = pendingPackage.id;
       setPendingPackageId(null);
       setResumePromptPackageId(targetId);
@@ -345,13 +349,16 @@ export function TryoutClient() {
                 const maximum = packageMaximum(item);
                 const isTwk = item.questions.every((q) => q.category === "TWK");
                 const isTkp = item.questions.every((q) => q.category === "TKP");
+                const isTwkTkp = item.questions.some((q) => q.category === "TWK") && item.questions.some((q) => q.category === "TKP");
                 const isMiniUnlocked = Boolean(state.unlockedPackages?.includes(item.id));
-                const targetScore = isTwk ? 65 : isTkp ? 166 : 80;
-                const categoryLabel = isTwk ? "TWK" : isTkp ? "TKP" : "TIU";
+                const targetScore = isTwk ? "65" : isTkp ? "166" : isTwkTkp ? "TWK 65 & TKP 166" : "80";
+                const categoryLabel = isTwk ? "TWK" : isTkp ? "TKP" : isTwkTkp ? "TWK & TKP" : "TIU";
                 const subtestSummary = isTwk
                   ? "Bahasa Indonesia, Pilar Negara, Bela Negara, Integritas, Nasionalisme"
                   : isTkp
                   ? "Pelayanan Publik, Jejaring Kerja, Sosial Budaya, TIK, Profesionalisme, Anti Radikalisme"
+                  : isTwkTkp
+                  ? "30 soal TWK + 45 soal TKP Penalaran & Karakteristik Pribadi"
                   : "verbal, numerik, dan figural";
                 return (
                   <article key={item.id} className="border border-black bg-warm-white p-5 sm:p-7">
@@ -517,7 +524,7 @@ export function TryoutClient() {
 
             <p className="border-l-4 border-brand-blue bg-secondary p-3 text-xs leading-relaxed">
               {pendingIsMini
-                ? `Mini TO ini adalah latihan mandiri ${pendingIsTwk ? "TWK" : pendingIsTkp ? "TKP" : "TIU"}. Target ${pendingIsTwk ? "65" : pendingIsTkp ? "166" : "80"} digunakan untuk evaluasi latihan, bukan ambang kelulusan resmi.`
+                ? `Mini TO ini adalah latihan mandiri ${pendingIsTwk ? "TWK" : pendingIsTkp ? "TKP" : pendingIsTwkTkp ? "TWK & TKP" : "TIU"}. Target ${pendingIsTwk ? "65" : pendingIsTkp ? "166" : pendingIsTwkTkp ? "TWK 65 dan TKP 166" : "80"} digunakan untuk evaluasi latihan, bukan ambang kelulusan resmi.`
                 : "Acuan pelamar umum CPNS TA 2024."} LesinAja tidak berafiliasi dengan BKN dan tidak memuat soal resmi.
             </p>
             <p className="text-xs leading-relaxed text-muted-foreground">
