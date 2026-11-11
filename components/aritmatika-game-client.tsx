@@ -33,6 +33,8 @@ import {
   playGameOverSound,
   playStreakSound,
   playWrongSound,
+  startBackgroundMusic,
+  stopBackgroundMusic,
 } from "@/lib/game-sound";
 import {
   createDefaultAritmatikaStats,
@@ -101,6 +103,18 @@ export function AritmatikaGameClient({
       window.clearTimeout(timer);
     };
   }, []);
+
+  // Background Music untuk Arena Aritmatika Sosial
+  useEffect(() => {
+    if (gameState === "playing" && soundOn) {
+      startBackgroundMusic("aritmatika");
+    } else {
+      stopBackgroundMusic();
+    }
+    return () => {
+      stopBackgroundMusic();
+    };
+  }, [gameState, soundOn]);
 
   const currentQuestion = questions[currentIndex] as GameQuestion | undefined;
 
@@ -1028,7 +1042,7 @@ export function AritmatikaGameClient({
             </div>
 
             {/* Bottom Keyboard Guide */}
-            <div className="text-center font-mono text-xs text-muted-foreground">
+            <div className="hidden sm:block text-center font-mono text-xs text-muted-foreground">
               Gunakan keyboard: <kbd className="px-1.5 py-0.5 border border-black bg-white">1</kbd> /{" "}
               <kbd className="px-1.5 py-0.5 border border-black bg-white">2</kbd> /{" "}
               <kbd className="px-1.5 py-0.5 border border-black bg-white">3</kbd> /{" "}

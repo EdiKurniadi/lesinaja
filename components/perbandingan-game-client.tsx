@@ -35,6 +35,8 @@ import {
   playGameOverSound,
   playStreakSound,
   playWrongSound,
+  startBackgroundMusic,
+  stopBackgroundMusic,
 } from "@/lib/game-sound";
 import {
   createDefaultPerbandinganStats,
@@ -104,6 +106,18 @@ export function PerbandinganGameClient({
       window.clearTimeout(timer);
     };
   }, []);
+
+  // Background Music untuk Arena Perbandingan
+  useEffect(() => {
+    if (gameState === "playing" && soundOn) {
+      startBackgroundMusic("perbandingan");
+    } else {
+      stopBackgroundMusic();
+    }
+    return () => {
+      stopBackgroundMusic();
+    };
+  }, [gameState, soundOn]);
 
   const currentQuestion = questions[currentIndex] as GameQuestion | undefined;
 
@@ -386,7 +400,7 @@ export function PerbandinganGameClient({
       return {
         badge: "PAKAR PERBANDINGAN TIU",
         color: "bg-signal text-black",
-        desc: "Sempurna! Pemahaman rasio 2/3 objek, perbandingan senilai, dan berbalik nilai Anda sangat matang.",
+        desc: "Sempurna! Pemahaman konsep rasio, perbandingan senilai, dan berbalik nilai Anda sangat matang.",
       };
     }
     if (accuracy >= 80) {
@@ -421,7 +435,7 @@ export function PerbandinganGameClient({
     <PageFrame
       eyebrow="Game & Refleks TIU"
       title="ARENA PERBANDINGAN."
-      description="Kuasai 3 pilar perbandingan: Konsep Rasio 2 & 3 Objek (Jumlah/Selisih), Perbandingan Senilai, dan Perbandingan Berbalik Nilai untuk ujian SKD CPNS & Kedinasan."
+      description="Kuasai 3 pilar perbandingan: Konsep Rasio (Jumlah/Selisih), Perbandingan Senilai, dan Perbandingan Berbalik Nilai untuk ujian SKD CPNS & Kedinasan."
       showHeader={gameState === "lobby"}
     >
       <div className="bg-background text-foreground">
@@ -479,7 +493,7 @@ export function PerbandinganGameClient({
                 <div className="bg-white border border-black/30 p-2.5">
                   <span className="font-bold text-emerald-700 block">2. Senilai (Direct)</span>
                   <span className="text-muted-foreground text-[11px] leading-tight block mt-0.5">
-                    Variabel A naik, B ikut naik (perkalian silang: A1/B1 = A2/B2)
+                    Variabel A naik, B ikut naik (hasil bagi konstan: A/B = k)
                   </span>
                 </div>
                 <div className="bg-white border border-black/30 p-2.5">
@@ -522,7 +536,7 @@ export function PerbandinganGameClient({
                         className="mt-1 size-4 accent-cyan-600"
                       />
                       <div>
-                        <div className="font-black text-sm uppercase">Konsep Rasio (2 & 3 Objek)</div>
+                        <div className="font-black text-sm uppercase">Konsep Rasio</div>
                         <div className="text-xs text-muted-foreground mt-0.5 leading-relaxed">
                           Informasi jumlah total, jumlah 2 objek, atau selisih 2 objek diketahui untuk menentukan nilai salah satu objek.
                         </div>
@@ -626,7 +640,7 @@ export function PerbandinganGameClient({
                     >
                       <div className="font-mono text-xs font-black uppercase">Level 1: Dasar</div>
                       <div className="text-xs mt-1 opacity-90">
-                        Rasio 2/3 objek, senilai & berbalik nilai dasar dengan angka rapi
+                        Rasio, senilai & berbalik nilai dasar
                       </div>
                     </button>
 
@@ -833,13 +847,13 @@ export function PerbandinganGameClient({
                   </div>
                   <ul className="space-y-2 text-muted-foreground list-disc pl-4">
                     <li>
-                      <strong className="text-foreground">Konsep Rasio 2/3 Objek:</strong> Tentukan nilai 1 bagian = Nilai Nyata / Jumlah atau Selisih Bagian Rasio.
+                      <strong className="text-foreground">Konsep Rasio:</strong> Tentukan nilai 1 bagian = Nilai Nyata / Jumlah atau Selisih Bagian Rasio.
                     </li>
                     <li>
-                      <strong className="text-foreground">Perbandingan Senilai:</strong> Jika satu nilai membesar, nilai pasangannya membesar sebanding.
+                      <strong className="text-foreground">Perbandingan Senilai:</strong> Jika satu nilai membesar, nilai pasangannya membesar sebanding (hasil bagi konstan: A/B = k).
                     </li>
                     <li>
-                      <strong className="text-foreground">Perbandingan Berbalik Nilai:</strong> Jika subjek membesar (misal pekerja atau hewan bertambah), durasi waktu berkurang.
+                      <strong className="text-foreground">Perbandingan Berbalik Nilai:</strong> Jika subjek membesar (misal pekerja atau hewan bertambah), durasi waktu berkurang (hasil kali konstan: A × B = k).
                     </li>
                   </ul>
                 </div>
@@ -1031,7 +1045,7 @@ export function PerbandinganGameClient({
             </div>
 
             {/* Bottom Keyboard Guide */}
-            <div className="text-center font-mono text-xs text-muted-foreground">
+            <div className="hidden sm:block text-center font-mono text-xs text-muted-foreground">
               Gunakan keyboard: <kbd className="px-1.5 py-0.5 border border-black bg-white">1</kbd> /{" "}
               <kbd className="px-1.5 py-0.5 border border-black bg-white">2</kbd> /{" "}
               <kbd className="px-1.5 py-0.5 border border-black bg-white">3</kbd> /{" "}

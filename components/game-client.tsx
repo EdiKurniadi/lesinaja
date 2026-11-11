@@ -37,6 +37,8 @@ import {
   playStreakSound,
   playWrongSound,
   setSoundEnabled,
+  startBackgroundMusic,
+  stopBackgroundMusic,
 } from "@/lib/game-sound";
 import {
   createDefaultAritmatikaStats,
@@ -151,6 +153,18 @@ export function GameClient() {
     setSoundOn(next);
     setSoundEnabled(next);
   };
+
+  // Background Music untuk Arena Hitung Cepat
+  useEffect(() => {
+    if (gameState === "playing" && activeGame === null && soundOn) {
+      startBackgroundMusic("hitung");
+    } else {
+      stopBackgroundMusic();
+    }
+    return () => {
+      stopBackgroundMusic();
+    };
+  }, [gameState, activeGame, soundOn]);
 
   const currentQuestion = questions[currentIndex] as GameQuestion | undefined;
 
@@ -548,7 +562,7 @@ export function GameClient() {
                     Prinsip Logika 100%
                   </p>
                   <p className="text-sm text-foreground/90 leading-relaxed">
-                    Kuasai aritmatika sosial tanpa rumus ribet! Kuasai satu ide kunci: <strong>Nilai Awal Selalu 100%</strong> untuk diskon, laba-rugi, bunga bank, bruto-neto, hingga 14 variasi analitis HOTS TIU SKD.
+                    Kuasai aritmatika sosial tanpa rumus ribet! Kuasai satu ide kunci: <strong>Nilai Awal Selalu 100%</strong> untuk diskon, laba-rugi, bunga bank, bruto-neto, hingga variasi analitis HOTS TIU SKD.
                   </p>
                 </div>
               </div>
@@ -593,7 +607,7 @@ export function GameClient() {
                     Rasio, Senilai & Berbalik Nilai
                   </p>
                   <p className="text-sm text-foreground/90 leading-relaxed">
-                    Kuasai 3 pilar perbandingan: <strong>Konsep Rasio 2 & 3 Objek</strong> (jumlah total, jumlah 2 objek, selisih), <strong>Perbandingan Senilai</strong> (pekerja, bensin, output), dan <strong>Berbalik Nilai</strong> (pakan ternak, kecepatan, proyek).
+                    Kuasai 3 pilar perbandingan: <strong>Konsep Rasio</strong> (jumlah total, jumlah 2 objek, selisih), <strong>Perbandingan Senilai</strong> (pekerja, bensin, output), dan <strong>Berbalik Nilai</strong> (pakan ternak, kecepatan, proyek).
                   </p>
                 </div>
               </div>
@@ -1137,7 +1151,7 @@ export function GameClient() {
             </div>
 
             {/* Bottom Keyboard Guide */}
-            <div className="text-center font-mono text-xs text-muted-foreground">
+            <div className="hidden sm:block text-center font-mono text-xs text-muted-foreground">
               Gunakan keyboard: <kbd className="px-1.5 py-0.5 border border-black bg-white">1</kbd> /{" "}
               <kbd className="px-1.5 py-0.5 border border-black bg-white">2</kbd> /{" "}
               <kbd className="px-1.5 py-0.5 border border-black bg-white">3</kbd> /{" "}
