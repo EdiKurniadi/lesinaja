@@ -739,7 +739,7 @@ export function AritmatikaGameClient({
                   onClick={startGame}
                   className="w-full h-14 border-2 border-black bg-emerald-600 hover:bg-emerald-700 text-white font-black text-lg uppercase tracking-wider shadow-[4px_4px_0_#10100f]"
                 >
-                  <Play className="size-5 mr-2 fill-current" /> Mulai Arena Aritmatika
+                  <Play className="size-5 mr-2 fill-current" /> Mulai
                 </Button>
               </div>
 

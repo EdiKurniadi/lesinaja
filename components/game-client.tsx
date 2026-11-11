@@ -743,13 +743,13 @@ export function GameClient() {
             {/* Mode Configuration Card */}
             <div className="grid md:grid-cols-[1.3fr_1fr] gap-6 items-start">
               {/* Left Column: Form & Settings */}
-              <div className="border-2 border-black bg-card p-5 sm:p-8 shadow-[6px_6px_0_#10100f] space-y-6">
+              <div className="border-2 border-black bg-card p-4 sm:p-8 shadow-[4px_4px_0_#10100f] sm:shadow-[6px_6px_0_#10100f] space-y-6 min-w-0">
                 <div>
                   <span className="font-mono text-xs uppercase tracking-wider text-muted-foreground">
                     Langkah 1
                   </span>
                   <h3 className="text-2xl font-black uppercase tracking-tight">Pilih Materi Soal</h3>
-                  <div className="grid grid-cols-3 gap-2 mt-3 font-mono text-xs">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 mt-3 font-mono text-xs">
                     {[
                       { id: "mixed", label: "Campuran", desc: "Konversi + Operasi" },
                       { id: "conversion", label: "Konversi", desc: "Pecahan ↔ Desimal" },
@@ -759,14 +759,14 @@ export function GameClient() {
                         key={item.id}
                         type="button"
                         onClick={() => setCategory(item.id as GameCategory)}
-                        className={`p-3 border-2 border-black text-left flex flex-col justify-between transition-all ${
+                        className={`p-3 border-2 border-black text-left flex flex-col sm:justify-between transition-all min-w-0 ${
                           category === item.id
                             ? "bg-signal text-black shadow-[3px_3px_0_#10100f]"
                             : "bg-warm-white hover:bg-secondary"
                         }`}
                       >
                         <span className="font-black text-sm">{item.label}</span>
-                        <span className="text-[10px] text-muted-foreground mt-1">{item.desc}</span>
+                        <span className="text-xs sm:text-[10px] text-muted-foreground mt-0.5 sm:mt-1">{item.desc}</span>
                       </button>
                     ))}
                   </div>
