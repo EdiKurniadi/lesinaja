@@ -1,7 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import {
-  generateAritmatikaQuestion,
   generateAritmatikaSet,
   generateLevel1ConceptQuestion,
   generateLevel2NominalQuestion,
@@ -34,26 +33,52 @@ test("Level 1 (Konseptual) menghasilkan 4 opsi unik dan jawaban ada di dalam ops
   }
 });
 
-test("Level 2 (Nominal) menghasilkan nominal bulat rupiah dan kg tanpa desimal liar", () => {
-  for (let i = 0; i < 50; i++) {
+test("Level 2 (Nominal) menghasilkan variasi target kondisi awal, delta perubahan, dan akhir dengan angka rapi", () => {
+  let hasInitialTarget = false;
+  let hasDeltaTarget = false;
+  let hasFinalTarget = false;
+
+  for (let i = 0; i < 100; i++) {
     const q = generateLevel2NominalQuestion();
     assert.ok(q.prompt.length > 10);
     assert.equal(q.options.length, 4);
     assert.equal(new Set(q.options).size, 4);
     assert.ok(q.options.includes(q.correctAnswer));
     assert.ok(!q.correctAnswer.includes("NaN"), "Tidak boleh menghasilkan NaN");
+
+    if (q.prompt.includes("mula-mula") || q.prompt.includes("sebelum") || q.prompt.includes("pertama kali")) {
+      hasInitialTarget = true;
+    }
+    if (q.prompt.includes("besar potongan") || q.prompt.includes("rupiah keuntungan") || q.prompt.includes("rupiah kerugian") || q.prompt.includes("berat tara") || q.prompt.includes("nominal pajak") || q.prompt.includes("bunga yang diperoleh")) {
+      hasDeltaTarget = true;
+    }
+    if (q.prompt.includes("harus dibayar") || q.prompt.includes("harga jual") || q.prompt.includes("berat bersih") || q.prompt.includes("total rupiah")) {
+      hasFinalTarget = true;
+    }
   }
+
+  assert.ok(hasInitialTarget, "Level 2 harus memuat pertanyaan nilai kondisi awal (100%)");
+  assert.ok(hasDeltaTarget, "Level 2 harus memuat pertanyaan selisih/delta perubahan");
+  assert.ok(hasFinalTarget, "Level 2 harus memuat pertanyaan kondisi akhir");
 });
 
-test("Level 3 (Kasus Kompleks) menghasilkan variasi pola PDF dengan 4 opsi unik", () => {
-  for (let i = 0; i < 60; i++) {
+test("Level 3 (Kasus Kompleks) menghasilkan pertanyaan langsung tanpa format P vs Q dan kecukupan data", () => {
+  for (let i = 0; i < 100; i++) {
     const q = generateLevel3ComplexQuestion();
     assert.ok(q.prompt.length > 20);
     assert.equal(q.options.length, 4);
     assert.equal(new Set(q.options).size, 4);
     assert.ok(q.options.includes(q.correctAnswer));
     assert.ok(!q.correctAnswer.includes("NaN"));
-    assert.ok(q.tip.includes("Langkah") || q.tip.includes("CUKUP") || q.tip.includes("Bunga") || q.tip.includes("Promo") || q.tip.includes("Tara") || q.tip.includes("Pajak") || q.tip.includes("Kuantitas"));
+
+    // Pastikan format P vs Q dan kecukupan data tidak lagi digunakan
+    assert.ok(!q.prompt.includes("Kuantitas P"), "Tidak boleh ada soal Kuantitas P vs Q");
+    assert.ok(!q.prompt.includes("Kuantitas Q"), "Tidak boleh ada soal Kuantitas P vs Q");
+    assert.ok(!q.prompt.includes("Pernyataan (1)"), "Tidak boleh ada soal Kecukupan Data");
+    assert.ok(!q.correctAnswer.includes("SAJA cukup"), "Tidak boleh ada opsi kecukupan data");
+
+    // Tip harus informatif dan memiliki panjang memadai
+    assert.ok(q.tip.length > 20, "Tip pembahasan harus detail");
   }
 });
 

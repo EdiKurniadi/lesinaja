@@ -539,7 +539,7 @@ export function GameClient() {
                     Prinsip Logika 100%
                   </p>
                   <p className="text-sm text-foreground/90 leading-relaxed">
-                    Kuasai aritmatika sosial tanpa rumus ribet! Kuasai satu ide kunci: <strong>Nilai Awal Selalu 100%</strong> untuk diskon, laba-rugi, bunga bank, bruto-neto, hingga 10 variasi analitis HOTS TIU SKD.
+                    Kuasai aritmatika sosial tanpa rumus ribet! Kuasai satu ide kunci: <strong>Nilai Awal Selalu 100%</strong> untuk diskon, laba-rugi, bunga bank, bruto-neto, hingga 14 variasi analitis HOTS TIU SKD.
                   </p>
                 </div>
               </div>

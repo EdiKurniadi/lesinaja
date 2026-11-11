@@ -565,9 +565,9 @@ export function AritmatikaGameClient({
                         className="mt-1 size-4 accent-emerald-600"
                       />
                       <div>
-                        <div className="font-black text-sm uppercase">Level 2: Hitung Cepat Nominal</div>
+                        <div className="font-black text-sm uppercase">Level 2: Hitung Cepat Variatif</div>
                         <div className="text-xs text-muted-foreground mt-0.5 leading-relaxed">
-                          Nominal harga awal/pokok/bruto tertera di soal. 1 langkah kalkulasi cepat dengan jaminan angka bulat bersih tanpa koma liar.
+                          Kalkulasi nominal cepat dengan variasi target: mencari nilai kondisi awal (100%), besar potongan/keuntungan (delta), atau kondisi akhir.
                         </div>
                       </div>
                     </div>
@@ -590,7 +590,7 @@ export function AritmatikaGameClient({
                       <div>
                         <div className="font-black text-sm uppercase">Level 3: Kasus Kompleks TIU SKD</div>
                         <div className="text-xs text-muted-foreground mt-0.5 leading-relaxed">
-                          10 Pola Soal HOTS CAT CPNS/Kedinasan: multi-karung eceran, P vs Q kuantitas, kecukupan data, diskon bertingkat, barang busuk, dan PPh ber-PTKP.
+                          Soal cerita analitis HOTS CAT CPNS/Kedinasan: multi-karung eceran, cicilan pinjaman, selisih bunga, susut barang busuk, margin berjenjang, promo grosir, hingga PPh ber-PTKP.
                         </div>
                       </div>
                     </div>
