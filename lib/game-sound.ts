@@ -176,12 +176,13 @@ export function playGameOverSound(): void {
 
 /**
  * ============================================================================
- * BACKGROUND MUSIC SYNTHESIZER (BGM)
- * Menghasilkan arpeggio & harmoni prosedural Web Audio API murni secara offline
+ * BACKGROUND MUSIC SYNTHESIZER (BGM) - KAHOOT VIBES
+ * Menghasilkan instrumen funky, bouncing bassline, countdown clock-ticks,
+ * dan staccato synth leads khas kuis Kahoot secara offline via Web Audio API.
  * Bervariasi untuk masing-masing game:
- * - "hitung": Upbeat & energik arcade (126 BPM)
- * - "aritmatika": Warm Lo-Fi jazz & fokus kalkulasi (90 BPM)
- * - "perbandingan": Playful puzzle & marimba rhythmic (108 BPM)
+ * - "hitung": Kahoot Frenzy (128 BPM, cepat, beradrenalin tinggi)
+ * - "aritmatika": Kahoot Lobby Lounge (120 BPM, funky lounge, santai tapi grooving)
+ * - "perbandingan": Kahoot Trivia Marimba (124 BPM, ritmik marimba kuis ceria)
  * ============================================================================
  */
 
@@ -194,14 +195,77 @@ let bgmFilter: BiquadFilterNode | null = null;
 let currentBgmStep = 0;
 let nextBgmTime = 0;
 
-function playTone(
+/**
+ * Detik jam kuis (Tick-Tock Metronom khas Kahoot)
+ */
+function playKahootTick(
+  ctx: AudioContext,
+  dest: AudioNode,
+  time: number,
+  isHigh: boolean
+): void {
+  try {
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = "sine";
+    // Nada tinggi / rendah untuk aksen detik jam
+    osc.frequency.setValueAtTime(isHigh ? 1320 : 880, time);
+
+    gain.gain.setValueAtTime(0.0001, time);
+    gain.gain.exponentialRampToValueAtTime(0.045, time + 0.003);
+    gain.gain.exponentialRampToValueAtTime(0.0001, time + 0.022);
+
+    osc.connect(gain);
+    gain.connect(dest);
+
+    osc.start(time);
+    osc.stop(time + 0.025);
+  } catch {
+    // Safe ignore
+  }
+}
+
+/**
+ * Funk Bouncy Bass khas Kahoot
+ */
+function playKahootBass(
+  ctx: AudioContext,
+  dest: AudioNode,
+  freq: number,
+  time: number,
+  duration: number
+): void {
+  try {
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = "triangle";
+    osc.frequency.setValueAtTime(freq, time);
+
+    gain.gain.setValueAtTime(0.0001, time);
+    gain.gain.exponentialRampToValueAtTime(0.24, time + 0.012);
+    gain.gain.exponentialRampToValueAtTime(0.0001, time + duration);
+
+    osc.connect(gain);
+    gain.connect(dest);
+
+    osc.start(time);
+    osc.stop(time + duration + 0.02);
+  } catch {
+    // Safe ignore
+  }
+}
+
+/**
+ * Melodi / Akord Staccato Lead khas Kahoot
+ */
+function playKahootLead(
   ctx: AudioContext,
   dest: AudioNode,
   freq: number,
   time: number,
   duration: number,
-  type: OscillatorType,
-  vol: number
+  type: OscillatorType = "sine",
+  vol: number = 0.12
 ): void {
   try {
     const osc = ctx.createOscillator();
@@ -210,42 +274,58 @@ function playTone(
     osc.frequency.setValueAtTime(freq, time);
 
     gain.gain.setValueAtTime(0.0001, time);
-    gain.gain.exponentialRampToValueAtTime(vol, time + 0.015);
+    gain.gain.exponentialRampToValueAtTime(vol, time + 0.008);
     gain.gain.exponentialRampToValueAtTime(0.0001, time + duration);
 
     osc.connect(gain);
     gain.connect(dest);
 
     osc.start(time);
-    osc.stop(time + duration + 0.03);
+    osc.stop(time + duration + 0.02);
   } catch {
     // Safe ignore
   }
 }
 
-// Track 1: Arena Hitung Cepat (Upbeat & Energik, 126 BPM)
-const HITUNG_BASS = [130.81, 0, 98.0, 0, 87.31, 0, 98.0, 0, 110.0, 0, 82.41, 0, 87.31, 0, 98.0, 0];
+// -----------------------------------------------------------------------------
+// TRACK 1: Arena Hitung Cepat (Kahoot Frenzy, 128 BPM)
+// Bouncing slap bass di C minor + arpeggio staccato berkecepatan kuis
+// -----------------------------------------------------------------------------
+const HITUNG_BASS = [
+  65.41, 130.81, 0, 65.41, 77.78, 87.31, 98.0, 0,
+  65.41, 130.81, 116.54, 0, 98.0, 87.31, 77.78, 73.42,
+];
 const HITUNG_LEAD = [
-  523.25, 659.25, 783.99, 659.25, 880.0, 783.99, 659.25, 587.33,
-  523.25, 587.33, 659.25, 783.99, 698.46, 659.25, 587.33, 493.88,
+  523.25, 0, 622.25, 0, 783.99, 698.46, 622.25, 523.25,
+  466.16, 523.25, 622.25, 0, 783.99, 932.33, 783.99, 0,
 ];
 
-// Track 2: Arena Aritmatika Sosial (Chill Lo-Fi Jazz, 90 BPM)
-const ARITM_BASS = [65.41, 0, 130.81, 0, 110.0, 0, 164.81, 0, 73.42, 0, 146.83, 0, 98.0, 0, 146.83, 0];
+// -----------------------------------------------------------------------------
+// TRACK 2: Arena Aritmatika Sosial (Kahoot Lobby Lounge, 120 BPM)
+// Funk groove santai tapi grooving, akord stabs melompat khas ruang tunggu Kahoot
+// -----------------------------------------------------------------------------
+const ARITM_BASS = [
+  73.42, 0, 146.83, 73.42, 87.31, 0, 98.0, 110.0,
+  73.42, 0, 130.81, 0, 98.0, 0, 110.0, 130.81,
+];
 const ARITM_CHORD: (number[] | null)[] = [
-  [329.63, 493.88], [392.0], [329.63, 659.25], [587.33],
-  [261.63, 392.0], [329.63], [261.63, 523.25], [493.88],
-  [349.23, 523.25], [440.0], [349.23, 698.46], [659.25],
-  [349.23, 493.88], [587.33], [293.66, 392.0], [493.88],
+  [349.23, 440.0], null, [349.23, 523.25], null,
+  [392.0, 587.33], null, [440.0, 659.25], null,
+  [349.23, 523.25], null, [329.63, 493.88], null,
+  [293.66, 440.0], null, [349.23, 587.33], null,
 ];
 
-// Track 3: Arena Perbandingan (Playful Marimba Puzzle, 108 BPM)
-const PERBAND_BASS = [146.83, 0, 146.83, 0, 123.47, 0, 123.47, 0, 98.0, 0, 98.0, 0, 110.0, 0, 110.0, 0];
+// -----------------------------------------------------------------------------
+// TRACK 3: Arena Perbandingan (Kahoot Trivia Marimba, 124 BPM)
+// Marimba plink khas trivia game dengan ritme timbangan yang melenting
+// -----------------------------------------------------------------------------
+const PERBAND_BASS = [
+  98.0, 196.0, 0, 98.0, 123.47, 0, 130.81, 146.83,
+  82.41, 164.81, 0, 82.41, 146.83, 0, 130.81, 123.47,
+];
 const PERBAND_PLINK = [
-  440.0, 369.99, 587.33, 440.0,
-  392.0, 493.88, 659.25, 587.33,
-  493.88, 587.33, 783.99, 739.99,
-  329.63, 440.0, 554.37, 659.25,
+  392.0, 493.88, 587.33, 0, 783.99, 587.33, 493.88, 0,
+  659.25, 783.99, 987.77, 880.0, 783.99, 659.25, 587.33, 0,
 ];
 
 function scheduleStep(
@@ -256,34 +336,40 @@ function scheduleStep(
   stepDur: number,
   filter: BiquadFilterNode
 ): void {
+  // 1. Tick metronom countdown kuis Kahoot (pada ketukan genap)
+  if (step % 2 === 0) {
+    playKahootTick(ctx, filter, time, step % 4 === 0);
+  }
+
+  // 2. Instrumen nada sesuai track
   if (track === "hitung") {
     const bFreq = HITUNG_BASS[step];
     if (bFreq && bFreq > 0) {
-      playTone(ctx, filter, bFreq, time, stepDur * 0.7, "triangle", 0.16);
+      playKahootBass(ctx, filter, bFreq, time, stepDur * 0.65);
     }
     const lFreq = HITUNG_LEAD[step];
     if (lFreq && lFreq > 0) {
-      playTone(ctx, filter, lFreq, time, stepDur * 0.85, "sine", 0.12);
+      playKahootLead(ctx, filter, lFreq, time, stepDur * 0.5, "triangle", 0.13);
     }
   } else if (track === "aritmatika") {
     const bFreq = ARITM_BASS[step];
     if (bFreq && bFreq > 0) {
-      playTone(ctx, filter, bFreq, time, stepDur * 0.9, "sine", 0.18);
+      playKahootBass(ctx, filter, bFreq, time, stepDur * 0.7);
     }
     const notes = ARITM_CHORD[step];
     if (notes) {
       notes.forEach((freq) => {
-        playTone(ctx, filter, freq, time, stepDur * 0.8, "triangle", 0.08);
+        playKahootLead(ctx, filter, freq, time, stepDur * 0.5, "sine", 0.09);
       });
     }
   } else if (track === "perbandingan") {
     const bFreq = PERBAND_BASS[step];
     if (bFreq && bFreq > 0) {
-      playTone(ctx, filter, bFreq, time, stepDur * 0.6, "triangle", 0.15);
+      playKahootBass(ctx, filter, bFreq, time, stepDur * 0.6);
     }
     const pFreq = PERBAND_PLINK[step];
     if (pFreq && pFreq > 0) {
-      playTone(ctx, filter, pFreq, time, stepDur * 0.55, "triangle", 0.14);
+      playKahootLead(ctx, filter, pFreq, time, stepDur * 0.45, "triangle", 0.14);
     }
   }
 }
@@ -308,15 +394,15 @@ export function startBackgroundMusic(track: BGMTrack): void {
   try {
     const masterGain = ctx.createGain();
     masterGain.gain.setValueAtTime(0.0001, ctx.currentTime);
-    masterGain.gain.linearRampToValueAtTime(0.22, ctx.currentTime + 0.3);
+    masterGain.gain.linearRampToValueAtTime(0.24, ctx.currentTime + 0.25);
 
     const filter = ctx.createBiquadFilter();
     filter.type = "lowpass";
     filter.frequency.setValueAtTime(
-      track === "aritmatika" ? 850 : track === "perbandingan" ? 1150 : 1300,
+      track === "aritmatika" ? 1100 : track === "perbandingan" ? 1250 : 1400,
       ctx.currentTime
     );
-    filter.Q.setValueAtTime(1, ctx.currentTime);
+    filter.Q.setValueAtTime(1.2, ctx.currentTime);
 
     filter.connect(masterGain);
     masterGain.connect(ctx.destination);
@@ -324,11 +410,12 @@ export function startBackgroundMusic(track: BGMTrack): void {
     bgmMasterGain = masterGain;
     bgmFilter = filter;
 
-    let stepDuration = 0.238; // 126 BPM
+    // Tempo energik khas Kahoot (120 - 128 BPM)
+    let stepDuration = 0.234; // 128 BPM (Hitung)
     if (track === "aritmatika") {
-      stepDuration = 0.333; // 90 BPM
+      stepDuration = 0.25; // 120 BPM (Aritmatika)
     } else if (track === "perbandingan") {
-      stepDuration = 0.278; // 108 BPM
+      stepDuration = 0.242; // 124 BPM (Perbandingan)
     }
 
     nextBgmTime = ctx.currentTime + 0.05;
