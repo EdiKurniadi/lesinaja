@@ -288,44 +288,73 @@ function playKahootLead(
 }
 
 // -----------------------------------------------------------------------------
-// TRACK 1: Arena Hitung Cepat (Kahoot Frenzy, 128 BPM)
-// Bouncing slap bass di C minor + arpeggio staccato berkecepatan kuis
+// TRACK 1: Arena Hitung Cepat (Kahoot Frenzy - 32 Steps Multi-Part)
+// Part A (0..15): Bouncing slap bass di C minor + staccato lead hook
+// Part B (16..31): Funk lift (F -> G -> Bb -> C) + rapid countdown arpeggio
 // -----------------------------------------------------------------------------
 const HITUNG_BASS = [
+  // Part A (0..15)
   65.41, 130.81, 0, 65.41, 77.78, 87.31, 98.0, 0,
   65.41, 130.81, 116.54, 0, 98.0, 87.31, 77.78, 73.42,
+  // Part B (16..31) - The Lift
+  87.31, 174.61, 0, 87.31, 98.0, 196.0, 0, 98.0,
+  116.54, 233.08, 0, 116.54, 130.81, 116.54, 98.0, 87.31,
 ];
 const HITUNG_LEAD = [
+  // Part A (0..15)
   523.25, 0, 622.25, 0, 783.99, 698.46, 622.25, 523.25,
   466.16, 523.25, 622.25, 0, 783.99, 932.33, 783.99, 0,
+  // Part B (16..31) - Rapid Arp Run
+  698.46, 783.99, 932.33, 1046.5, 932.33, 783.99, 698.46, 622.25,
+  783.99, 932.33, 1046.5, 1174.66, 1046.5, 932.33, 783.99, 622.25,
 ];
 
 // -----------------------------------------------------------------------------
-// TRACK 2: Arena Aritmatika Sosial (Kahoot Lobby Lounge, 120 BPM)
-// Funk groove santai tapi grooving, akord stabs melompat khas ruang tunggu Kahoot
+// TRACK 2: Arena Aritmatika Sosial (Kahoot Lobby Lounge - 32 Steps Multi-Part)
+// Part A (0..15): Funk groove D minor + akord stabs melompat
+// Part B (16..31): Walking funk bass + counterpoint melody staccato
 // -----------------------------------------------------------------------------
 const ARITM_BASS = [
+  // Part A (0..15)
   73.42, 0, 146.83, 73.42, 87.31, 0, 98.0, 110.0,
   73.42, 0, 130.81, 0, 98.0, 0, 110.0, 130.81,
+  // Part B (16..31) - Walking Bass
+  110.0, 0, 98.0, 0, 87.31, 0, 73.42, 0,
+  65.41, 130.81, 0, 73.42, 87.31, 98.0, 110.0, 130.81,
 ];
 const ARITM_CHORD: (number[] | null)[] = [
+  // Part A (0..15)
   [349.23, 440.0], null, [349.23, 523.25], null,
   [392.0, 587.33], null, [440.0, 659.25], null,
   [349.23, 523.25], null, [329.63, 493.88], null,
   [293.66, 440.0], null, [349.23, 587.33], null,
+  // Part B (16..31) - Melodic Staccato Lounge
+  [440.0], [523.25], null, [587.33],
+  null, [659.25], [587.33], [523.25],
+  [440.0], null, [392.0], [440.0],
+  [523.25], null, [440.0], null,
 ];
 
 // -----------------------------------------------------------------------------
-// TRACK 3: Arena Perbandingan (Kahoot Trivia Marimba, 124 BPM)
-// Marimba plink khas trivia game dengan ritme timbangan yang melenting
+// TRACK 3: Arena Perbandingan (Kahoot Trivia Marimba - 32 Steps Multi-Part)
+// Part A (0..15): Marimba pentatonik G ceria + bouncing bass
+// Part B (16..31): Dialog plink melenting C & D scale transition
 // -----------------------------------------------------------------------------
 const PERBAND_BASS = [
+  // Part A (0..15)
   98.0, 196.0, 0, 98.0, 123.47, 0, 130.81, 146.83,
   82.41, 164.81, 0, 82.41, 146.83, 0, 130.81, 123.47,
+  // Part B (16..31) - Lift to C & D
+  130.81, 0, 196.0, 130.81, 146.83, 0, 220.0, 146.83,
+  98.0, 146.83, 196.0, 0, 146.83, 130.81, 123.47, 98.0,
 ];
 const PERBAND_PLINK = [
+  // Part A (0..15)
   392.0, 493.88, 587.33, 0, 783.99, 587.33, 493.88, 0,
   659.25, 783.99, 987.77, 880.0, 783.99, 659.25, 587.33, 0,
+  // Part B (16..31) - Fast Plink Dialogue
+  587.33, 659.25, 783.99, 880.0, 987.77, 0, 880.0, 783.99,
+  659.25, 0, 587.33, 493.88, 392.0, 493.88, 587.33, 0,
 ];
 
 function scheduleStep(
@@ -336,12 +365,14 @@ function scheduleStep(
   stepDur: number,
   filter: BiquadFilterNode
 ): void {
-  // 1. Tick metronom countdown kuis Kahoot (pada ketukan genap)
-  if (step % 2 === 0) {
-    playKahootTick(ctx, filter, time, step % 4 === 0);
+  // 1. Tick metronom countdown kuis Kahoot
+  // Pada akhir frase (step 28..31), detak berbunyi setiap step untuk sensasi countdown
+  const isCountdownRush = step >= 28;
+  if (isCountdownRush || step % 2 === 0) {
+    playKahootTick(ctx, filter, time, step % 4 === 0 || isCountdownRush);
   }
 
-  // 2. Instrumen nada sesuai track
+  // 2. Instrumen nada sesuai track (32 steps loop)
   if (track === "hitung") {
     const bFreq = HITUNG_BASS[step];
     if (bFreq && bFreq > 0) {
@@ -359,7 +390,7 @@ function scheduleStep(
     const notes = ARITM_CHORD[step];
     if (notes) {
       notes.forEach((freq) => {
-        playKahootLead(ctx, filter, freq, time, stepDur * 0.5, "sine", 0.09);
+        playKahootLead(ctx, filter, freq, time, stepDur * 0.5, "sine", 0.1);
       });
     }
   } else if (track === "perbandingan") {
@@ -429,7 +460,7 @@ export function startBackgroundMusic(track: BGMTrack): void {
       while (nextBgmTime < ctx.currentTime + lookahead) {
         scheduleStep(ctx, track, currentBgmStep, nextBgmTime, stepDuration, bgmFilter);
         nextBgmTime += stepDuration;
-        currentBgmStep = (currentBgmStep + 1) % 16;
+        currentBgmStep = (currentBgmStep + 1) % 32;
       }
     }, 40);
   } catch {
