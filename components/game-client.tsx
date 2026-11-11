@@ -41,12 +41,15 @@ import {
 import {
   createDefaultAritmatikaStats,
   createDefaultGameStats,
+  createDefaultPerbandinganStats,
   readAritmatikaStats,
   readGameStats,
+  readPerbandinganStats,
   updateGameStats,
   type GameStats,
 } from "@/lib/game-storage";
 import { AritmatikaGameClient } from "@/components/aritmatika-game-client";
+import { PerbandinganGameClient } from "@/components/perbandingan-game-client";
 
 interface AnswerHistoryItem {
   question: GameQuestion;
@@ -57,8 +60,8 @@ interface AnswerHistoryItem {
 
 export function GameClient() {
   // --- Game Selection State ---
-  // null = Menampilkan Daftar Game (Katalog); "arena-hitung" = Arena Hitung Cepat; "aritmatika-sosial" = Arena Aritmatika Sosial
-  const [activeGame, setActiveGame] = useState<"arena-hitung" | "aritmatika-sosial" | null>(null);
+  // null = Menampilkan Daftar Game (Katalog); "arena-hitung" = Arena Hitung Cepat; "aritmatika-sosial" = Arena Aritmatika Sosial; "perbandingan" = Arena Perbandingan
+  const [activeGame, setActiveGame] = useState<"arena-hitung" | "aritmatika-sosial" | "perbandingan" | null>(null);
 
   // --- Arena Hitung Cepat State ---
   const [category, setCategory] = useState<GameCategory>("mixed");
@@ -71,6 +74,7 @@ export function GameClient() {
   const [gameState, setGameState] = useState<"lobby" | "playing" | "summary">("lobby");
   const [stats, setStats] = useState<GameStats>(createDefaultGameStats);
   const [aritmStats, setAritmStats] = useState<GameStats>(createDefaultAritmatikaStats);
+  const [propStats, setPropStats] = useState<GameStats>(createDefaultPerbandinganStats);
 
   // Active match data
   const [questions, setQuestions] = useState<GameQuestion[]>([]);
@@ -93,12 +97,12 @@ export function GameClient() {
   const timerIntervalRef = useRef<number | null>(null);
   const autoAdvanceTimeoutRef = useRef<number | null>(null);
 
-  // Sync with URL query param ?play=arena-hitung or ?play=aritmatika-sosial and hydrate localStorage state
+  // Sync with URL query param ?play=... and hydrate localStorage state
   useEffect(() => {
     const syncFromUrl = () => {
       const params = new URLSearchParams(window.location.search);
       const play = params.get("play");
-      if (play === "arena-hitung" || play === "aritmatika-sosial") {
+      if (play === "arena-hitung" || play === "aritmatika-sosial" || play === "perbandingan") {
         setActiveGame(play);
       } else {
         setActiveGame(null);
@@ -109,6 +113,7 @@ export function GameClient() {
       syncFromUrl();
       setStats(readGameStats());
       setAritmStats(readAritmatikaStats());
+      setPropStats(readPerbandinganStats());
       setSoundOn(isSoundEnabled());
     }, 0);
 
@@ -119,7 +124,7 @@ export function GameClient() {
     };
   }, []);
 
-  const openGame = (gameId: "arena-hitung" | "aritmatika-sosial") => {
+  const openGame = (gameId: "arena-hitung" | "aritmatika-sosial" | "perbandingan") => {
     setActiveGame(gameId);
     if (typeof window !== "undefined") {
       const url = new URL(window.location.href);
@@ -133,6 +138,7 @@ export function GameClient() {
     // Refresh stats when closing game back to catalog
     setStats(readGameStats());
     setAritmStats(readAritmatikaStats());
+    setPropStats(readPerbandinganStats());
     if (typeof window !== "undefined") {
       const url = new URL(window.location.href);
       url.searchParams.delete("play");
@@ -459,21 +465,24 @@ export function GameClient() {
             <div className="flex items-center gap-2">
               <Gamepad2 className="size-5 text-brand-blue" />
               <span className="font-mono text-xs sm:text-sm font-bold uppercase tracking-wider">
-                2 Game Tersedia · 1 Game Segera Hadir
+                3 Game Tersedia · 1 Game Segera Hadir
               </span>
             </div>
-            <div className="flex items-center gap-4 font-mono text-xs">
+            <div className="flex flex-wrap items-center gap-4 font-mono text-xs">
               <span className="text-muted-foreground">
-                Rekor Hitung: <strong className="text-brand-red" suppressHydrationWarning>{stats.survivalHighScore} PTS</strong>
+                Hitung: <strong className="text-brand-red" suppressHydrationWarning>{stats.survivalHighScore} PTS</strong>
               </span>
               <span className="text-muted-foreground">
-                Rekor Aritmatika: <strong className="text-emerald-700" suppressHydrationWarning>{aritmStats.survivalHighScore} PTS</strong>
+                Aritmatika: <strong className="text-emerald-700" suppressHydrationWarning>{aritmStats.survivalHighScore} PTS</strong>
+              </span>
+              <span className="text-muted-foreground">
+                Perbandingan: <strong className="text-cyan-800" suppressHydrationWarning>{propStats.survivalHighScore} PTS</strong>
               </span>
             </div>
           </div>
 
-          {/* Game Cards Grid */}
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {/* Game Cards Grid (2x2 Layout) */}
+          <div className="grid md:grid-cols-2 gap-6">
             {/* GAME 1: ARENA HITUNG CEPAT (ACTIVE) */}
             <div className="border-2 border-black bg-card p-6 sm:p-7 shadow-[6px_6px_0_#10100f] flex flex-col justify-between space-y-6 relative overflow-hidden group hover:translate-x-0.5 hover:translate-y-0.5 transition-transform">
               <div className="space-y-4">
@@ -564,7 +573,52 @@ export function GameClient() {
               </div>
             </div>
 
-            {/* GAME 3: POLA ANGKA RAHASIA (COMING SOON) */}
+            {/* GAME 3: ARENA PERBANDINGAN (ACTIVE) */}
+            <div className="border-2 border-black bg-card p-6 sm:p-7 shadow-[6px_6px_0_#10100f] flex flex-col justify-between space-y-6 relative overflow-hidden group hover:translate-x-0.5 hover:translate-y-0.5 transition-transform">
+              <div className="space-y-4">
+                <div className="flex items-center justify-between gap-2 border-b-2 border-black pb-3">
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1 font-mono text-xs font-black uppercase border border-black bg-cyan-400 text-black">
+                    <Zap className="size-3.5 fill-current text-cyan-950" /> Siap Dimainkan
+                  </span>
+                  <span className="font-mono text-xs font-bold text-cyan-800 uppercase">
+                    Perbandingan TIU HOTS
+                  </span>
+                </div>
+
+                <div className="space-y-2">
+                  <h3 className="text-2xl font-black uppercase tracking-tight flex items-center gap-2">
+                    Arena Perbandingan
+                  </h3>
+                  <p className="font-mono text-xs font-bold text-muted-foreground">
+                    Rasio, Senilai & Berbalik Nilai
+                  </p>
+                  <p className="text-sm text-foreground/90 leading-relaxed">
+                    Kuasai 3 pilar perbandingan: <strong>Konsep Rasio 2 & 3 Objek</strong> (jumlah total, jumlah 2 objek, selisih), <strong>Perbandingan Senilai</strong> (pekerja, bensin, output), dan <strong>Berbalik Nilai</strong> (pakan ternak, kecepatan, proyek).
+                  </p>
+                </div>
+              </div>
+
+              <div className="pt-4 border-t-2 border-black/20 flex flex-wrap items-center justify-between gap-3">
+                <div className="font-mono text-xs">
+                  <span className="text-muted-foreground">Rekor: </span>
+                  <span className="font-black text-cyan-800" suppressHydrationWarning>{propStats.survivalHighScore} PTS</span>
+                  {propStats.survivalBestStreak > 0 && (
+                    <span className="text-amber-600 ml-1 font-bold" suppressHydrationWarning>
+                      ({propStats.survivalBestStreak}x 🔥)
+                    </span>
+                  )}
+                </div>
+
+                <Button
+                  onClick={() => openGame("perbandingan")}
+                  className="h-11 px-5 border-2 border-black bg-cyan-700 hover:bg-cyan-800 text-white font-mono text-xs font-black uppercase tracking-wider shadow-[3px_3px_0_#10100f]"
+                >
+                  Mainkan <ArrowRight className="size-3.5 ml-1" />
+                </Button>
+              </div>
+            </div>
+
+            {/* GAME 4: POLA ANGKA RAHASIA (COMING SOON) */}
             <div className="border-2 border-black bg-warm-white/60 p-6 sm:p-7 shadow-[4px_4px_0_#10100f] flex flex-col justify-between space-y-6 opacity-85">
               <div className="space-y-4">
                 <div className="flex items-center justify-between gap-2 border-b-2 border-black/30 pb-3">
@@ -616,7 +670,20 @@ export function GameClient() {
   }
 
   // =========================================================================
-  // VIEW 3: ARENA HITUNG CEPAT (GAMEPLAY)
+  // VIEW 3: ARENA PERBANDINGAN (GAMEPLAY)
+  // =========================================================================
+  if (activeGame === "perbandingan") {
+    return (
+      <PerbandinganGameClient
+        onBack={closeGame}
+        soundOn={soundOn}
+        onToggleSound={toggleSound}
+      />
+    );
+  }
+
+  // =========================================================================
+  // VIEW 4: ARENA HITUNG CEPAT (GAMEPLAY)
   // =========================================================================
   return (
     <PageFrame

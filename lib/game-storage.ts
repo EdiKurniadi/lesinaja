@@ -174,3 +174,77 @@ export function updateAritmatikaStats(
   return next;
 }
 
+const PERBANDINGAN_STORAGE_KEY = "lesinaja.perbandingan.stats.v1";
+
+export function createDefaultPerbandinganStats(): GameStats {
+  return createDefaultGameStats();
+}
+
+export function readPerbandinganStats(): GameStats {
+  if (typeof window === "undefined") return createDefaultPerbandinganStats();
+  try {
+    const raw = window.localStorage.getItem(PERBANDINGAN_STORAGE_KEY);
+    if (!raw) return createDefaultPerbandinganStats();
+    const parsed = JSON.parse(raw);
+    return {
+      totalPlayed: typeof parsed.totalPlayed === "number" ? parsed.totalPlayed : 0,
+      totalAnswered: typeof parsed.totalAnswered === "number" ? parsed.totalAnswered : 0,
+      totalCorrect: typeof parsed.totalCorrect === "number" ? parsed.totalCorrect : 0,
+      survivalHighScore: typeof parsed.survivalHighScore === "number" ? parsed.survivalHighScore : 0,
+      survivalBestStreak: typeof parsed.survivalBestStreak === "number" ? parsed.survivalBestStreak : 0,
+      fixedBestScore: {
+        5: typeof parsed.fixedBestScore?.["5"] === "number" ? parsed.fixedBestScore["5"] : 0,
+        10: typeof parsed.fixedBestScore?.["10"] === "number" ? parsed.fixedBestScore["10"] : 0,
+        20: typeof parsed.fixedBestScore?.["20"] === "number" ? parsed.fixedBestScore["20"] : 0,
+      },
+      lastPlayedAt: typeof parsed.lastPlayedAt === "number" ? parsed.lastPlayedAt : 0,
+    };
+  } catch {
+    return createDefaultPerbandinganStats();
+  }
+}
+
+export function writePerbandinganStats(stats: GameStats): void {
+  if (typeof window === "undefined") return;
+  try {
+    window.localStorage.setItem(PERBANDINGAN_STORAGE_KEY, JSON.stringify(stats));
+  } catch {
+    // quota exceeded or private mode
+  }
+}
+
+export function updatePerbandinganStats(
+  result: {
+    mode: "fixed" | "survival";
+    fixedCount?: 5 | 10 | 20;
+    score: number;
+    streak: number;
+    answered: number;
+    correct: number;
+  }
+): GameStats {
+  const current = readPerbandinganStats();
+  const next: GameStats = {
+    ...current,
+    totalPlayed: current.totalPlayed + 1,
+    totalAnswered: current.totalAnswered + result.answered,
+    totalCorrect: current.totalCorrect + result.correct,
+    lastPlayedAt: Date.now(),
+  };
+
+  if (result.mode === "survival") {
+    next.survivalHighScore = Math.max(current.survivalHighScore, result.score);
+    next.survivalBestStreak = Math.max(current.survivalBestStreak, result.streak);
+  } else if (result.fixedCount && [5, 10, 20].includes(result.fixedCount)) {
+    const currentBest = current.fixedBestScore[result.fixedCount] || 0;
+    next.fixedBestScore = {
+      ...current.fixedBestScore,
+      [result.fixedCount]: Math.max(currentBest, result.score),
+    };
+  }
+
+  writePerbandinganStats(next);
+  return next;
+}
+
+
