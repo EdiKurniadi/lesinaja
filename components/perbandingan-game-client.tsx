@@ -644,15 +644,12 @@ export function PerbandinganGameClient({
                       </div>
                     </button>
 
-                    <div className="p-3.5 border-2 border-black/40 bg-neutral-100 text-neutral-500 text-left relative cursor-not-allowed">
+                    <div className="p-3.5 border-2 border-black/40 bg-neutral-100 text-neutral-500 text-left relative cursor-not-allowed flex flex-col justify-center">
                       <div className="flex items-center justify-between font-mono text-xs font-black uppercase">
                         <span>Level 2: Lanjutan</span>
                         <span className="inline-flex items-center gap-1 text-[10px] bg-neutral-200 px-1.5 py-0.5 border border-black/30">
                           <Lock className="size-2.5" /> Coming Soon
                         </span>
-                      </div>
-                      <div className="text-xs mt-1 opacity-80">
-                        Perbandingan umur masa lampau, proyek terhenti cuaca, dan rasio majemuk
                       </div>
                     </div>
                   </div>
