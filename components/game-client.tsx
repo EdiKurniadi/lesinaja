@@ -39,11 +39,14 @@ import {
   setSoundEnabled,
 } from "@/lib/game-sound";
 import {
+  createDefaultAritmatikaStats,
   createDefaultGameStats,
+  readAritmatikaStats,
   readGameStats,
   updateGameStats,
   type GameStats,
 } from "@/lib/game-storage";
+import { AritmatikaGameClient } from "@/components/aritmatika-game-client";
 
 interface AnswerHistoryItem {
   question: GameQuestion;
@@ -54,8 +57,8 @@ interface AnswerHistoryItem {
 
 export function GameClient() {
   // --- Game Selection State ---
-  // null = Menampilkan Daftar Game (Katalog); "arena-hitung" = Game Arena Hitung Cepat
-  const [activeGame, setActiveGame] = useState<"arena-hitung" | null>(null);
+  // null = Menampilkan Daftar Game (Katalog); "arena-hitung" = Arena Hitung Cepat; "aritmatika-sosial" = Arena Aritmatika Sosial
+  const [activeGame, setActiveGame] = useState<"arena-hitung" | "aritmatika-sosial" | null>(null);
 
   // --- Arena Hitung Cepat State ---
   const [category, setCategory] = useState<GameCategory>("mixed");
@@ -67,6 +70,7 @@ export function GameClient() {
 
   const [gameState, setGameState] = useState<"lobby" | "playing" | "summary">("lobby");
   const [stats, setStats] = useState<GameStats>(createDefaultGameStats);
+  const [aritmStats, setAritmStats] = useState<GameStats>(createDefaultAritmatikaStats);
 
   // Active match data
   const [questions, setQuestions] = useState<GameQuestion[]>([]);
@@ -89,12 +93,13 @@ export function GameClient() {
   const timerIntervalRef = useRef<number | null>(null);
   const autoAdvanceTimeoutRef = useRef<number | null>(null);
 
-  // Sync with URL query param ?play=arena-hitung and hydrate localStorage state
+  // Sync with URL query param ?play=arena-hitung or ?play=aritmatika-sosial and hydrate localStorage state
   useEffect(() => {
     const syncFromUrl = () => {
       const params = new URLSearchParams(window.location.search);
-      if (params.get("play") === "arena-hitung") {
-        setActiveGame("arena-hitung");
+      const play = params.get("play");
+      if (play === "arena-hitung" || play === "aritmatika-sosial") {
+        setActiveGame(play);
       } else {
         setActiveGame(null);
       }
@@ -103,6 +108,7 @@ export function GameClient() {
     const initialSyncTimer = window.setTimeout(() => {
       syncFromUrl();
       setStats(readGameStats());
+      setAritmStats(readAritmatikaStats());
       setSoundOn(isSoundEnabled());
     }, 0);
 
@@ -113,7 +119,7 @@ export function GameClient() {
     };
   }, []);
 
-  const openGame = (gameId: "arena-hitung") => {
+  const openGame = (gameId: "arena-hitung" | "aritmatika-sosial") => {
     setActiveGame(gameId);
     if (typeof window !== "undefined") {
       const url = new URL(window.location.href);
@@ -124,6 +130,9 @@ export function GameClient() {
 
   const closeGame = () => {
     setActiveGame(null);
+    // Refresh stats when closing game back to catalog
+    setStats(readGameStats());
+    setAritmStats(readAritmatikaStats());
     if (typeof window !== "undefined") {
       const url = new URL(window.location.href);
       url.searchParams.delete("play");
@@ -450,23 +459,23 @@ export function GameClient() {
             <div className="flex items-center gap-2">
               <Gamepad2 className="size-5 text-brand-blue" />
               <span className="font-mono text-xs sm:text-sm font-bold uppercase tracking-wider">
-                1 Game Tersedia · 1 Game Segera Hadir
+                2 Game Tersedia · 1 Game Segera Hadir
               </span>
             </div>
             <div className="flex items-center gap-4 font-mono text-xs">
               <span className="text-muted-foreground">
-                Rekor Survival: <strong className="text-brand-red" suppressHydrationWarning>{stats.survivalHighScore} PTS</strong>
+                Rekor Hitung: <strong className="text-brand-red" suppressHydrationWarning>{stats.survivalHighScore} PTS</strong>
               </span>
               <span className="text-muted-foreground">
-                Total Soal: <strong className="text-foreground" suppressHydrationWarning>{stats.totalAnswered}</strong>
+                Rekor Aritmatika: <strong className="text-emerald-700" suppressHydrationWarning>{aritmStats.survivalHighScore} PTS</strong>
               </span>
             </div>
           </div>
 
           {/* Game Cards Grid */}
-          <div className="grid md:grid-cols-2 gap-6">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {/* GAME 1: ARENA HITUNG CEPAT (ACTIVE) */}
-            <div className="border-2 border-black bg-card p-6 sm:p-8 shadow-[6px_6px_0_#10100f] flex flex-col justify-between space-y-6 relative overflow-hidden group hover:translate-x-0.5 hover:translate-y-0.5 transition-transform">
+            <div className="border-2 border-black bg-card p-6 sm:p-7 shadow-[6px_6px_0_#10100f] flex flex-col justify-between space-y-6 relative overflow-hidden group hover:translate-x-0.5 hover:translate-y-0.5 transition-transform">
               <div className="space-y-4">
                 <div className="flex items-center justify-between gap-2 border-b-2 border-black pb-3">
                   <span className="inline-flex items-center gap-1.5 px-3 py-1 font-mono text-xs font-black uppercase border border-black bg-signal text-black">
@@ -478,7 +487,7 @@ export function GameClient() {
                 </div>
 
                 <div className="space-y-2">
-                  <h3 className="text-2xl sm:text-3xl font-black uppercase tracking-tight flex items-center gap-2">
+                  <h3 className="text-2xl font-black uppercase tracking-tight flex items-center gap-2">
                     Arena Hitung Cepat
                   </h3>
                   <p className="font-mono text-xs font-bold text-muted-foreground">
@@ -492,10 +501,10 @@ export function GameClient() {
 
               <div className="pt-4 border-t-2 border-black/20 flex flex-wrap items-center justify-between gap-3">
                 <div className="font-mono text-xs">
-                  <span className="text-muted-foreground">Rekor Terbaik: </span>
+                  <span className="text-muted-foreground">Rekor: </span>
                   <span className="font-black text-brand-blue" suppressHydrationWarning>{stats.survivalHighScore} PTS</span>
                   {stats.survivalBestStreak > 0 && (
-                    <span className="text-amber-600 ml-1.5 font-bold" suppressHydrationWarning>
+                    <span className="text-amber-600 ml-1 font-bold" suppressHydrationWarning>
                       ({stats.survivalBestStreak}x 🔥)
                     </span>
                   )}
@@ -503,15 +512,60 @@ export function GameClient() {
 
                 <Button
                   onClick={() => openGame("arena-hitung")}
-                  className="h-12 px-6 border-2 border-black bg-brand-blue hover:bg-brand-blue-hover text-white font-mono text-sm font-black uppercase tracking-wider shadow-[3px_3px_0_#10100f]"
+                  className="h-11 px-5 border-2 border-black bg-brand-blue hover:bg-brand-blue-hover text-white font-mono text-xs font-black uppercase tracking-wider shadow-[3px_3px_0_#10100f]"
                 >
-                  Mainkan Sekarang <ArrowRight className="size-4 ml-1.5" />
+                  Mainkan <ArrowRight className="size-3.5 ml-1" />
                 </Button>
               </div>
             </div>
 
-            {/* GAME 2: POLA ANGKA RAHASIA (COMING SOON) */}
-            <div className="border-2 border-black bg-warm-white/60 p-6 sm:p-8 shadow-[4px_4px_0_#10100f] flex flex-col justify-between space-y-6 opacity-85">
+            {/* GAME 2: ARENA ARITMATIKA SOSIAL (ACTIVE) */}
+            <div className="border-2 border-black bg-card p-6 sm:p-7 shadow-[6px_6px_0_#10100f] flex flex-col justify-between space-y-6 relative overflow-hidden group hover:translate-x-0.5 hover:translate-y-0.5 transition-transform">
+              <div className="space-y-4">
+                <div className="flex items-center justify-between gap-2 border-b-2 border-black pb-3">
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1 font-mono text-xs font-black uppercase border border-black bg-emerald-400 text-black">
+                    <Zap className="size-3.5 fill-current text-emerald-950" /> Siap Dimainkan
+                  </span>
+                  <span className="font-mono text-xs font-bold text-emerald-700 uppercase">
+                    Aritmatika TIU HOTS
+                  </span>
+                </div>
+
+                <div className="space-y-2">
+                  <h3 className="text-2xl font-black uppercase tracking-tight flex items-center gap-2">
+                    Aritmatika Sosial
+                  </h3>
+                  <p className="font-mono text-xs font-bold text-muted-foreground">
+                    Prinsip Logika 100%
+                  </p>
+                  <p className="text-sm text-foreground/90 leading-relaxed">
+                    Kuasai aritmatika sosial tanpa rumus ribet! Kuasai satu ide kunci: <strong>Nilai Awal Selalu 100%</strong> untuk diskon, laba-rugi, bunga bank, bruto-neto, hingga 10 variasi analitis HOTS TIU SKD.
+                  </p>
+                </div>
+              </div>
+
+              <div className="pt-4 border-t-2 border-black/20 flex flex-wrap items-center justify-between gap-3">
+                <div className="font-mono text-xs">
+                  <span className="text-muted-foreground">Rekor: </span>
+                  <span className="font-black text-emerald-700" suppressHydrationWarning>{aritmStats.survivalHighScore} PTS</span>
+                  {aritmStats.survivalBestStreak > 0 && (
+                    <span className="text-amber-600 ml-1 font-bold" suppressHydrationWarning>
+                      ({aritmStats.survivalBestStreak}x 🔥)
+                    </span>
+                  )}
+                </div>
+
+                <Button
+                  onClick={() => openGame("aritmatika-sosial")}
+                  className="h-11 px-5 border-2 border-black bg-emerald-600 hover:bg-emerald-700 text-white font-mono text-xs font-black uppercase tracking-wider shadow-[3px_3px_0_#10100f]"
+                >
+                  Mainkan <ArrowRight className="size-3.5 ml-1" />
+                </Button>
+              </div>
+            </div>
+
+            {/* GAME 3: POLA ANGKA RAHASIA (COMING SOON) */}
+            <div className="border-2 border-black bg-warm-white/60 p-6 sm:p-7 shadow-[4px_4px_0_#10100f] flex flex-col justify-between space-y-6 opacity-85">
               <div className="space-y-4">
                 <div className="flex items-center justify-between gap-2 border-b-2 border-black/30 pb-3">
                   <span className="inline-flex items-center gap-1.5 px-3 py-1 font-mono text-xs font-black uppercase border border-black/40 bg-neutral-200 text-neutral-700">
@@ -523,7 +577,7 @@ export function GameClient() {
                 </div>
 
                 <div className="space-y-2">
-                  <h3 className="text-2xl sm:text-3xl font-black uppercase tracking-tight text-neutral-800">
+                  <h3 className="text-2xl font-black uppercase tracking-tight text-neutral-800">
                     Pola Angka Rahasia
                   </h3>
                   <p className="font-mono text-xs font-bold text-muted-foreground">
@@ -549,7 +603,20 @@ export function GameClient() {
   }
 
   // =========================================================================
-  // VIEW 2: ARENA HITUNG CEPAT (GAMEPLAY)
+  // VIEW 2: ARENA ARITMATIKA SOSIAL (GAMEPLAY)
+  // =========================================================================
+  if (activeGame === "aritmatika-sosial") {
+    return (
+      <AritmatikaGameClient
+        onBack={closeGame}
+        soundOn={soundOn}
+        onToggleSound={toggleSound}
+      />
+    );
+  }
+
+  // =========================================================================
+  // VIEW 3: ARENA HITUNG CEPAT (GAMEPLAY)
   // =========================================================================
   return (
     <PageFrame

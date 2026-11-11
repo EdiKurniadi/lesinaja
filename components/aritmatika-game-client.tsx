@@ -1,0 +1,1213 @@
+"use client";
+
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  ArrowLeft,
+  ArrowRight,
+  Check,
+  CheckCircle2,
+  Clock,
+  Flame,
+  Heart,
+  HelpCircle,
+  Lightbulb,
+  Play,
+  RotateCcw,
+  Sparkles,
+  Trophy,
+  Volume2,
+  VolumeX,
+  X,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { PageFrame } from "@/components/page-frame";
+import { MathText } from "@/components/math-text";
+import {
+  generateAritmatikaSet,
+  type AritmatikaLevel,
+} from "@/lib/aritmatika-engine";
+import type { GameModeType, GameQuestion } from "@/lib/game-engine";
+import {
+  playCorrectSound,
+  playGameOverSound,
+  playStreakSound,
+  playWrongSound,
+} from "@/lib/game-sound";
+import {
+  createDefaultAritmatikaStats,
+  readAritmatikaStats,
+  updateAritmatikaStats,
+  type GameStats,
+} from "@/lib/game-storage";
+
+interface AnswerHistoryItem {
+  question: GameQuestion;
+  userAnswer: string;
+  isCorrect: boolean;
+  timeSpentSec: number;
+}
+
+interface AritmatikaGameClientProps {
+  onBack: () => void;
+  soundOn: boolean;
+  onToggleSound: () => void;
+}
+
+export function AritmatikaGameClient({
+  onBack,
+  soundOn,
+  onToggleSound,
+}: AritmatikaGameClientProps) {
+  // Settings
+  const [level, setLevel] = useState<AritmatikaLevel>("all");
+  const [modeType, setModeType] = useState<GameModeType>("survival");
+  const [fixedCount, setFixedCount] = useState<5 | 10 | 20>(10);
+  const [fixedTimeLimitMinutes, setFixedTimeLimitMinutes] = useState<number>(3); // 0 = tanpa batas
+  const [autoAdvance, setAutoAdvance] = useState<boolean>(false);
+
+  // Game Lifecycle
+  const [gameState, setGameState] = useState<"lobby" | "playing" | "summary">("lobby");
+  const [stats, setStats] = useState<GameStats>(createDefaultAritmatikaStats);
+
+  // Match State
+  const [questions, setQuestions] = useState<GameQuestion[]>([]);
+  const [currentIndex, setCurrentIndex] = useState<number>(0);
+  const [lives, setLives] = useState<number>(3);
+  const [score, setScore] = useState<number>(0);
+  const [streak, setStreak] = useState<number>(0);
+  const [maxStreak, setMaxStreak] = useState<number>(0);
+  const [history, setHistory] = useState<AnswerHistoryItem[]>([]);
+
+  // Selection & Feedback
+  const [selectedOption, setSelectedOption] = useState<string | null>(null);
+  const [isAnswerRevealed, setIsAnswerRevealed] = useState<boolean>(false);
+
+  // Timers
+  const [survivalRemainingMs, setSurvivalRemainingMs] = useState<number>(45000);
+  const [survivalTotalMs, setSurvivalTotalMs] = useState<number>(45000);
+  const [fixedRemainingMs, setFixedRemainingMs] = useState<number>(180000);
+
+  const questionStartTimeRef = useRef<number>(0);
+  const timerIntervalRef = useRef<number | null>(null);
+  const autoAdvanceTimeoutRef = useRef<number | null>(null);
+
+  // Load stats on mount safely without cascading synchronous render
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      setStats(readAritmatikaStats());
+    }, 0);
+    return () => {
+      window.clearTimeout(timer);
+    };
+  }, []);
+
+  const currentQuestion = questions[currentIndex] as GameQuestion | undefined;
+
+  // Hitung batas waktu per soal untuk mode survival
+  const getQuestionSurvivalTime = useCallback((q?: GameQuestion, questionNum: number = 1): number => {
+    // Soal level 1 (konseptual): 35s turun ke 15s
+    // Soal level 2 (hitung nominal): 45s turun ke 20s
+    // Soal level 3 (kasus cerita kompleks): 65s turun ke 35s
+    const kind = q?.kind || "complex";
+    let base = 50;
+    if (kind === "concept") base = 35;
+    else if (kind === "nominal") base = 45;
+    else base = 65;
+
+    // Reduksi 1.5 detik per 5 soal yang terselesaikan, dengan batas minimum
+    const reduction = Math.min(Math.floor((questionNum - 1) / 3) * 2, base - 15);
+    return Math.max(15, base - reduction) * 1000;
+  }, []);
+
+  // Cleanup helper
+  const clearAllTimers = useCallback(() => {
+    if (timerIntervalRef.current) {
+      clearInterval(timerIntervalRef.current);
+      timerIntervalRef.current = null;
+    }
+    if (autoAdvanceTimeoutRef.current) {
+      clearTimeout(autoAdvanceTimeoutRef.current);
+      autoAdvanceTimeoutRef.current = null;
+    }
+  }, []);
+
+  // Start new game
+  const startGame = useCallback(() => {
+    clearAllTimers();
+
+    let initialQuestions: GameQuestion[] = [];
+    if (modeType === "fixed") {
+      initialQuestions = generateAritmatikaSet(level, fixedCount);
+    } else {
+      // Survival mode: preload 20 soal pertama
+      initialQuestions = generateAritmatikaSet(level, 20);
+    }
+
+    setQuestions(initialQuestions);
+    setCurrentIndex(0);
+    setLives(3);
+    setScore(0);
+    setStreak(0);
+    setMaxStreak(0);
+    setHistory([]);
+    setSelectedOption(null);
+    setIsAnswerRevealed(false);
+
+    const firstTimeLimit = getQuestionSurvivalTime(initialQuestions[0], 1);
+    setSurvivalRemainingMs(firstTimeLimit);
+    setSurvivalTotalMs(firstTimeLimit);
+    setFixedRemainingMs(fixedTimeLimitMinutes > 0 ? fixedTimeLimitMinutes * 60 * 1000 : 0);
+
+    questionStartTimeRef.current = Date.now();
+    setGameState("playing");
+  }, [clearAllTimers, fixedCount, fixedTimeLimitMinutes, getQuestionSurvivalTime, level, modeType]);
+
+  // Finish match & save stats
+  const finishGame = useCallback(
+    (finalHistory: AnswerHistoryItem[], finalScore: number, finalMaxStreak: number) => {
+      clearAllTimers();
+      setGameState("summary");
+
+      const correctCount = finalHistory.filter((h) => h.isCorrect).length;
+      const updated = updateAritmatikaStats({
+        mode: modeType,
+        score: finalScore,
+        streak: finalMaxStreak,
+        answered: finalHistory.length,
+        correct: correctCount,
+        fixedCount: modeType === "fixed" ? fixedCount : undefined,
+      });
+      setStats(updated);
+      playGameOverSound();
+    },
+    [clearAllTimers, fixedCount, modeType]
+  );
+
+  // Next question
+  const advanceToNextQuestion = useCallback(() => {
+    clearAllTimers();
+    setSelectedOption(null);
+    setIsAnswerRevealed(false);
+
+    const nextIndex = currentIndex + 1;
+
+    // Mode Fixed: cek apakah sudah selesai
+    if (modeType === "fixed") {
+      if (nextIndex >= questions.length) {
+        finishGame(history, score, maxStreak);
+        return;
+      }
+    } else {
+      // Mode Survival: jika soal mendekati akhir buffer, tambah lagi
+      if (nextIndex >= questions.length - 2) {
+        const extra = generateAritmatikaSet(level, 10);
+        setQuestions((prev) => [...prev, ...extra]);
+      }
+    }
+
+    setCurrentIndex(nextIndex);
+    const nextQ = questions[nextIndex];
+    const newSurvivalLimit = getQuestionSurvivalTime(nextQ, nextIndex + 1);
+    setSurvivalRemainingMs(newSurvivalLimit);
+    setSurvivalTotalMs(newSurvivalLimit);
+    questionStartTimeRef.current = Date.now();
+  }, [clearAllTimers, currentIndex, finishGame, getQuestionSurvivalTime, history, level, maxStreak, modeType, questions, score]);
+
+  // Handle Answer Selection
+  const handleAnswer = useCallback(
+    (chosenAnswer: string) => {
+      if (isAnswerRevealed || !currentQuestion) return;
+
+      const timeSpentSec = Math.max(
+        1,
+        Math.round((Date.now() - questionStartTimeRef.current) / 1000)
+      );
+
+      setSelectedOption(chosenAnswer);
+      setIsAnswerRevealed(true);
+
+      const isCorrect = chosenAnswer === currentQuestion.correctAnswer;
+      const newHistoryItem: AnswerHistoryItem = {
+        question: currentQuestion,
+        userAnswer: chosenAnswer,
+        isCorrect,
+        timeSpentSec,
+      };
+
+      const nextHistory = [...history, newHistoryItem];
+      setHistory(nextHistory);
+
+      let nextScore = score;
+      let nextStreak = streak;
+      let nextMaxStreak = maxStreak;
+      let nextLives = lives;
+
+      if (isCorrect) {
+        nextStreak += 1;
+        if (nextStreak > nextMaxStreak) {
+          nextMaxStreak = nextStreak;
+        }
+
+        // Skor: Basis per level + bonus streak + bonus kecepatan
+        const levelBonus = currentQuestion.kind === "complex" ? 150 : currentQuestion.kind === "nominal" ? 100 : 70;
+        const streakBonus = Math.min(nextStreak * 10, 100);
+        const speedBonus = Math.max(0, 30 - timeSpentSec * 2);
+        nextScore += levelBonus + streakBonus + speedBonus;
+
+        setScore(nextScore);
+        setStreak(nextStreak);
+        setMaxStreak(nextMaxStreak);
+
+        if (nextStreak > 0 && nextStreak % 5 === 0) {
+          playStreakSound();
+        } else {
+          playCorrectSound();
+        }
+      } else {
+        // Salah
+        nextStreak = 0;
+        setStreak(0);
+        playWrongSound();
+
+        if (modeType === "survival") {
+          nextLives -= 1;
+          setLives(nextLives);
+          if (nextLives <= 0) {
+            // Game Over
+            if (autoAdvanceTimeoutRef.current) clearTimeout(autoAdvanceTimeoutRef.current);
+            autoAdvanceTimeoutRef.current = window.setTimeout(() => {
+              finishGame(nextHistory, nextScore, nextMaxStreak);
+            }, 1800);
+            return;
+          }
+        }
+      }
+
+      // Auto Advance jika diaktifkan (beri jeda agar sempat melihat kunci)
+      if (autoAdvance) {
+        if (autoAdvanceTimeoutRef.current) clearTimeout(autoAdvanceTimeoutRef.current);
+        autoAdvanceTimeoutRef.current = window.setTimeout(() => {
+          advanceToNextQuestion();
+        }, isCorrect ? 1200 : 2500);
+      }
+    },
+    [
+      advanceToNextQuestion,
+      autoAdvance,
+      currentQuestion,
+      finishGame,
+      history,
+      isAnswerRevealed,
+      lives,
+      maxStreak,
+      modeType,
+      score,
+      streak,
+    ]
+  );
+
+  // Time-out per soal (Survival)
+  const handleQuestionTimeout = useCallback(() => {
+    if (isAnswerRevealed || !currentQuestion) return;
+    handleAnswer("__TIMEOUT__");
+  }, [currentQuestion, handleAnswer, isAnswerRevealed]);
+
+  // Main Timer Loop
+  useEffect(() => {
+    if (gameState !== "playing" || isAnswerRevealed) {
+      if (timerIntervalRef.current) {
+        clearInterval(timerIntervalRef.current);
+        timerIntervalRef.current = null;
+      }
+      return;
+    }
+
+    const interval = window.setInterval(() => {
+      // 1. Mode Survival Timer
+      if (modeType === "survival") {
+        setSurvivalRemainingMs((prev) => {
+          const next = prev - 100;
+          if (next <= 0) {
+            handleQuestionTimeout();
+            return 0;
+          }
+          return next;
+        });
+      }
+
+      // 2. Mode Fixed Overall Timer
+      if (modeType === "fixed" && fixedTimeLimitMinutes > 0) {
+        setFixedRemainingMs((prev) => {
+          const next = prev - 100;
+          if (next <= 0) {
+            finishGame(history, score, maxStreak);
+            return 0;
+          }
+          return next;
+        });
+      }
+    }, 100);
+
+    timerIntervalRef.current = interval;
+    return () => {
+      clearInterval(interval);
+    };
+  }, [
+    gameState,
+    isAnswerRevealed,
+    modeType,
+    fixedTimeLimitMinutes,
+    handleQuestionTimeout,
+    finishGame,
+    history,
+    score,
+    maxStreak,
+  ]);
+
+  // Keyboard Shortcuts (1-4, A-D, Enter)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (gameState !== "playing") return;
+
+      if (isAnswerRevealed) {
+        if (e.key === "Enter" || e.key === " " || e.key === "ArrowRight") {
+          e.preventDefault();
+          advanceToNextQuestion();
+        }
+        return;
+      }
+
+      if (!currentQuestion) return;
+
+      const key = e.key.toLowerCase();
+      let selectedIdx = -1;
+
+      if (key === "1" || key === "a") selectedIdx = 0;
+      else if (key === "2" || key === "b") selectedIdx = 1;
+      else if (key === "3" || key === "c") selectedIdx = 2;
+      else if (key === "4" || key === "d") selectedIdx = 3;
+
+      if (selectedIdx >= 0 && selectedIdx < currentQuestion.options.length) {
+        e.preventDefault();
+        handleAnswer(currentQuestion.options[selectedIdx]);
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [advanceToNextQuestion, currentQuestion, gameState, handleAnswer, isAnswerRevealed]);
+
+  // Evaluasi Performa
+  const performanceEvaluation = useMemo(() => {
+    const correctCount = history.filter((h) => h.isCorrect).length;
+    const total = history.length || 1;
+    const accuracy = Math.round((correctCount / total) * 100);
+
+    if (accuracy === 100 && total >= 8) {
+      return {
+        badge: "MASTER ARITMATIKA 100%",
+        color: "bg-signal text-black",
+        desc: "Luar biasa sempurna! Prinsip dasar nilai awal 100% sudah mendarah daging, siap melibas variasi soal tersulit di TIU SKD.",
+      };
+    }
+    if (accuracy >= 80) {
+      return {
+        badge: "ANALIS TANGKAS & TAJAM",
+        color: "bg-emerald-400 text-black",
+        desc: "Hebat! Pemahaman logika persentase, margin, dan pajak Anda sangat solid.",
+      };
+    }
+    if (accuracy >= 60) {
+      return {
+        badge: "SOLID & BERKEMBANG",
+        color: "bg-amber-300 text-black",
+        desc: "Bagus! Terus latih kebiasaan melihat nilai awal selalu 100% agar perhitungan cepat tanpa perlu rumus panjang.",
+      };
+    }
+    return {
+      badge: "BUTUH PEMANTAPAN",
+      color: "bg-neutral-200 text-black",
+      desc: "Jangan khawatir! Pelajari pembahasan di bawah. Kuncinya: selalu tentukan siapa nilai awal (100%), lalu hitung selisih naik/turunnya.",
+    };
+  }, [history]);
+
+  // Format Helper
+  const formatTime = (ms: number) => {
+    const totalSec = Math.max(0, Math.ceil(ms / 1000));
+    const m = Math.floor(totalSec / 60);
+    const s = totalSec % 60;
+    return `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+  };
+
+  return (
+    <PageFrame
+      eyebrow="Game & Refleks TIU"
+      title="ARENA ARITMATIKA SOSIAL."
+      description="Kuasai aritmatika sosial tanpa rumus rumit! Kuasai satu ide kunci: Nilai Awal Selalu 100% untuk diskon, laba-rugi, bunga, bruto-neto, dan variasi HOTS TIU."
+      showHeader={gameState === "lobby"}
+    >
+      <div className="bg-background text-foreground">
+        {/* ========================================================================= */}
+        {/* VIEW 1: LOBBY / MENU ARITMATIKA SOSIAL */}
+        {/* ========================================================================= */}
+        {gameState === "lobby" && (
+          <div className="p-4 sm:p-8 lg:p-10 space-y-8 max-w-5xl mx-auto">
+            {/* Top Toolbar */}
+            <div className="flex flex-wrap items-center justify-between gap-3 border-b-2 border-black pb-5">
+              <button
+                type="button"
+                onClick={onBack}
+                className="inline-flex items-center gap-2 font-mono text-xs font-bold uppercase py-1.5 px-3 border-2 border-black bg-warm-white hover:bg-secondary transition-colors"
+              >
+                <ArrowLeft className="size-4" /> Daftar Game
+              </button>
+
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={onToggleSound}
+                  className="border-2 border-black font-mono text-xs font-bold hover:bg-secondary"
+                >
+                  {soundOn ? (
+                    <>
+                      <Volume2 className="size-4 mr-1 text-emerald-600" /> Suara ON
+                    </>
+                  ) : (
+                    <>
+                      <VolumeX className="size-4 mr-1 text-muted-foreground" /> Suara OFF
+                    </>
+                  )}
+                </Button>
+              </div>
+            </div>
+
+            {/* Philosophy Banner: Prinsip Emas 100% */}
+            <div className="border-2 border-black bg-amber-50 p-5 sm:p-6 shadow-[5px_5px_0_#10100f] space-y-3">
+              <div className="flex items-center gap-2 font-mono text-xs font-black uppercase text-amber-900 tracking-wider">
+                <Lightbulb className="size-4 text-amber-600 fill-amber-500" />
+                Kaidah Emas Aritmatika Sosial
+              </div>
+              <h2 className="text-xl sm:text-2xl font-black uppercase tracking-tight text-foreground">
+                Nilai Awal Selalu 100%. Naik atau Turun Berjangkar dari 100%.
+              </h2>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 pt-2 font-mono text-xs">
+                <div className="bg-white border border-black/30 p-2.5">
+                  <span className="font-bold text-brand-red block">Diskon 20%</span>
+                  <span className="text-muted-foreground text-[11px]">Bayar 80% harga awal</span>
+                </div>
+                <div className="bg-white border border-black/30 p-2.5">
+                  <span className="font-bold text-emerald-700 block">Untung 15%</span>
+                  <span className="text-muted-foreground text-[11px]">Harga jual 115% modal</span>
+                </div>
+                <div className="bg-white border border-black/30 p-2.5">
+                  <span className="font-bold text-brand-blue block">PPN 11%</span>
+                  <span className="text-muted-foreground text-[11px]">Total bayar 111% kotor</span>
+                </div>
+                <div className="bg-white border border-black/30 p-2.5">
+                  <span className="font-bold text-purple-700 block">Tara 2%</span>
+                  <span className="text-muted-foreground text-[11px]">Neto bersih 98% bruto</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Configuration & Highscores */}
+            <div className="grid md:grid-cols-[1.3fr_1fr] gap-6 items-start">
+              {/* Left Column: Form & Level Settings */}
+              <div className="border-2 border-black bg-card p-5 sm:p-8 shadow-[6px_6px_0_#10100f] space-y-6">
+                <div>
+                  <span className="font-mono text-xs uppercase tracking-wider text-muted-foreground">
+                    Langkah 1
+                  </span>
+                  <h3 className="text-xl sm:text-2xl font-black uppercase tracking-tight mt-0.5">
+                    Pilih Level Tantangan
+                  </h3>
+                </div>
+
+                <div className="space-y-2.5">
+                  {/* Level 1 */}
+                  <label
+                    className={`block border-2 border-black p-3.5 cursor-pointer transition-colors ${
+                      level === 1 ? "bg-emerald-100/70 border-emerald-900 shadow-[2px_2px_0_#10100f]" : "bg-card hover:bg-secondary/40"
+                    }`}
+                  >
+                    <div className="flex items-start gap-3">
+                      <input
+                        type="radio"
+                        name="aritm-level"
+                        checked={level === 1}
+                        onChange={() => setLevel(1)}
+                        className="mt-1 size-4 accent-emerald-600"
+                      />
+                      <div>
+                        <div className="font-black text-sm uppercase">Level 1: Konsep Dasar (Logika 100%)</div>
+                        <div className="text-xs text-muted-foreground mt-0.5 leading-relaxed">
+                          Refleks penalaran tanpa angka nominal rupiah. Menguji pemahaman murni perbandingan nilai awal vs nilai akhir (diskon, laba-rugi, pajak, tara).
+                        </div>
+                      </div>
+                    </div>
+                  </label>
+
+                  {/* Level 2 */}
+                  <label
+                    className={`block border-2 border-black p-3.5 cursor-pointer transition-colors ${
+                      level === 2 ? "bg-emerald-100/70 border-emerald-900 shadow-[2px_2px_0_#10100f]" : "bg-card hover:bg-secondary/40"
+                    }`}
+                  >
+                    <div className="flex items-start gap-3">
+                      <input
+                        type="radio"
+                        name="aritm-level"
+                        checked={level === 2}
+                        onChange={() => setLevel(2)}
+                        className="mt-1 size-4 accent-emerald-600"
+                      />
+                      <div>
+                        <div className="font-black text-sm uppercase">Level 2: Hitung Cepat Nominal</div>
+                        <div className="text-xs text-muted-foreground mt-0.5 leading-relaxed">
+                          Nominal harga awal/pokok/bruto tertera di soal. 1 langkah kalkulasi cepat dengan jaminan angka bulat bersih tanpa koma liar.
+                        </div>
+                      </div>
+                    </div>
+                  </label>
+
+                  {/* Level 3 */}
+                  <label
+                    className={`block border-2 border-black p-3.5 cursor-pointer transition-colors ${
+                      level === 3 ? "bg-emerald-100/70 border-emerald-900 shadow-[2px_2px_0_#10100f]" : "bg-card hover:bg-secondary/40"
+                    }`}
+                  >
+                    <div className="flex items-start gap-3">
+                      <input
+                        type="radio"
+                        name="aritm-level"
+                        checked={level === 3}
+                        onChange={() => setLevel(3)}
+                        className="mt-1 size-4 accent-emerald-600"
+                      />
+                      <div>
+                        <div className="font-black text-sm uppercase">Level 3: Kasus Kompleks TIU SKD</div>
+                        <div className="text-xs text-muted-foreground mt-0.5 leading-relaxed">
+                          10 Pola Soal HOTS CAT CPNS/Kedinasan: multi-karung eceran, P vs Q kuantitas, kecukupan data, diskon bertingkat, barang busuk, dan PPh ber-PTKP.
+                        </div>
+                      </div>
+                    </div>
+                  </label>
+
+                  {/* Campuran */}
+                  <label
+                    className={`block border-2 border-black p-3.5 cursor-pointer transition-colors ${
+                      level === "all" ? "bg-emerald-100/70 border-emerald-900 shadow-[2px_2px_0_#10100f]" : "bg-card hover:bg-secondary/40"
+                    }`}
+                  >
+                    <div className="flex items-start gap-3">
+                      <input
+                        type="radio"
+                        name="aritm-level"
+                        checked={level === "all"}
+                        onChange={() => setLevel("all")}
+                        className="mt-1 size-4 accent-emerald-600"
+                      />
+                      <div>
+                        <div className="font-black text-sm uppercase">Campuran (Semua Level)</div>
+                        <div className="text-xs text-muted-foreground mt-0.5 leading-relaxed">
+                          Simulasi komprehensif menguji refleks konsep, hitung cepat nominal, hingga penalaran soal cerita berbobot tinggi.
+                        </div>
+                      </div>
+                    </div>
+                  </label>
+                </div>
+
+                <div className="pt-2 border-t-2 border-black/20">
+                  <span className="font-mono text-xs uppercase tracking-wider text-muted-foreground">
+                    Langkah 2
+                  </span>
+                  <h3 className="text-xl sm:text-2xl font-black uppercase tracking-tight mt-0.5 mb-3">
+                    Pilih Mode Permainan
+                  </h3>
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <button
+                      type="button"
+                      onClick={() => setModeType("survival")}
+                      className={`p-3.5 border-2 border-black text-left transition-all ${
+                        modeType === "survival"
+                          ? "bg-brand-red text-white shadow-[3px_3px_0_#10100f]"
+                          : "bg-card hover:bg-secondary"
+                      }`}
+                    >
+                      <div className="flex items-center gap-2 font-mono text-xs font-black uppercase">
+                        <Heart className="size-4 fill-current text-white" />
+                        Survival
+                      </div>
+                      <div className="text-xs mt-1 opacity-90">
+                        3 Nyawa · Timer adaptif per soal · Kejar skor tertinggi
+                      </div>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setModeType("fixed")}
+                      className={`p-3.5 border-2 border-black text-left transition-all ${
+                        modeType === "fixed"
+                          ? "bg-brand-blue text-white shadow-[3px_3px_0_#10100f]"
+                          : "bg-card hover:bg-secondary"
+                      }`}
+                    >
+                      <div className="flex items-center gap-2 font-mono text-xs font-black uppercase">
+                        <Clock className="size-4" />
+                        Target Soal
+                      </div>
+                      <div className="text-xs mt-1 opacity-90">
+                        Pilihan 5, 10, atau 20 soal · Cocok untuk latihan santai
+                      </div>
+                    </button>
+                  </div>
+
+                  {/* Pengaturan Tambahan Mode Fixed */}
+                  {modeType === "fixed" && (
+                    <div className="mt-4 p-3.5 bg-warm-white border-2 border-black space-y-3 font-mono text-xs">
+                      <div>
+                        <div className="font-bold uppercase text-muted-foreground mb-1.5">
+                          Jumlah Soal:
+                        </div>
+                        <div className="flex gap-2">
+                          {([5, 10, 20] as const).map((cnt) => (
+                            <button
+                              key={cnt}
+                              type="button"
+                              onClick={() => setFixedCount(cnt)}
+                              className={`flex-1 py-1.5 border border-black font-bold uppercase transition-colors ${
+                                fixedCount === cnt
+                                  ? "bg-brand-blue text-white shadow-[1px_1px_0_#10100f]"
+                                  : "bg-white hover:bg-secondary"
+                              }`}
+                            >
+                              {cnt} Soal
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div>
+                        <div className="font-bold uppercase text-muted-foreground mb-1.5">
+                          Batas Waktu:
+                        </div>
+                        <div className="flex gap-2">
+                          {[
+                            { label: "Bebas", val: 0 },
+                            { label: "2 Mnt", val: 2 },
+                            { label: "3 Mnt", val: 3 },
+                            { label: "5 Mnt", val: 5 },
+                          ].map((t) => (
+                            <button
+                              key={t.val}
+                              type="button"
+                              onClick={() => setFixedTimeLimitMinutes(t.val)}
+                              className={`flex-1 py-1.5 border border-black font-bold uppercase transition-colors ${
+                                fixedTimeLimitMinutes === t.val
+                                  ? "bg-brand-blue text-white shadow-[1px_1px_0_#10100f]"
+                                  : "bg-white hover:bg-secondary"
+                              }`}
+                            >
+                              {t.label}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Auto Advance Toggle */}
+                  <div className="mt-4 flex items-center justify-between p-3 border border-black/30 bg-warm-white">
+                    <div className="font-mono text-xs">
+                      <div className="font-bold uppercase">Lanjut Otomatis (Auto-Advance)</div>
+                      <div className="text-[11px] text-muted-foreground">
+                        Pindah ke soal berikutnya otomatis setelah menjawab
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setAutoAdvance(!autoAdvance)}
+                      className={`relative inline-flex h-6 w-11 items-center border border-black transition-colors ${
+                        autoAdvance ? "bg-emerald-500" : "bg-neutral-300"
+                      }`}
+                    >
+                      <span
+                        className={`inline-block size-4 transform border border-black bg-white transition-transform ${
+                          autoAdvance ? "translate-x-6" : "translate-x-1"
+                        }`}
+                      />
+                    </button>
+                  </div>
+                </div>
+
+                {/* Tombol Mulai */}
+                <Button
+                  size="lg"
+                  onClick={startGame}
+                  className="w-full h-14 border-2 border-black bg-emerald-600 hover:bg-emerald-700 text-white font-black text-lg uppercase tracking-wider shadow-[4px_4px_0_#10100f]"
+                >
+                  <Play className="size-5 mr-2 fill-current" /> Mulai Arena Aritmatika
+                </Button>
+              </div>
+
+              {/* Right Column: Rekor & Statistik */}
+              <div className="space-y-6">
+                <div className="border-2 border-black bg-card p-5 sm:p-6 shadow-[6px_6px_0_#10100f] space-y-4">
+                  <div className="border-b-2 border-black pb-3 flex items-center justify-between">
+                    <div className="flex items-center gap-2 font-mono text-xs font-black uppercase">
+                      <Trophy className="size-4 text-amber-500" /> Rekor Pribadi Anda
+                    </div>
+                    <span className="font-mono text-xs font-bold text-muted-foreground">
+                      Aritmatika Sosial
+                    </span>
+                  </div>
+
+                  <div className="space-y-3 font-mono">
+                    <div className="border border-black p-3 bg-warm-white">
+                      <div className="text-[11px] uppercase text-muted-foreground">
+                        Skor Terbaik Survival
+                      </div>
+                      <div className="text-2xl font-black text-brand-red mt-0.5">
+                        {stats.survivalHighScore}{" "}
+                        <span className="text-xs font-bold text-foreground">PTS</span>
+                      </div>
+                    </div>
+
+                    <div className="border border-black p-3 bg-warm-white">
+                      <div className="text-[11px] uppercase text-muted-foreground">
+                        Rentetan Benar Tertinggi
+                      </div>
+                      <div className="text-2xl font-black text-amber-600 mt-0.5">
+                        {stats.survivalBestStreak}x{" "}
+                        <Flame className="size-4 inline text-amber-500 fill-current" />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-2">
+                      <div className="border border-black p-2.5 bg-warm-white text-center">
+                        <div className="text-[10px] uppercase text-muted-foreground">
+                          Total Dijawab
+                        </div>
+                        <div className="text-lg font-black mt-0.5">{stats.totalAnswered}</div>
+                      </div>
+                      <div className="border border-black p-2.5 bg-warm-white text-center">
+                        <div className="text-[10px] uppercase text-muted-foreground">Akurasi</div>
+                        <div className="text-lg font-black mt-0.5 text-emerald-600">
+                          {stats.totalAnswered > 0
+                            ? `${Math.round((stats.totalCorrect / stats.totalAnswered) * 100)}%`
+                            : "0%"}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Level Overview Card */}
+                <div className="border-2 border-black bg-warm-white p-5 shadow-[4px_4px_0_#10100f] space-y-3 text-xs">
+                  <div className="font-mono font-bold uppercase border-b border-black/20 pb-2 flex items-center gap-1.5">
+                    <Sparkles className="size-4 text-emerald-600" /> Cakupan Materi Game
+                  </div>
+                  <ul className="space-y-2 text-muted-foreground list-disc pl-4">
+                    <li>
+                      <strong className="text-foreground">Diskon & Diskon Bertingkat:</strong>{" "}
+                      Harga dibayar selalu $100\% - D\%$.
+                    </li>
+                    <li>
+                      <strong className="text-foreground">Untung & Rugi:</strong> Penjualan laba ={" "}
+                      $100\% + U\%$, penjualan rugi = $100\% - R\%$.
+                    </li>
+                    <li>
+                      <strong className="text-foreground">Pajak (PPN/PPh/Resto):</strong> Nilai akhir ={" "}
+                      $100\% + P\%$ dari dasar pengenaan.
+                    </li>
+                    <li>
+                      <strong className="text-foreground">Bruto, Tara & Neto:</strong> Neto = $100\% - \text{Tara}\%$ dari berat kotor.
+                    </li>
+                    <li>
+                      <strong className="text-foreground">Bunga Bank & Angsuran:</strong> Pokok tabungan = $100\%$.
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ========================================================================= */}
+        {/* VIEW 2: GAMEPLAY (PLAYING STATE) */}
+        {/* ========================================================================= */}
+        {gameState === "playing" && currentQuestion && (
+          <div className="p-4 sm:p-8 max-w-4xl mx-auto space-y-6">
+            {/* Top Bar: Progress, Timer, Lives, Score */}
+            <div className="border-2 border-black bg-card p-4 shadow-[4px_4px_0_#10100f] flex flex-wrap items-center justify-between gap-3 font-mono">
+              {/* Back to lobby button */}
+              <button
+                type="button"
+                onClick={() => setGameState("lobby")}
+                className="inline-flex items-center gap-1.5 text-xs font-bold uppercase hover:underline"
+              >
+                <ArrowLeft className="size-3.5" /> Berhenti
+              </button>
+
+              {/* Center status: Lives or Question counter */}
+              <div className="flex items-center gap-4">
+                {modeType === "survival" ? (
+                  <div className="flex items-center gap-1">
+                    {[1, 2, 3].map((heartIndex) => (
+                      <Heart
+                        key={heartIndex}
+                        className={`size-5 transition-transform ${
+                          heartIndex <= lives
+                            ? "fill-brand-red text-brand-red scale-100"
+                            : "fill-neutral-300 text-neutral-400 scale-90"
+                        }`}
+                      />
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-xs font-bold uppercase">
+                    Soal <span className="text-brand-blue font-black">{currentIndex + 1}</span> /{" "}
+                    {fixedCount}
+                  </div>
+                )}
+
+                {/* Streak Badge */}
+                {streak >= 2 && (
+                  <div className="inline-flex items-center gap-1 px-2 py-0.5 bg-amber-100 border border-amber-500 text-amber-900 text-xs font-black animate-pulse">
+                    <Flame className="size-3.5 text-amber-500 fill-current" />
+                    {streak}x STREAK
+                  </div>
+                )}
+              </div>
+
+              {/* Right side: Score & Timer */}
+              <div className="flex items-center gap-4 text-xs font-bold">
+                <div>
+                  SKOR: <span className="text-emerald-700 font-black">{score}</span>
+                </div>
+
+                <div className="flex items-center gap-1.5 bg-warm-white px-2 py-1 border border-black">
+                  <Clock className="size-3.5 text-brand-blue" />
+                  <span>
+                    {modeType === "survival"
+                      ? `${Math.ceil(survivalRemainingMs / 1000)}s`
+                      : fixedTimeLimitMinutes > 0
+                      ? formatTime(fixedRemainingMs)
+                      : "∞"}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Survival Timer Progress Bar */}
+            {modeType === "survival" && (
+              <div className="h-2 w-full border border-black bg-neutral-200 overflow-hidden">
+                <div
+                  className={`h-full transition-all duration-100 ${
+                    survivalRemainingMs < 5000
+                      ? "bg-brand-red"
+                      : survivalRemainingMs < 15000
+                      ? "bg-amber-500"
+                      : "bg-emerald-500"
+                  }`}
+                  style={{
+                    width: `${Math.max(0, Math.min(100, (survivalRemainingMs / survivalTotalMs) * 100))}%`,
+                  }}
+                />
+              </div>
+            )}
+
+            {/* Question Card */}
+            <div className="border-2 border-black bg-card p-6 sm:p-8 shadow-[6px_6px_0_#10100f] space-y-6">
+              {/* Question Level Badge & Tag */}
+              <div className="flex flex-wrap items-center justify-between gap-2 border-b-2 border-black pb-3">
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 font-mono text-xs font-black uppercase border border-black bg-warm-white">
+                  {currentQuestion.kind === "concept" && (
+                    <span className="text-blue-700">Level 1 · Konsep 100%</span>
+                  )}
+                  {currentQuestion.kind === "nominal" && (
+                    <span className="text-emerald-700">Level 2 · Hitung Cepat</span>
+                  )}
+                  {currentQuestion.kind === "complex" && (
+                    <span className="text-purple-700">Level 3 · Kasus TIU SKD</span>
+                  )}
+                </span>
+
+                <span className="font-mono text-xs text-muted-foreground uppercase">
+                  {currentQuestion.subtext || "Aritmatika Sosial"}
+                </span>
+              </div>
+
+              {/* Story Prompt */}
+              <div className="text-lg sm:text-xl font-bold leading-relaxed text-foreground">
+                <MathText text={currentQuestion.prompt} />
+              </div>
+
+              {/* 4 Options Grid */}
+              <div className="grid sm:grid-cols-2 gap-3.5 pt-2">
+                {currentQuestion.options.map((opt, idx) => {
+                  const shortcutLetter = ["A", "B", "C", "D"][idx];
+
+                  // Styling state
+                  let btnStyle = "bg-warm-white hover:bg-secondary text-foreground";
+                  if (isAnswerRevealed) {
+                    if (opt === currentQuestion.correctAnswer) {
+                      btnStyle = "bg-emerald-500 text-white border-emerald-950 shadow-[2px_2px_0_#064e3b]";
+                    } else if (opt === selectedOption) {
+                      btnStyle = "bg-brand-red text-white border-red-950 shadow-[2px_2px_0_#450a0a]";
+                    } else {
+                      btnStyle = "bg-neutral-100 text-neutral-400 opacity-60";
+                    }
+                  }
+
+                  return (
+                    <button
+                      key={idx}
+                      type="button"
+                      disabled={isAnswerRevealed}
+                      onClick={() => handleAnswer(opt)}
+                      className={`border-2 border-black p-4 text-left font-bold text-sm sm:text-base transition-all flex items-start gap-3 shadow-[3px_3px_0_#10100f] active:translate-x-0.5 active:translate-y-0.5 ${btnStyle}`}
+                    >
+                      <span className="size-6 shrink-0 border border-black bg-white text-black font-mono text-xs font-black flex items-center justify-center">
+                        {shortcutLetter}
+                      </span>
+                      <span className="flex-1 leading-snug">
+                        <MathText text={opt} />
+                      </span>
+                      {isAnswerRevealed && opt === currentQuestion.correctAnswer && (
+                        <Check className="size-5 shrink-0 text-white stroke-[3]" />
+                      )}
+                      {isAnswerRevealed && opt === selectedOption && opt !== currentQuestion.correctAnswer && (
+                        <X className="size-5 shrink-0 text-white stroke-[3]" />
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Explanation & Philosophy Tip (Tampil setelah menjawab) */}
+              {isAnswerRevealed && (
+                <div className="pt-4 border-t-2 border-black/20 space-y-4 animate-in fade-in slide-in-from-top-2 duration-200">
+                  <div
+                    className={`p-4 border-2 border-black ${
+                      selectedOption === currentQuestion.correctAnswer
+                        ? "bg-emerald-50/80 border-emerald-800"
+                        : "bg-red-50/80 border-red-800"
+                    }`}
+                  >
+                    <div className="flex items-center gap-2 font-mono text-xs font-black uppercase mb-1.5">
+                      {selectedOption === currentQuestion.correctAnswer ? (
+                        <>
+                          <CheckCircle2 className="size-4 text-emerald-600" />
+                          <span className="text-emerald-800">Jawaban Tepat!</span>
+                        </>
+                      ) : (
+                        <>
+                          <X className="size-4 text-brand-red" />
+                          <span className="text-brand-red">Belum Tepat</span>
+                        </>
+                      )}
+                    </div>
+
+                    <div className="text-xs sm:text-sm text-foreground/90 whitespace-pre-line leading-relaxed font-sans">
+                      💡 <strong>Konsep 100%:</strong>{" "}
+                      <MathText text={currentQuestion.tip} />
+                    </div>
+                  </div>
+
+                  <div className="flex justify-end">
+                    <Button
+                      onClick={advanceToNextQuestion}
+                      className="h-12 px-6 border-2 border-black bg-brand-blue hover:bg-brand-blue-hover text-white font-mono text-sm font-black uppercase tracking-wider shadow-[3px_3px_0_#10100f]"
+                    >
+                      Lanjut <ArrowRight className="size-4 ml-1.5" />
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Bottom Keyboard Guide */}
+            <div className="text-center font-mono text-xs text-muted-foreground">
+              Gunakan keyboard: <kbd className="px-1.5 py-0.5 border border-black bg-white">1</kbd> /{" "}
+              <kbd className="px-1.5 py-0.5 border border-black bg-white">2</kbd> /{" "}
+              <kbd className="px-1.5 py-0.5 border border-black bg-white">3</kbd> /{" "}
+              <kbd className="px-1.5 py-0.5 border border-black bg-white">4</kbd> atau{" "}
+              <kbd className="px-1.5 py-0.5 border border-black bg-white">A</kbd>-
+              <kbd className="px-1.5 py-0.5 border border-black bg-white">D</kbd> ·{" "}
+              <kbd className="px-1.5 py-0.5 border border-black bg-white">Enter</kbd> untuk lanjut
+            </div>
+          </div>
+        )}
+
+        {/* ========================================================================= */}
+        {/* VIEW 3: SUMMARY / HASIL PERMAINAN */}
+        {/* ========================================================================= */}
+        {gameState === "summary" && (
+          <div className="p-4 sm:p-8 max-w-4xl mx-auto space-y-8">
+            <div className="border-2 border-black bg-card p-6 sm:p-10 shadow-[6px_6px_0_#10100f] space-y-6">
+              {/* Header Title */}
+              <div className="border-b-2 border-black pb-5 flex flex-wrap items-center justify-between gap-3">
+                <div>
+                  <span
+                    className={`inline-block px-3 py-1 font-mono text-xs font-black uppercase border border-black ${performanceEvaluation.color}`}
+                  >
+                    {performanceEvaluation.badge}
+                  </span>
+                  <h2 className="text-3xl sm:text-5xl font-black uppercase tracking-tight mt-2">
+                    Hasil Permainan
+                  </h2>
+                  <p className="text-sm sm:text-base text-muted-foreground mt-1">
+                    {performanceEvaluation.desc}
+                  </p>
+                </div>
+
+                <div className="font-mono text-right">
+                  <div className="text-xs uppercase text-muted-foreground">Skor Anda</div>
+                  <div className="text-4xl sm:text-5xl font-black text-emerald-600">
+                    {score} <span className="text-sm font-bold text-foreground">PTS</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Stats Highlights Grid */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 font-mono">
+                <div className="border-2 border-black bg-warm-white p-3 text-center">
+                  <div className="text-[11px] text-muted-foreground uppercase">Akurasi</div>
+                  <div className="text-2xl font-black mt-1">
+                    {history.length > 0
+                      ? `${Math.round((history.filter((h) => h.isCorrect).length / history.length) * 100)}%`
+                      : "0%"}
+                  </div>
+                </div>
+
+                <div className="border-2 border-black bg-warm-white p-3 text-center">
+                  <div className="text-[11px] text-muted-foreground uppercase">Benar / Total</div>
+                  <div className="text-2xl font-black mt-1 text-emerald-600">
+                    {history.filter((h) => h.isCorrect).length} / {history.length}
+                  </div>
+                </div>
+
+                <div className="border-2 border-black bg-warm-white p-3 text-center">
+                  <div className="text-[11px] text-muted-foreground uppercase">Rentetan Tertinggi</div>
+                  <div className="text-2xl font-black mt-1 text-amber-600">
+                    {maxStreak}x <Flame className="size-4 inline text-amber-500 fill-current" />
+                  </div>
+                </div>
+
+                <div className="border-2 border-black bg-warm-white p-3 text-center">
+                  <div className="text-[11px] text-muted-foreground uppercase">Rata-rata Waktu</div>
+                  <div className="text-2xl font-black mt-1">
+                    {history.length > 0
+                      ? `${(
+                          history.reduce((acc, cur) => acc + cur.timeSpentSec, 0) / history.length
+                        ).toFixed(1)}s`
+                      : "0s"}
+                  </div>
+                </div>
+              </div>
+
+              {/* Actions: Main Lagi, Menu Arena, & Kembali ke Daftar Game */}
+              <div className="flex flex-wrap gap-3 pt-2">
+                <Button
+                  size="lg"
+                  onClick={startGame}
+                  className="flex-1 min-w-[180px] h-14 border-2 border-black bg-emerald-600 hover:bg-emerald-700 text-white font-black text-lg uppercase tracking-wider shadow-[3px_3px_0_#10100f]"
+                >
+                  <RotateCcw className="size-5 mr-2" /> Main Lagi
+                </Button>
+                <Button
+                  variant="outline"
+                  size="lg"
+                  onClick={() => setGameState("lobby")}
+                  className="border-2 border-black h-14 font-black text-base uppercase tracking-wider hover:bg-secondary"
+                >
+                  Menu Aritmatika
+                </Button>
+                <Button
+                  variant="outline"
+                  size="lg"
+                  onClick={onBack}
+                  className="border-2 border-black h-14 font-black text-base uppercase tracking-wider hover:bg-secondary"
+                >
+                  <ArrowLeft className="size-4 mr-1.5" /> Daftar Game
+                </Button>
+              </div>
+            </div>
+
+            {/* Question Breakdown List */}
+            {history.length > 0 && (
+              <div className="border-2 border-black bg-card p-5 sm:p-6 shadow-[6px_6px_0_#10100f] space-y-4">
+                <h3 className="text-xl font-black uppercase tracking-tight flex items-center gap-2">
+                  <HelpCircle className="size-5 text-emerald-600" /> Evaluasi & Pembahasan Konsep 100%
+                </h3>
+
+                <div className="space-y-3">
+                  {history.map((item, idx) => (
+                    <div
+                      key={idx}
+                      className={`border-2 border-black p-4 space-y-2 ${
+                        item.isCorrect ? "bg-emerald-50/60" : "bg-red-50/60"
+                      }`}
+                    >
+                      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-black/20 pb-2">
+                        <span className="font-mono text-xs font-bold uppercase">
+                          Soal #{idx + 1} · {item.question.subtext || "Aritmatika Sosial"}
+                        </span>
+                        <div className="flex items-center gap-2 font-mono text-xs">
+                          <span className="text-muted-foreground">{item.timeSpentSec} detik</span>
+                          {item.isCorrect ? (
+                            <span className="inline-flex items-center gap-1 font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 border border-emerald-400">
+                              <Check className="size-3.5" /> Benar
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center gap-1 font-bold text-brand-red bg-red-100 px-2 py-0.5 border border-brand-red">
+                              <X className="size-3.5" /> Salah
+                            </span>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="text-base sm:text-lg font-bold leading-relaxed">
+                        <MathText text={item.question.prompt} />
+                      </div>
+
+                      <div className="grid sm:grid-cols-2 gap-2 font-mono text-xs pt-1">
+                        <div>
+                          <span className="text-muted-foreground">Jawaban Anda: </span>
+                          <span
+                            className={
+                              item.isCorrect ? "font-bold text-emerald-700" : "font-bold text-brand-red"
+                            }
+                          >
+                            <MathText text={item.userAnswer === "__TIMEOUT__" ? "(Waktu Habis)" : item.userAnswer} />
+                          </span>
+                        </div>
+                        <div>
+                          <span className="text-muted-foreground">Kunci Benar: </span>
+                          <span className="font-bold text-emerald-700">
+                            <MathText text={item.question.correctAnswer} />
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="text-xs bg-white/90 p-2.5 border border-black/30 text-foreground leading-relaxed mt-1">
+                        💡 <strong>Pembahasan & Konsep 100%:</strong>{" "}
+                        <MathText text={item.question.tip} />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    </PageFrame>
+  );
+}
+
