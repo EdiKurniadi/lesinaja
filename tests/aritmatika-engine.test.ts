@@ -96,16 +96,17 @@ test("generateAritmatikaSet menghasilkan jumlah soal yang tepat untuk level apap
 });
 
 test("getAritmatikaSurvivalTimeLimitSec memenuhi batas waktu survival tiap level", () => {
-  // Level 1: 35s di awal, minimal 15s
-  assert.equal(getAritmatikaSurvivalTimeLimitSec("concept", 1), 35);
-  assert.equal(getAritmatikaSurvivalTimeLimitSec("concept", 50), 15);
+  // Level 1: Mulai 45 detik, batas tercepat 5 detik
+  assert.equal(getAritmatikaSurvivalTimeLimitSec("concept", 1), 45);
+  assert.ok(getAritmatikaSurvivalTimeLimitSec("concept", 10) < 45);
+  assert.equal(getAritmatikaSurvivalTimeLimitSec("concept", 50), 5);
 
-  // Level 2: Mulai 1 menit (60 detik) dan paling cepat 10 detik
+  // Level 2: Mulai 60 detik (1 menit) dan batas tercepat 15 detik
   assert.equal(getAritmatikaSurvivalTimeLimitSec("nominal", 1), 60);
   assert.ok(getAritmatikaSurvivalTimeLimitSec("nominal", 10) < 60);
-  assert.equal(getAritmatikaSurvivalTimeLimitSec("nominal", 50), 10);
+  assert.equal(getAritmatikaSurvivalTimeLimitSec("nominal", 50), 15);
 
-  // Level 3: Mulai 2 menit (120 detik) dan paling cepat 30 detik
+  // Level 3: Mulai 120 detik (2 menit) dan batas tercepat 30 detik
   assert.equal(getAritmatikaSurvivalTimeLimitSec("complex", 1), 120);
   assert.ok(getAritmatikaSurvivalTimeLimitSec("complex", 15) < 120);
   assert.equal(getAritmatikaSurvivalTimeLimitSec("complex", 60), 30);

@@ -105,9 +105,9 @@ export function AritmatikaGameClient({
   const currentQuestion = questions[currentIndex] as GameQuestion | undefined;
 
   // Hitung batas waktu per soal untuk mode survival sesuai spesifikasi:
-  // - Level 1: 35s turun ke 15s
-  // - Level 2: Mulai 1 menit (60s) hingga paling cepat 10s
-  // - Level 3: Mulai 2 menit (120s) hingga paling cepat 30s
+  // - Level 1: Mulai 45s hingga paling cepat 5s
+  // - Level 2: Mulai 60s (1 menit) hingga paling cepat 15s
+  // - Level 3: Mulai 120s (2 menit) hingga paling cepat 30s
   const getQuestionSurvivalTime = useCallback((q?: GameQuestion, questionNum: number = 1): number => {
     const kind = q?.kind || "complex";
     return getAritmatikaSurvivalTimeLimitSec(kind, questionNum) * 1000;

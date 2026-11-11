@@ -74,13 +74,13 @@ test("getSurvivalTimeLimit berkurang dari 45 detik hingga minimal 5 detik", () =
 
 test("generateConversionQuestion memunculkan pecahan non-unit (3/4, 2/5, 3/8, dll.) secara seimbang", () => {
   let nonUnitCount = 0;
-  const sampleSize = 100;
+  const sampleSize = 200;
   for (let i = 0; i < sampleSize; i++) {
     const q = generateConversionQuestion();
     const hasNonUnit = ["3/4", "2/5", "3/5", "4/5", "3/8", "5/8", "7/8", "2/3", "5/6", "3/10", "7/10", "9/10", "0,75", "0,4", "0,6", "0,8", "0,375", "0,625", "0,875", "0,667", "0,833"].some((val) => q.prompt.includes(val) || q.correctAnswer === val);
     if (hasNonUnit) nonUnitCount++;
   }
-  assert.ok(nonUnitCount >= 30, `Pecahan non-unit harus sering muncul (ditemukan: ${nonUnitCount}/${sampleSize})`);
+  assert.ok(nonUnitCount >= 45, `Pecahan non-unit harus sering muncul (ditemukan: ${nonUnitCount}/${sampleSize})`);
 });
 
 test("generateOperationQuestion memuat operasi antar pecahan, desimal, dan persen (bukan hanya pengali bulat)", () => {

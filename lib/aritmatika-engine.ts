@@ -976,9 +976,9 @@ export function generateAritmatikaSet(level: AritmatikaLevel, count: number): Ga
 
 /**
  * Menghitung batas waktu dinamis per soal pada mode SURVIVAL Aritmatika Sosial (dalam detik):
- * - Level 1 (Konsep 100% / "concept"): seperti sebelumnya (35 detik turun hingga minimal 15 detik).
- * - Level 2 (Hitung Nominal / "nominal"): mulai dari 1 menit (60 detik) sampai paling cepat 10 detik.
- * - Level 3 (Kasus Kompleks / "complex"): mulai dari 2 menit (120 detik) dan paling cepat 30 detik.
+ * - Level 1 (Konsep 100% / "concept"): mulai dari 45 detik, turun bertahap hingga paling cepat 5 detik.
+ * - Level 2 (Hitung Nominal / "nominal"): mulai dari 60 detik (1 menit), turun bertahap hingga paling cepat 15 detik.
+ * - Level 3 (Kasus Kompleks / "complex"): mulai dari 120 detik (2 menit), turun bertahap hingga paling cepat 30 detik.
  */
 export function getAritmatikaSurvivalTimeLimitSec(
   kind: "concept" | "nominal" | "complex" | string = "complex",
@@ -987,18 +987,18 @@ export function getAritmatikaSurvivalTimeLimitSec(
   const qNum = Math.max(1, questionNumber);
 
   if (kind === "concept") {
-    // Level 1: 35s di awal, turun bertahap hingga minimum 15s
-    const calculated = Math.round(35 - (qNum - 1) * 1.5);
-    return Math.max(15, calculated);
+    // Level 1: Mulai 45 detik, batas tercepat 5 detik
+    const calculated = Math.round(45 - (qNum - 1) * 2);
+    return Math.max(5, calculated);
   }
 
   if (kind === "nominal") {
-    // Level 2: Mulai 1 menit (60 detik), berkurang 2 detik per nomor soal, mentok di paling cepat 10 detik
+    // Level 2: Mulai 60 detik (1 menit), berkurang 2 detik per nomor soal, batas tercepat 15 detik
     const calculated = Math.round(60 - (qNum - 1) * 2);
-    return Math.max(10, calculated);
+    return Math.max(15, calculated);
   }
 
-  // Level 3 (complex): Mulai 2 menit (120 detik), berkurang 3 detik per nomor soal, mentok di paling cepat 30 detik
+  // Level 3 (complex): Mulai 120 detik (2 menit), berkurang 3 detik per nomor soal, batas tercepat 30 detik
   const calculated = Math.round(120 - (qNum - 1) * 3);
   return Math.max(30, calculated);
 }
