@@ -69,7 +69,7 @@ export function PerbandinganGameClient({
   const [modeType, setModeType] = useState<GameModeType>("survival");
   const [fixedCount, setFixedCount] = useState<5 | 10 | 20>(10);
   const [fixedTimeLimitMinutes, setFixedTimeLimitMinutes] = useState<number>(3); // 0 = tanpa batas
-  const [autoAdvance, setAutoAdvance] = useState<boolean>(false);
+  const [autoAdvance, setAutoAdvance] = useState<boolean>(true);
 
   // Game Lifecycle
   const [gameState, setGameState] = useState<"lobby" | "playing" | "summary">("lobby");
