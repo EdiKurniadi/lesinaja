@@ -491,9 +491,9 @@ export function PerbandinganGameClient({
                   </span>
                 </div>
                 <div className="bg-white border border-black/30 p-2.5">
-                  <span className="font-bold text-emerald-700 block">2. Senilai (Direct)</span>
+                  <span className="font-bold text-emerald-700 block">2. Senilai</span>
                   <span className="text-muted-foreground text-[11px] leading-tight block mt-0.5">
-                    Variabel A naik, B ikut naik (hasil bagi konstan: A/B = k)
+                    Variabel A naik, B ikut naik (hasil bagi konstan: A1/B1 = A2/B2)
                   </span>
                 </div>
                 <div className="bg-white border border-black/30 p-2.5">
@@ -847,7 +847,7 @@ export function PerbandinganGameClient({
                       <strong className="text-foreground">Konsep Rasio:</strong> Tentukan nilai 1 bagian = Nilai Nyata / Jumlah atau Selisih Bagian Rasio.
                     </li>
                     <li>
-                      <strong className="text-foreground">Perbandingan Senilai:</strong> Jika satu nilai membesar, nilai pasangannya membesar sebanding (hasil bagi konstan: A/B = k).
+                      <strong className="text-foreground">Perbandingan Senilai:</strong> Jika satu nilai membesar, nilai pasangannya membesar sebanding (hasil bagi konstan: A1/B1 = A2/B2).
                     </li>
                     <li>
                       <strong className="text-foreground">Perbandingan Berbalik Nilai:</strong> Jika subjek membesar (misal pekerja atau hewan bertambah), durasi waktu berkurang (hasil kali konstan: A × B = k).

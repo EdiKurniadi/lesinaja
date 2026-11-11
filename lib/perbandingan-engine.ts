@@ -409,11 +409,11 @@ export function generateKonsepRasioQuestion(): GameQuestion {
 }
 
 // =========================================================================
-// 2. GENERATOR PERBANDINGAN SENILAI (DIRECT PROPORTION)
+// 2. GENERATOR PERBANDINGAN SENILAI
 // =========================================================================
 
 export function generatePerbandinganSenilaiQuestion(): GameQuestion {
-  const scenarioType = randInt(1, 5);
+  const scenarioType = randInt(1, 6);
 
   let prompt = "";
   let correctAnswer = "";
@@ -422,131 +422,193 @@ export function generatePerbandinganSenilaiQuestion(): GameQuestion {
 
   switch (scenarioType) {
     case 1: {
-      // 1. Pekerja vs Hasil Produksi (kain, sepatu, masker, dll.)
-      const crafts = [
-        { product: "helai kain batik", worker: "pembatik", p1: 3, o1: 5 },
-        { product: "pasang sepatu kulit", worker: "pengrajin", p1: 4, o1: 7 },
-        { product: "potong kemeja", worker: "penjahit", p1: 5, o1: 12 },
-        { product: "buah tas anyaman", worker: "pengrajin", p1: 2, o1: 9 },
-        { product: "lusin kotak suvenir", worker: "karyawan", p1: 3, o1: 8 },
+      // 1. Waktu Pembuatan vs Minuman / Makanan (Barista, Kafe & Dapur)
+      // Termasuk variasi non-kelipatan seperti 4 menit -> 18 kopi, 10 menit -> ?
+      const cafeData = [
+        { subject: "Seorang barista kafe", verb: "meracik", t1: 4, o1: 18, t2: 10, unitT: "menit", unitO: "cangkir kopi" },
+        { subject: "Seorang barista", verb: "membuat", t1: 6, o1: 21, t2: 10, unitT: "menit", unitO: "cangkir kopi susu" },
+        { subject: "Karyawan kedai teh", verb: "menyajikan", t1: 6, o1: 15, t2: 14, unitT: "menit", unitO: "cangkir teh tarik" },
+        { subject: "Koki restoran", verb: "memasak", t1: 8, o1: 20, t2: 18, unitT: "menit", unitO: "porsi mi goreng" },
+        { subject: "Pelayan kedai roti", verb: "memanggang", t1: 4, o1: 14, t2: 6, unitT: "menit", unitO: "porsi roti bakar" },
+        { subject: "Barista kedai jus", verb: "membuat", t1: 5, o1: 12, t2: 15, unitT: "menit", unitO: "gelas jus buah segar" },
+        { subject: "Chef pastry", verb: "membuat", t1: 8, o1: 30, t2: 12, unitT: "menit", unitO: "potong kue waffle" },
       ];
-      const item = sample(crafts);
-      const k = sample([3, 4, 5, 6]);
-      const p2 = item.p1 * k;
-      const o2 = item.o1 * k;
+      const c = sample(cafeData);
+      const o2 = Math.round((c.t2 / c.t1) * c.o1);
+      const askOutput = Math.random() < 0.75; // 75% tanya output (B2), 25% tanya waktu (A2)
 
-      prompt = `Sebanyak ${item.p1} orang ${item.worker} mampu memproduksi ${item.o1} ${item.product} dalam waktu yang sama. Jika jumlah ${item.worker} ditambah menjadi ${p2} orang dengan kecepatan kerja yang sama, berapa banyak ${item.product} yang dapat diproduksi?`;
-      correctAnswer = `${formatNumber(o2)} ${item.product}`;
-
-      distractors = [
-        `${formatNumber(o2 - item.o1)} ${item.product}`,
-        `${formatNumber(o2 + item.o1)} ${item.product}`,
-        `${formatNumber(o2 + k)} ${item.product}`,
-        `${formatNumber(p2 * 2)} ${item.product}`,
-      ];
-
-      tip = `Perbandingan Senilai: Semakin banyak pekerja, semakin banyak hasil produksi.\n(3 pekerja -> 5 kain, maka 18 pekerja -> ?)\nOutput = (${p2} / ${item.p1}) × ${item.o1} = ${k} × ${item.o1} = ${correctAnswer}.`;
+      if (askOutput) {
+        prompt = `${c.subject} mampu ${c.verb} ${c.o1} ${c.unitO} dalam waktu ${c.t1} ${c.unitT}. Jika ia bekerja konstan selama ${c.t2} ${c.unitT}, berapa banyak ${c.unitO} yang dapat dihasilkan?`;
+        correctAnswer = `${formatNumber(o2)} ${c.unitO}`;
+        distractors = [
+          `${formatNumber(o2 - Math.round(c.o1 / 2))} ${c.unitO}`,
+          `${formatNumber(o2 + Math.round(c.o1 / 2))} ${c.unitO}`,
+          `${formatNumber(Math.round(c.o1 * (c.t2 / c.t1) * 0.8))} ${c.unitO}`,
+          `${formatNumber(c.t2 * 3)} ${c.unitO}`,
+        ];
+        tip = `Perbandingan Senilai (hasil bagi konstan: A1/B1 = A2/B2):\nA1 = ${c.t1} ${c.unitT}, B1 = ${c.o1} ${c.unitO}\nA2 = ${c.t2} ${c.unitT}, B2 = ?\nRumus: A1/B1 = A2/B2  =>  B2 = (A2 / A1) × B1\nB2 = (${c.t2} / ${c.t1}) × ${c.o1} = ${correctAnswer}.`;
+      } else {
+        prompt = `${c.subject} mampu ${c.verb} ${c.o1} ${c.unitO} dalam waktu ${c.t1} ${c.unitT}. Berapa ${c.unitT} waktu yang dibutuhkan jika ia harus ${c.verb} ${o2} ${c.unitO} dengan kecepatan yang sama?`;
+        correctAnswer = `${c.t2} ${c.unitT}`;
+        distractors = [
+          `${c.t2 - 2} ${c.unitT}`,
+          `${c.t2 + 2} ${c.unitT}`,
+          `${c.t2 + 4} ${c.unitT}`,
+          `${Math.round(c.t1 * 2)} ${c.unitT}`,
+        ];
+        tip = `Perbandingan Senilai (hasil bagi konstan: A1/B1 = A2/B2):\nA1 = ${c.t1} ${c.unitT}, B1 = ${c.o1} ${c.unitO}\nB2 = ${o2} ${c.unitO}, A2 = ?\nRumus: A1/B1 = A2/B2  =>  A2 = (B2 / B1) × A1\nA2 = (${o2} / ${c.o1}) × ${c.t1} = ${correctAnswer}.`;
+      }
       break;
     }
 
     case 2: {
-      // 2. Bensin vs Jarak Tempuh
-      const fuelData = [
-        { fuel1: 6, dist1: 72, k: sample([2.5, 3, 3.5, 4]) },
-        { fuel1: 8, dist1: 112, k: sample([1.5, 2, 2.5]) },
-        { fuel1: 5, dist1: 85, k: sample([2, 3, 4]) },
-        { fuel1: 10, dist1: 150, k: sample([2, 2.5, 3]) },
+      // 2. Pekerja / Hari vs Hasil Produksi (Kerajinan, Tekstil & Proyek)
+      const crafts = [
+        { role: "pembatik", verb: "menghasilkan", w1: 8, o1: 14, w2: 20, unitW: "hari kerja", unitO: "helai kain batik" },
+        { role: "penjahit", verb: "menjahit", w1: 6, o1: 15, w2: 8, unitW: "orang penjahit", unitO: "potong kemeja dinas" },
+        { role: "pengrajin kulit", verb: "membuat", w1: 4, o1: 18, w2: 10, unitW: "orang pengrajin", unitO: "buah tas kulit" },
+        { role: "pengrajin kayu", verb: "memproduksi", w1: 6, o1: 21, w2: 8, unitW: "orang tukang kayu", unitO: "unit meja belajar" },
+        { role: "karyawan suvenir", verb: "merakit", w1: 9, o1: 24, w2: 15, unitW: "orang karyawan", unitO: "kotak parsel hadiah" },
+        { role: "penenun tradisional", verb: "menenun", w1: 6, o1: 21, w2: 8, unitW: "orang penenun", unitO: "sarung tenun ikat" },
+        { role: "pengrajin rotan", verb: "menganyam", w1: 4, o1: 14, w2: 10, unitW: "orang pengrajin", unitO: "keranjang rotan" },
+        { role: "pembatik tulis", verb: "membuat", w1: 3, o1: 5, w2: 18, unitW: "orang pembatik", unitO: "helai kain batik" },
       ];
-      const item = sample(fuelData);
-      const dist2 = Math.round(item.dist1 * item.k);
-      const fuel2 = Math.round(item.fuel1 * item.k);
+      const item = sample(crafts);
+      const o2 = Math.round((item.w2 / item.w1) * item.o1);
 
-      prompt = `Sebuah mobil dinas memerlukan ${item.fuel1} liter bensin untuk menempuh perjalanan sejauh ${item.dist1} km. Berapa liter bensin yang dibutuhkan mobil tersebut untuk menempuh jarak ${dist2} km dengan efisiensi mesin yang sama?`;
-      correctAnswer = `${fuel2} liter`;
+      prompt = `Sebanyak ${item.w1} ${item.unitW} mampu ${item.verb} ${item.o1} ${item.unitO}. Jika dialokasikan ${item.w2} ${item.unitW} dengan ritme kerja yang sama, berapa banyak ${item.unitO} yang dapat diselesaikan?`;
+      correctAnswer = `${formatNumber(o2)} ${item.unitO}`;
 
       distractors = [
-        `${fuel2 - 2} liter`,
-        `${fuel2 + 2} liter`,
-        `${fuel2 + 4} liter`,
-        `${item.fuel1 * 2} liter`,
+        `${formatNumber(o2 - Math.round(item.o1 / 2))} ${item.unitO}`,
+        `${formatNumber(o2 + Math.round(item.o1 / 2))} ${item.unitO}`,
+        `${formatNumber(o2 + 6)} ${item.unitO}`,
+        `${formatNumber(item.w2 * 2)} ${item.unitO}`,
       ];
 
-      tip = `Perbandingan Senilai: Jarak bertambah, konsumsi bensin ikut bertambah.\nKonsumsi per liter = ${item.dist1} / ${item.fuel1} = ${item.dist1 / item.fuel1} km/liter.\nBensin dibutuhkan = ${dist2} km / (${item.dist1 / item.fuel1} km/liter) = ${correctAnswer}.`;
+      tip = `Perbandingan Senilai (hasil bagi konstan: A1/B1 = A2/B2):\nA1 = ${item.w1} ${item.unitW}, B1 = ${item.o1} ${item.unitO}\nA2 = ${item.w2} ${item.unitW}, B2 = ?\nRumus: A1/B1 = A2/B2  =>  B2 = (A2 / A1) × B1\nB2 = (${item.w2} / ${item.w1}) × ${item.o1} = ${correctAnswer}.`;
       break;
     }
 
     case 3: {
-      // 3. Mesin/Waktu vs Output Cetak / Scan
-      const machineData = [
-        { task: "memindai dokumen arsip", ratePerMin: 12, t1: 5, t2: 15, unit: "halaman" },
-        { task: "mencetak lembar ujian", ratePerMin: 25, t1: 4, t2: 12, unit: "lembar" },
-        { task: "mengemas paket kardus", ratePerMin: 8, t1: 6, t2: 24, unit: "paket" },
-        { task: "memasang label produk", ratePerMin: 15, t1: 4, t2: 20, unit: "label" },
+      // 3. Konsumsi Bahan Bakar (Bensin) vs Jarak Tempuh
+      const fuelData = [
+        { f1: 4, d1: 54, f2: 10, ask: "dist" }, // 54 * (10/4) = 135 km
+        { f1: 6, d1: 75, f2: 10, ask: "fuel" }, // d2 = 125 km -> butuh 10 liter
+        { f1: 8, d1: 140, f2: 12, ask: "fuel" }, // d2 = 210 km -> butuh 12 liter
+        { f1: 6, d1: 84, f2: 9, ask: "dist" },  // 84 * (9/6) = 126 km
+        { f1: 8, d1: 100, f2: 14, ask: "dist" }, // 100 * (14/8) = 175 km
+        { f1: 5, d1: 65, f2: 8, ask: "dist" },  // 65 * (8/5) = 104 km
+        { f1: 4, d1: 48, f2: 7, ask: "fuel" },  // d2 = 84 km -> butuh 7 liter
+        { f1: 6, d1: 72, f2: 18, ask: "dist" }, // 72 * 3 = 216 km
       ];
-      const m = sample(machineData);
-      const out1 = m.ratePerMin * m.t1;
-      const out2 = m.ratePerMin * m.t2;
+      const item = sample(fuelData);
+      const d2 = Math.round((item.f2 / item.f1) * item.d1);
 
-      prompt = `Sebuah mesin otomatis mampu ${m.task} sebanyak ${out1} ${m.unit} dalam waktu ${m.t1} menit. Jika mesin tersebut beroperasi konstan selama ${m.t2} menit, berapa banyak ${m.unit} yang berhasil diselesaikan?`;
-      correctAnswer = `${formatNumber(out2)} ${m.unit}`;
-
-      distractors = [
-        `${formatNumber(out2 - m.ratePerMin * 2)} ${m.unit}`,
-        `${formatNumber(out2 + m.ratePerMin * 2)} ${m.unit}`,
-        `${formatNumber(out2 + 50)} ${m.unit}`,
-        `${formatNumber(out1 * 2)} ${m.unit}`,
-      ];
-
-      tip = `Perbandingan Senilai: Waktu bertambah, jumlah ${m.unit} yang diproses ikut bertambah sebanding.\nKecepatan = ${out1} / ${m.t1} = ${m.ratePerMin} ${m.unit}/menit.\nTotal (${m.t2} menit) = ${m.t2} × ${m.ratePerMin} = ${correctAnswer}.`;
+      if (item.ask === "dist") {
+        prompt = `Sebuah mobil operasional memerlukan ${item.f1} liter bensin untuk menempuh perjalanan sejauh ${item.d1} km. Berapa km jarak yang dapat ditempuh mobil tersebut jika menghabiskan ${item.f2} liter bensin dengan laju rata-rata yang sama?`;
+        correctAnswer = `${d2} km`;
+        distractors = [
+          `${d2 - 15} km`,
+          `${d2 + 15} km`,
+          `${d2 + 25} km`,
+          `${Math.round(item.d1 * 2)} km`,
+        ];
+        tip = `Perbandingan Senilai (hasil bagi konstan: A1/B1 = A2/B2):\nA1 = ${item.f1} liter, B1 = ${item.d1} km\nA2 = ${item.f2} liter, B2 = ?\nRumus: A1/B1 = A2/B2  =>  B2 = (A2 / A1) × B1\nB2 = (${item.f2} / ${item.f1}) × ${item.d1} = ${correctAnswer}.`;
+      } else {
+        prompt = `Sebuah mobil dinas memerlukan ${item.f1} liter bensin untuk menempuh jarak ${item.d1} km. Berapa liter bensin yang dibutuhkan mobil tersebut untuk menempuh jarak ${d2} km dengan kondisi jalan yang sama?`;
+        correctAnswer = `${item.f2} liter`;
+        distractors = [
+          `${item.f2 - 2} liter`,
+          `${item.f2 + 2} liter`,
+          `${item.f2 + 4} liter`,
+          `${Math.round(item.f1 * 2)} liter`,
+        ];
+        tip = `Perbandingan Senilai (hasil bagi konstan: A1/B1 = A2/B2):\nA1 = ${item.f1} liter, B1 = ${item.d1} km\nB2 = ${d2} km, A2 = ?\nRumus: A1/B1 = A2/B2  =>  A2 = (B2 / B1) × A1\nA2 = (${d2} / ${item.d1}) × ${item.f1} = ${correctAnswer}.`;
+      }
       break;
     }
 
     case 4: {
-      // 4. Bahan Resep / Suvenir vs Porsi
+      // 4. Mesin Otomatis vs Output Cetak / Scan / Kemas
+      const machineData = [
+        { task: "mencetak dokumen arsip dinas", t1: 8, o1: 60, t2: 14, unit: "lembar arsip" },
+        { task: "mencetak sablon kaos seragam", t1: 6, o1: 21, t2: 10, unit: "kaos sablon" },
+        { task: "mencetak lembar soal ujian", t1: 4, o1: 26, t2: 10, unit: "halaman cetak" },
+        { task: "memasang label botol kemasan", t1: 9, o1: 24, t2: 15, unit: "botol kemasan" },
+        { task: "mengemas paket kardus logistik", t1: 4, o1: 14, t2: 6, unit: "kardus paket" },
+        { task: "memindai berkas digitalisasi", t1: 5, o1: 60, t2: 15, unit: "lembar berkas" },
+      ];
+      const m = sample(machineData);
+      const out2 = Math.round((m.t2 / m.t1) * m.o1);
+
+      prompt = `Sebuah mesin otomatis mampu ${m.task} sebanyak ${m.o1} ${m.unit} dalam waktu ${m.t1} menit. Jika mesin tersebut terus bekerja konstan selama ${m.t2} menit, berapa banyak ${m.unit} yang selesai diproses?`;
+      correctAnswer = `${formatNumber(out2)} ${m.unit}`;
+
+      distractors = [
+        `${formatNumber(out2 - Math.round(m.o1 / 2))} ${m.unit}`,
+        `${formatNumber(out2 + Math.round(m.o1 / 2))} ${m.unit}`,
+        `${formatNumber(out2 + 20)} ${m.unit}`,
+        `${formatNumber(m.o1 * 2)} ${m.unit}`,
+      ];
+
+      tip = `Perbandingan Senilai (hasil bagi konstan: A1/B1 = A2/B2):\nA1 = ${m.t1} menit, B1 = ${m.o1} ${m.unit}\nA2 = ${m.t2} menit, B2 = ?\nRumus: A1/B1 = A2/B2  =>  B2 = (A2 / A1) × B1\nB2 = (${m.t2} / ${m.t1}) × ${m.o1} = ${correctAnswer}.`;
+      break;
+    }
+
+    case 5: {
+      // 5. Porsi Resep Masakan vs Kebutuhan Bahan Baku
       const recipeData = [
-        { p1: 4, b1: 250, p2: sample([12, 16, 20]), name: "porsi kue bolu", bahan: "tepung terigu", unit: "gram" },
-        { p1: 6, b1: 180, p2: sample([18, 24, 30]), name: "gelas jus buah", bahan: "sirup murni", unit: "ml" },
-        { p1: 5, b1: 15, p2: sample([15, 20, 25]), name: "buah parsel lebaran", bahan: "pita hias", unit: "meter" },
+        { p1: 4, b1: 180, p2: 10, name: "porsi kue bolu kukus", bahan: "tepung terigu", unit: "gram" },
+        { p1: 6, b1: 450, p2: 8, name: "porsi rendang daging sapi", bahan: "santan kelapa", unit: "gram" },
+        { p1: 6, b1: 210, p2: 8, name: "gelas jus buah segar", bahan: "sirup murni", unit: "ml" },
+        { p1: 4, b1: 14, p2: 6, name: "loyang martabak manis", bahan: "butir telur bebek", unit: "butir" },
+        { p1: 8, b1: 140, p2: 12, name: "toples kue kering mentega", bahan: "margarin berkualitas", unit: "gram" },
+        { p1: 4, b1: 250, p2: 12, name: "porsi sup jamur tiram", bahan: "jamur tiram segar", unit: "gram" },
       ];
       const r = sample(recipeData);
-      const ratio = r.p2 / r.p1;
-      const b2 = r.b1 * ratio;
+      const b2 = Math.round((r.p2 / r.p1) * r.b1);
 
-      prompt = `Untuk membuat ${r.p1} ${r.name} diperlukan bahan baku ${r.bahan} sebanyak ${formatNumber(r.b1)} ${r.unit}. Jika pembuat ingin membuat ${r.p2} ${r.name} dengan kualitas yang sama, berapa ${r.unit} ${r.bahan} yang harus disiapkan?`;
+      prompt = `Untuk membuat ${r.p1} ${r.name} diperlukan bahan baku ${r.bahan} sebanyak ${formatNumber(r.b1)} ${r.unit}. Jika koki ingin membuat ${r.p2} ${r.name} dengan takaran rasa yang sama persis, berapa ${r.unit} ${r.bahan} yang harus disediakan?`;
       correctAnswer = `${formatNumber(b2)} ${r.unit}`;
 
       distractors = [
-        `${formatNumber(b2 - r.b1)} ${r.unit}`,
-        `${formatNumber(b2 + r.b1)} ${r.unit}`,
-        `${formatNumber(b2 + 100)} ${r.unit}`,
-        `${formatNumber(b2 / 2)} ${r.unit}`,
+        `${formatNumber(b2 - Math.round(r.b1 / 2))} ${r.unit}`,
+        `${formatNumber(b2 + Math.round(r.b1 / 2))} ${r.unit}`,
+        `${formatNumber(b2 + 80)} ${r.unit}`,
+        `${formatNumber(Math.round(r.b1 * 2))} ${r.unit}`,
       ];
 
-      tip = `Perbandingan Senilai: Porsi bertambah ${ratio}x lipat, maka kebutuhan bahan juga bertambah ${ratio}x lipat.\nBahan = (${r.p2} / ${r.p1}) × ${formatNumber(r.b1)} = ${ratio} × ${r.b1} = ${correctAnswer}.`;
+      tip = `Perbandingan Senilai (hasil bagi konstan: A1/B1 = A2/B2):\nA1 = ${r.p1} porsi, B1 = ${formatNumber(r.b1)} ${r.unit}\nA2 = ${r.p2} porsi, B2 = ?\nRumus: A1/B1 = A2/B2  =>  B2 = (A2 / A1) × B1\nB2 = (${r.p2} / ${r.p1}) × ${formatNumber(r.b1)} = ${correctAnswer}.`;
       break;
     }
 
     default: {
-      // 5. Harga Total Barang vs Kuantitas (Pembelian Eceran/Grosir)
-      const basePrices = [12000, 15000, 18000, 20000, 25000];
-      const unitPrice = sample(basePrices);
-      const q1 = sample([3, 4, 5]);
-      const k = sample([2, 3, 4]);
-      const q2 = q1 * k;
-      const cost1 = q1 * unitPrice;
-      const cost2 = q2 * unitPrice;
+      // 6. Kuantitas Barang vs Total Biaya Pembelian
+      const priceData = [
+        { q1: 4, c1: 18000, q2: 10, item: "buah spidol whiteboard" },
+        { q1: 6, c1: 75000, q2: 10, item: "meter kain seragam dinas" },
+        { q1: 8, c1: 36000, q2: 14, item: "buah pulpen gel kantor" },
+        { q1: 6, c1: 90000, q2: 9, item: "buah buku agenda kerja" },
+        { q1: 8, c1: 380000, q2: 12, item: "rim kertas HVS A4" },
+        { q1: 6, c1: 27000, q2: 8, item: "buah buku catatan bergaris" },
+        { q1: 3, c1: 45000, q2: 12, item: "buah map arsip kulit" },
+      ];
+      const p = sample(priceData);
+      const c2 = Math.round((p.q2 / p.q1) * p.c1);
 
-      prompt = `Harga pembelian ${q1} buku agenda kantor adalah ${formatRupiah(cost1)}. Berapakah harga yang harus dibayarkan jika instansi membeli ${q2} buku agenda yang sama?`;
-      correctAnswer = formatRupiah(cost2);
+      prompt = `Harga pembelian ${p.q1} ${p.item} adalah ${formatRupiah(p.c1)}. Berapakah biaya yang harus dibayarkan jika instansi membeli ${p.q2} ${p.item} yang serupa?`;
+      correctAnswer = formatRupiah(c2);
 
+      const step = Math.round((p.c1 / p.q1) * 2);
       distractors = [
-        formatRupiah(cost2 - unitPrice),
-        formatRupiah(cost2 + unitPrice),
-        formatRupiah(cost1 * 2),
-        formatRupiah(cost2 + 25000),
+        formatRupiah(c2 - step),
+        formatRupiah(c2 + step),
+        formatRupiah(c2 + step * 2),
+        formatRupiah(p.c1 * 2),
       ];
 
-      tip = `Perbandingan Senilai: Jumlah barang naik ${k}x lipat (${q1} -> ${q2}), maka total harga ikut naik ${k}x lipat.\nTotal = ${k} × ${formatRupiah(cost1)} = ${correctAnswer}.`;
+      tip = `Perbandingan Senilai (hasil bagi konstan: A1/B1 = A2/B2):\nA1 = ${p.q1} barang, B1 = ${formatRupiah(p.c1)}\nA2 = ${p.q2} barang, B2 = ?\nRumus: A1/B1 = A2/B2  =>  B2 = (A2 / A1) × B1\nB2 = (${p.q2} / ${p.q1}) × ${formatRupiah(p.c1)} = ${correctAnswer}.`;
       break;
     }
   }
