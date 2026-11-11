@@ -5,6 +5,7 @@ import {
   generateLevel1ConceptQuestion,
   generateLevel2NominalQuestion,
   generateLevel3ComplexQuestion,
+  getAritmatikaSurvivalTimeLimitSec,
   gcd,
   simplifyFraction,
   formatRupiah,
@@ -92,5 +93,21 @@ test("generateAritmatikaSet menghasilkan jumlah soal yang tepat untuk level apap
   assert.equal(setL2.length, 10);
   assert.equal(setL3.length, 20);
   assert.equal(setAll.length, 15);
+});
+
+test("getAritmatikaSurvivalTimeLimitSec memenuhi batas waktu survival tiap level", () => {
+  // Level 1: 35s di awal, minimal 15s
+  assert.equal(getAritmatikaSurvivalTimeLimitSec("concept", 1), 35);
+  assert.equal(getAritmatikaSurvivalTimeLimitSec("concept", 50), 15);
+
+  // Level 2: Mulai 1 menit (60 detik) dan paling cepat 10 detik
+  assert.equal(getAritmatikaSurvivalTimeLimitSec("nominal", 1), 60);
+  assert.ok(getAritmatikaSurvivalTimeLimitSec("nominal", 10) < 60);
+  assert.equal(getAritmatikaSurvivalTimeLimitSec("nominal", 50), 10);
+
+  // Level 3: Mulai 2 menit (120 detik) dan paling cepat 30 detik
+  assert.equal(getAritmatikaSurvivalTimeLimitSec("complex", 1), 120);
+  assert.ok(getAritmatikaSurvivalTimeLimitSec("complex", 15) < 120);
+  assert.equal(getAritmatikaSurvivalTimeLimitSec("complex", 60), 30);
 });
 

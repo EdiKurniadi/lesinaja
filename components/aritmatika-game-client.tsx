@@ -24,6 +24,7 @@ import { PageFrame } from "@/components/page-frame";
 import { MathText } from "@/components/math-text";
 import {
   generateAritmatikaSet,
+  getAritmatikaSurvivalTimeLimitSec,
   type AritmatikaLevel,
 } from "@/lib/aritmatika-engine";
 import type { GameModeType, GameQuestion } from "@/lib/game-engine";
@@ -103,20 +104,13 @@ export function AritmatikaGameClient({
 
   const currentQuestion = questions[currentIndex] as GameQuestion | undefined;
 
-  // Hitung batas waktu per soal untuk mode survival
+  // Hitung batas waktu per soal untuk mode survival sesuai spesifikasi:
+  // - Level 1: 35s turun ke 15s
+  // - Level 2: Mulai 1 menit (60s) hingga paling cepat 10s
+  // - Level 3: Mulai 2 menit (120s) hingga paling cepat 30s
   const getQuestionSurvivalTime = useCallback((q?: GameQuestion, questionNum: number = 1): number => {
-    // Soal level 1 (konseptual): 35s turun ke 15s
-    // Soal level 2 (hitung nominal): 45s turun ke 20s
-    // Soal level 3 (kasus cerita kompleks): 65s turun ke 35s
     const kind = q?.kind || "complex";
-    let base = 50;
-    if (kind === "concept") base = 35;
-    else if (kind === "nominal") base = 45;
-    else base = 65;
-
-    // Reduksi 1.5 detik per 5 soal yang terselesaikan, dengan batas minimum
-    const reduction = Math.min(Math.floor((questionNum - 1) / 3) * 2, base - 15);
-    return Math.max(15, base - reduction) * 1000;
+    return getAritmatikaSurvivalTimeLimitSec(kind, questionNum) * 1000;
   }, []);
 
   // Cleanup helper

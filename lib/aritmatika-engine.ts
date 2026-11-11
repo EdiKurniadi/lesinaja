@@ -974,3 +974,32 @@ export function generateAritmatikaSet(level: AritmatikaLevel, count: number): Ga
   return questions;
 }
 
+/**
+ * Menghitung batas waktu dinamis per soal pada mode SURVIVAL Aritmatika Sosial (dalam detik):
+ * - Level 1 (Konsep 100% / "concept"): seperti sebelumnya (35 detik turun hingga minimal 15 detik).
+ * - Level 2 (Hitung Nominal / "nominal"): mulai dari 1 menit (60 detik) sampai paling cepat 10 detik.
+ * - Level 3 (Kasus Kompleks / "complex"): mulai dari 2 menit (120 detik) dan paling cepat 30 detik.
+ */
+export function getAritmatikaSurvivalTimeLimitSec(
+  kind: "concept" | "nominal" | "complex" | string = "complex",
+  questionNumber: number = 1
+): number {
+  const qNum = Math.max(1, questionNumber);
+
+  if (kind === "concept") {
+    // Level 1: 35s di awal, turun bertahap hingga minimum 15s
+    const calculated = Math.round(35 - (qNum - 1) * 1.5);
+    return Math.max(15, calculated);
+  }
+
+  if (kind === "nominal") {
+    // Level 2: Mulai 1 menit (60 detik), berkurang 2 detik per nomor soal, mentok di paling cepat 10 detik
+    const calculated = Math.round(60 - (qNum - 1) * 2);
+    return Math.max(10, calculated);
+  }
+
+  // Level 3 (complex): Mulai 2 menit (120 detik), berkurang 3 detik per nomor soal, mentok di paling cepat 30 detik
+  const calculated = Math.round(120 - (qNum - 1) * 3);
+  return Math.max(30, calculated);
+}
+
