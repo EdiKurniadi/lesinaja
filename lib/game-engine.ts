@@ -412,7 +412,7 @@ export type GameModeType = "fixed" | "survival";
 
 export interface GameQuestion {
   id: string;
-  kind: "conversion" | "operation";
+  kind: "conversion" | "operation" | "concept" | "nominal" | "complex" | "senilai" | "berbalik";
   prompt: string;
   subtext?: string;
   options: string[];

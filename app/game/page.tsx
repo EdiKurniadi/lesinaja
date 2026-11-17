@@ -2,9 +2,9 @@ import type { Metadata } from "next";
 import { GameClient } from "@/components/game-client";
 
 export const metadata: Metadata = {
-  title: "Arena Hitung Cepat — Game Pecahan, Desimal & Persen",
+  title: "Game TIU — Arena Numerik dan Silogisme",
   description:
-    "Game latihan fondasi mental math dan refleks pecahan istimewa untuk persiapan ujian TIU SKD CPNS dan Kedinasan.",
+    "Game latihan hitung cepat, aritmatika, perbandingan, dan silogisme interaktif untuk persiapan TIU SKD CPNS dan Kedinasan.",
 };
 
 export const dynamic = "force-static";

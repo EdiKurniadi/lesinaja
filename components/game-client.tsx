@@ -52,6 +52,7 @@ import {
 } from "@/lib/game-storage";
 import { AritmatikaGameClient } from "@/components/aritmatika-game-client";
 import { PerbandinganGameClient } from "@/components/perbandingan-game-client";
+import { SilogismeGameClient } from "@/components/silogisme-game-client";
 
 interface AnswerHistoryItem {
   question: GameQuestion;
@@ -63,7 +64,7 @@ interface AnswerHistoryItem {
 export function GameClient() {
   // --- Game Selection State ---
   // null = Menampilkan Daftar Game (Katalog); "arena-hitung" = Arena Hitung Cepat; "aritmatika-sosial" = Arena Aritmatika Sosial; "perbandingan" = Arena Perbandingan
-  const [activeGame, setActiveGame] = useState<"arena-hitung" | "aritmatika-sosial" | "perbandingan" | null>(null);
+  const [activeGame, setActiveGame] = useState<"arena-hitung" | "aritmatika-sosial" | "perbandingan" | "silogisme" | null>(null);
 
   // --- Arena Hitung Cepat State ---
   const [category, setCategory] = useState<GameCategory>("mixed");
@@ -104,7 +105,7 @@ export function GameClient() {
     const syncFromUrl = () => {
       const params = new URLSearchParams(window.location.search);
       const play = params.get("play");
-      if (play === "arena-hitung" || play === "aritmatika-sosial" || play === "perbandingan") {
+      if (play === "arena-hitung" || play === "aritmatika-sosial" || play === "perbandingan" || play === "silogisme") {
         setActiveGame(play);
       } else {
         setActiveGame(null);
@@ -126,7 +127,7 @@ export function GameClient() {
     };
   }, []);
 
-  const openGame = (gameId: "arena-hitung" | "aritmatika-sosial" | "perbandingan") => {
+  const openGame = (gameId: "arena-hitung" | "aritmatika-sosial" | "perbandingan" | "silogisme") => {
     setActiveGame(gameId);
     if (typeof window !== "undefined") {
       const url = new URL(window.location.href);
@@ -479,7 +480,7 @@ export function GameClient() {
             <div className="flex items-center gap-2">
               <Gamepad2 className="size-5 text-brand-blue" />
               <span className="font-mono text-xs sm:text-sm font-bold uppercase tracking-wider">
-                3 Game Tersedia · 1 Game Segera Hadir
+                4 Game Tersedia · 1 Game Segera Hadir
               </span>
             </div>
             <div className="flex flex-wrap items-center gap-4 font-mono text-xs">
@@ -632,7 +633,16 @@ export function GameClient() {
               </div>
             </div>
 
-            {/* GAME 4: POLA ANGKA RAHASIA (COMING SOON) */}
+            <div className="border-2 border-black bg-card p-6 sm:p-7 shadow-[6px_6px_0_#10100f] flex flex-col justify-between gap-6">
+              <div className="space-y-4">
+                <div className="flex flex-wrap items-center justify-between gap-2 border-b-2 border-black pb-3"><span className="border border-black bg-signal px-3 py-1 font-mono text-xs font-black uppercase">Siap Dimainkan</span><span className="font-mono text-xs font-bold text-brand-blue">TIU LOGIKA</span></div>
+                <h3 className="text-2xl font-black uppercase tracking-tight">Arena Silogisme</h3>
+                <p className="font-mono text-xs font-bold text-muted-foreground">Konversi · Susun · Buktikan</p>
+                <p className="text-sm leading-relaxed">Ubah kalimat menjadi simbol, susun kartu dengan drag-and-drop, dan jalankan operasi logika. Sepuluh tantangan bertahap dengan animasi pembuktian dan jejak langkah.</p>
+              </div>
+              <div className="flex flex-wrap items-center justify-between gap-3 border-t-2 border-black/20 pt-4"><span className="font-mono text-xs">Mulai dari fakta, ikuti panah.</span><Button onClick={() => openGame("silogisme")} className="h-11 border-2 border-black bg-brand-blue px-5 font-mono text-xs font-black uppercase text-white hover:bg-brand-blue-hover">Mainkan <ArrowRight className="ml-1 size-3.5" /></Button></div>
+            </div>
+            {/* GAME 5: POLA ANGKA RAHASIA (COMING SOON) */}
             <div className="border-2 border-black bg-warm-white/60 p-6 sm:p-7 shadow-[4px_4px_0_#10100f] flex flex-col justify-between space-y-6 opacity-85">
               <div className="space-y-4">
                 <div className="flex items-center justify-between gap-2 border-b-2 border-black/30 pb-3">
@@ -673,6 +683,8 @@ export function GameClient() {
   // =========================================================================
   // VIEW 2: ARENA ARITMATIKA SOSIAL (GAMEPLAY)
   // =========================================================================
+  if (activeGame === "silogisme") return <SilogismeGameClient onBack={closeGame} />;
+
   if (activeGame === "aritmatika-sosial") {
     return (
       <AritmatikaGameClient

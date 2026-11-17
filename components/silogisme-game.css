@@ -1,0 +1,102 @@
+.silo { --silo-green: #13734a; --silo-green-soft: #e5f6ec; }
+.silo button,.silo select { font: inherit; }
+.silo button:not(:disabled),.silo summary,.silo select { cursor:pointer; }
+.silo button:disabled { cursor:not-allowed; opacity:.45; }
+.silo-hero { padding:28px clamp(20px,5vw,64px) 34px; color:var(--warm-white); background:var(--brand-blue); border-bottom:2px solid var(--foreground); }
+.silo-back { display:inline-flex; align-items:center; gap:8px; font-size:13px!important; margin-bottom:25px; text-decoration:none; }
+.silo-kicker { font:700 11px/1.5 var(--font-mono)!important; letter-spacing:.1em; text-transform:uppercase; margin:0 0 9px; }
+.silo-hero h1 { font-size:clamp(40px,7vw,78px); line-height:.92; letter-spacing:-.06em; font-weight:900; margin:0 0 20px; }
+.silo-hero>p:not(.silo-kicker) { font-size:16px; margin:0; }
+.silo-progress { margin-top:24px; display:flex; align-items:center; gap:16px; flex-wrap:wrap; font:12px var(--font-mono); }
+.silo-progress progress { width:200px; max-width:100%; height:8px; accent-color:var(--signal); }
+.silo-main { padding:24px clamp(16px,4vw,56px) 48px; }
+.silo-toolbar { display:flex; align-items:end; justify-content:space-between; flex-wrap:wrap; gap:12px; }
+.silo-toolbar label { display:grid; gap:6px; min-width:0; max-width:100%; font-size:12px; font-weight:700; }
+.silo-toolbar select { max-width:100%; min-height:44px; border:1px solid var(--foreground); background:var(--card); color:var(--foreground); padding:9px 12px; }
+.silo-btn { display:inline-flex; align-items:center; justify-content:center; gap:8px; min-height:44px; padding:10px 15px; border:1px solid var(--foreground); background:var(--card); color:var(--foreground); font-size:13px!important; font-weight:700!important; }
+.silo-btn:hover:not(:disabled) { background:var(--secondary); }
+.silo-primary { color:var(--warm-white); background:var(--brand-blue); }
+.silo-primary:hover:not(:disabled) { background:var(--brand-blue-hover); }
+.silo-help { margin:20px 0 28px; border-block:1px solid var(--foreground); padding:13px 0; font-size:13px; line-height:1.65; }
+.silo-help summary { font-weight:700; }
+.silo-help p { margin:12px 0 0; max-width:900px; }
+.silo-question-heading { display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:20px; }
+.silo-question-heading h2 { font-weight:900; font-size:clamp(25px,4vw,36px); letter-spacing:-.04em; margin:0; }
+.silo-stage { padding:7px 10px; background:var(--signal); border:1px solid var(--foreground); font:700 11px var(--font-mono); }
+.silo-symbols { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr)); gap:10px 20px; background:var(--secondary); border:1px solid var(--foreground); padding:16px; margin-bottom:16px; }
+.silo-symbols>div { display:flex; align-items:baseline; gap:10px; font-size:13px; min-width:0; }
+.silo-symbols code { font-weight:700; color:var(--brand-blue); }
+.silo-goal { display:flex; align-items:center; flex-wrap:wrap; gap:10px 16px; padding:14px 16px; border:1px solid var(--foreground); background:var(--card); margin-bottom:20px; }
+.silo-goal>span { font:700 10px var(--font-mono); color:var(--brand-red); letter-spacing:.1em; }
+.silo-goal p { flex:1; min-width:min(100%,180px); margin:0; font-size:14px; font-weight:700; }
+.silo-goal code { font-weight:700; font-size:17px; }
+.silo-premises { border:1px solid var(--foreground); }
+.silo-premise { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:12px 20px; padding:16px; background:var(--card); }
+.silo-premise+.silo-premise { border-top:1px solid var(--foreground); }
+.silo-premise.is-confirmed { background:var(--silo-green-soft); }
+.silo-premise-text { display:flex; align-items:baseline; gap:12px; min-width:0; }
+.silo-premise-text>span { font:700 11px var(--font-mono); color:var(--brand-blue); flex-shrink:0; }
+.silo-premise-text p { margin:0; font-size:14px; line-height:1.65; }
+.silo-conversion { display:flex; align-items:center; justify-content:flex-end; gap:8px; min-width:0; }
+.silo-conversion code { font-size:18px; font-weight:700; white-space:normal; overflow-wrap:anywhere; }
+.silo-icon { width:32px; min-height:32px; border:1px solid var(--foreground); background:var(--card); color:var(--foreground); display:inline-flex; align-items:center; justify-content:center; flex-shrink:0; }
+.silo-icon:hover:not(:disabled) { background:var(--signal); }
+.silo-icon.is-checked { background:var(--silo-green); color:var(--warm-white); }
+.silo-row-error { grid-column:1/-1; display:flex; align-items:start; gap:6px; margin:0; color:#9e251b; font-size:13px; line-height:1.5; }
+.silo-row-error svg { flex-shrink:0; margin-top:3px; }
+.silo-notice { display:flex; align-items:start; gap:10px; margin:18px 0; padding:14px 16px; background:var(--secondary); border-left:4px solid var(--brand-blue); font-size:14px; line-height:1.6; }
+.silo-notice svg { flex-shrink:0; margin-top:3px; }
+.silo-notice.error { background:var(--brand-red-soft); border-color:var(--brand-red); }
+.silo-notice.success { background:var(--silo-green-soft); border-color:var(--silo-green); }
+.silo-conversion-footer,.silo-operation-bar { display:flex; justify-content:flex-end; align-items:center; flex-wrap:wrap; gap:12px; }
+.silo-conversion-footer>span,.silo-operation-bar>p { margin:0 auto 0 0; font:12px var(--font-mono); }
+.silo-board-section { margin-top:30px; border:2px solid var(--foreground); background:var(--card); }
+.silo-board-heading { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px; padding:20px; border-bottom:1px solid var(--foreground); }
+.silo-board-heading h3 { margin:0; font-size:23px; font-weight:900; letter-spacing:-.03em; }
+.silo-board-heading p { margin:6px 0 0; font-size:13px; line-height:1.5; }
+.silo-board { display:flex; gap:16px; overflow-x:auto; overscroll-behavior-x:contain; padding:24px 20px; min-height:220px; align-items:stretch; }
+.silo-card { flex:0 0 auto; width:230px; max-width:85vw; border:2px solid var(--foreground); background:var(--background); transition:background .2s,box-shadow .2s; }
+.silo-card.is-selected { background:var(--secondary); box-shadow:4px 4px 0 var(--brand-blue); border-color:var(--brand-blue); }
+.silo-card.is-dragged { opacity:.6; }
+.silo-card.is-result { animation:silo-card-enter .4s ease-out; }
+.silo-card-top { display:flex; align-items:center; justify-content:space-between; padding:6px 8px 6px 12px; border-bottom:1px solid var(--foreground); gap:8px; font:700 10px var(--font-mono); }
+.silo-grip { touch-action:none; cursor:grab!important; }
+.silo-card-select { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:12px; padding:22px 10px 18px; width:100%; min-height:115px; color:var(--foreground); }
+.silo-card-select code { font-size:21px; font-weight:700; overflow-wrap:anywhere; max-width:100%; }
+.silo-card-select>span { font:10px var(--font-mono); }
+.silo-card-controls { display:flex; align-items:center; justify-content:space-between; gap:5px; border-top:1px solid var(--foreground); padding:6px; }
+.silo-equals { display:flex; align-items:center; gap:6px; font-size:22px!important; padding:0 5px; min-height:32px; }
+.silo-equals>span { font:10px var(--font-mono); }
+.silo-operation-bar { padding:16px 20px; border-top:1px solid var(--foreground); }
+.silo-operate { background:var(--signal); box-shadow:3px 3px 0 var(--foreground); }
+.silo-operate>span { font-size:25px; line-height:20px; }
+.silo-operate:hover:not(:disabled) { background:var(--signal); transform:translate(1px,1px); box-shadow:2px 2px 0 var(--foreground); }
+.silo-animation { padding:20px; border-top:1px solid var(--foreground); background:var(--secondary); }
+.silo-animation-title { font:700 11px var(--font-mono); }
+.silo-equation { display:flex; align-items:center; flex-wrap:wrap; gap:12px; margin:18px 0; font-size:21px; }
+.silo-equation code { padding:8px; border-bottom:3px solid transparent; overflow-wrap:anywhere; max-width:100%; }
+.silo-source { border-color:var(--brand-blue)!important; }
+.phase-1 .silo-source { animation:silo-feed .45s ease-in-out; }
+.silo-new-fact { opacity:.15; transform:translateX(-12px); transition:opacity .3s,transform .3s; }
+.phase-2 .silo-new-fact { opacity:1; transform:none; background:var(--signal); }
+.silo-animation p { margin:0; font-size:13px; }
+.silo-victory { display:flex; align-items:center; flex-wrap:wrap; gap:14px; background:var(--silo-green-soft); border:2px solid var(--silo-green); padding:22px; margin-top:24px; }
+.silo-victory>svg { color:var(--silo-green); flex-shrink:0; }
+.silo-victory>div { flex:1; min-width:min(100%,210px); }
+.silo-victory h3 { margin:0 0 5px; font-size:22px; font-weight:900; }
+.silo-victory p { margin:0; font-size:14px; line-height:1.6; }
+.silo-log { margin-top:26px; }
+.silo-log h3 { font:700 12px var(--font-mono); text-transform:uppercase; }
+.silo-log ol { padding:0; margin:0; list-style:none; }
+.silo-log li { display:flex; gap:14px; padding:11px 0; border-bottom:1px solid var(--foreground); font-size:13px; overflow-wrap:anywhere; }
+.silo-log li>span { color:var(--brand-blue); font-weight:700; }
+.silo-log code { min-width:0; }
+.silo-summary { padding:40px 0; max-width:700px; }
+.silo-summary>svg { color:var(--silo-green); }
+.silo-summary h2 { font-size:clamp(28px,5vw,44px); font-weight:900; letter-spacing:-.04em; margin:18px 0; }
+.silo-summary p { line-height:1.8; margin-bottom:24px; }
+@keyframes silo-card-enter { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:none; } }
+@keyframes silo-feed { 50% { background:var(--signal); transform:translateX(8px); } }
+@media(max-width:640px) { .silo-premise { grid-template-columns:1fr; } .silo-conversion { justify-content:flex-start; padding-left:27px; } .silo-conversion code { margin-right:auto; } .silo-toolbar label { width:100%; } .silo-toolbar select { width:100%; } .silo-operation-bar { padding:14px; } .silo-hero { padding-top:22px; } .silo-board-heading { padding:16px; } }
+@media(pointer:coarse) { .silo-icon { min-width:44px; min-height:44px; } .silo-equals { min-height:44px; } .silo-card { width:255px; } }
+@media(prefers-reduced-motion:reduce) { .silo * { animation:none!important; transition:none!important; scroll-behavior:auto!important; } }
