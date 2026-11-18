@@ -1,4 +1,5 @@
 import { EXAM_RULES } from "./exam-rules";
+import { ARITMATIKA_SOSIAL_DRILL_QUESTIONS } from "./aritmatika-sosial-drill-content";
 import { BAHASA_INDONESIA_DRILL_QUESTIONS } from "./bahasa-indonesia-drill-content";
 import { BELA_NEGARA_DRILL_QUESTIONS } from "./bela-negara-drill-content";
 import { INTEGRITAS_DRILL_QUESTIONS } from "./integritas-drill-content";
@@ -338,7 +339,7 @@ export const ALL_TRYOUT_PACKAGES = [...EXAM_PACKAGES, ...MINI_TRYOUT_PACKAGES];
 
 const DRILL_TOPICS: Record<Category, string[]> = {
   TWK: ["Pancasila", "UUD 1945", "NKRI & Bhinneka", "Pilar Negara", "Nasionalisme", "Integritas", "Bela Negara", "Bahasa Indonesia"],
-  TIU: ["Kemampuan Verbal", "Kemampuan Numerik", "Deret & Pola", "Logika Analitis"],
+  TIU: ["Kemampuan Verbal", "Kemampuan Numerik", "Deret & Pola", "Logika Analitis", "Aritmatika Sosial"],
   TKP: ["Pelayanan Publik", "Profesionalisme", "Jejaring Kerja", "Teknologi Informasi", "Sosial Budaya"],
 };
 
@@ -348,6 +349,7 @@ const DRILL_PACKAGE_COUNTS: Record<string, number> = {
   "TWK:Nasionalisme": 5,
   "TWK:Integritas": 5,
   "TWK:Bela Negara": 5,
+  "TIU:Aritmatika Sosial": 5,
   "TKP:Pelayanan Publik": 5,
   "TKP:Profesionalisme": 5,
   "TKP:Jejaring Kerja": 5,
@@ -365,6 +367,7 @@ const drillSource: Question[] = [
   ...INTEGRITAS_DRILL_QUESTIONS,
   ...BELA_NEGARA_DRILL_QUESTIONS,
   ...[3, 4, 5, 6].flatMap((variant) => makeTiu(`d${variant}`, variant)),
+  ...ARITMATIKA_SOSIAL_DRILL_QUESTIONS,
   ...PELAYANAN_PUBLIK_DRILL_QUESTIONS,
   ...PROFESIONALISME_DRILL_QUESTIONS,
   ...JEJARING_KERJA_DRILL_QUESTIONS,

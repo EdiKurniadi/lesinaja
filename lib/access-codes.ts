@@ -65,6 +65,11 @@ export const PACKAGE_ACCESS_CODES: Record<string, string> = {
   "tiu-deret-dan-pola-2": "TIUDERETPOLA2FG95",
   "tiu-logika-analitis-1": "TIUANALITIS1HJ28",
   "tiu-logika-analitis-2": "TIUANALITIS2KL74",
+  "tiu-aritmatika-sosial-1": "TIUARITMATIKA1MN72",
+  "tiu-aritmatika-sosial-2": "TIUARITMATIKA2PQ38",
+  "tiu-aritmatika-sosial-3": "TIUARITMATIKA3RS64",
+  "tiu-aritmatika-sosial-4": "TIUARITMATIKA4TU91",
+  "tiu-aritmatika-sosial-5": "TIUARITMATIKA5VW45",
 
   // === DRILL TKP ===
   "tkp-pelayanan-publik-1": "TKPPELAYANANPUBLIK1MN39",

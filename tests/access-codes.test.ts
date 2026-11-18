@@ -12,7 +12,7 @@ import { ALL_TRYOUT_PACKAGES, DRILL_PACKAGES } from "../lib/content";
 
 test("seluruh paket tryout dan drill memiliki kode akses terdaftar", () => {
   assert.equal(ALL_TRYOUT_PACKAGES.length, 14);
-  assert.equal(DRILL_PACKAGES.length, 62);
+  assert.equal(DRILL_PACKAGES.length, 67);
 
   for (const pkg of ALL_TRYOUT_PACKAGES) {
     const code = getPackageAccessCode(pkg.id);
@@ -26,7 +26,24 @@ test("seluruh paket tryout dan drill memiliki kode akses terdaftar", () => {
     assert.match(code, /^[A-Z0-9]{5,35}$/, `Format kode ${code} tidak valid`);
   }
 
-  assert.equal(Object.keys(PACKAGE_ACCESS_CODES).length, 76);
+  assert.equal(Object.keys(PACKAGE_ACCESS_CODES).length, 81);
+});
+
+test("kode akses Drill Aritmatika Sosial sesuai spesifikasi", () => {
+  const codes: Record<string, string> = {
+    "tiu-aritmatika-sosial-1": "TIUARITMATIKA1MN72",
+    "tiu-aritmatika-sosial-2": "TIUARITMATIKA2PQ38",
+    "tiu-aritmatika-sosial-3": "TIUARITMATIKA3RS64",
+    "tiu-aritmatika-sosial-4": "TIUARITMATIKA4TU91",
+    "tiu-aritmatika-sosial-5": "TIUARITMATIKA5VW45",
+  };
+  for (const [id, code] of Object.entries(codes)) {
+    assert.equal(getPackageAccessCode(id), code);
+    assert.equal(validatePackageAccessCode(id, code), true);
+    assert.equal(validatePackageAccessCode(id, code.toLowerCase()), true);
+    assert.equal(validatePackageAccessCode(id, `  ${code.toLowerCase()}  `), true);
+    assert.equal(validatePackageAccessCode(id, "SALAHKODE88"), false);
+  }
 });
 
 test("kode akses Drill Pilar Negara sesuai spesifikasi", () => {
