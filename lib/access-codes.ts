@@ -70,6 +70,11 @@ export const PACKAGE_ACCESS_CODES: Record<string, string> = {
   "tiu-aritmatika-sosial-3": "TIUARITMATIKA3RS64",
   "tiu-aritmatika-sosial-4": "TIUARITMATIKA4TU91",
   "tiu-aritmatika-sosial-5": "TIUARITMATIKA5VW45",
+  "tiu-perbandingan-1": "TIUPERBANDINGAN1XY83",
+  "tiu-perbandingan-2": "TIUPERBANDINGAN2ZA49",
+  "tiu-perbandingan-3": "TIUPERBANDINGAN3BC27",
+  "tiu-perbandingan-4": "TIUPERBANDINGAN4DE65",
+  "tiu-perbandingan-5": "TIUPERBANDINGAN5FG14",
 
   // === DRILL TKP ===
   "tkp-pelayanan-publik-1": "TKPPELAYANANPUBLIK1MN39",

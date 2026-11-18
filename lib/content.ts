@@ -24,6 +24,7 @@ import { MINI_TKP_QUESTIONS } from "./mini-tkp-content";
 import { MINI_TWK_TKP_QUESTIONS } from "./mini-twk-tkp-content";
 import { NASIONALISME_DRILL_QUESTIONS } from "./nasionalisme-drill-content";
 import { PELAYANAN_PUBLIK_DRILL_QUESTIONS } from "./pelayanan-publik-drill-content";
+import { PERBANDINGAN_DRILL_QUESTIONS } from "./perbandingan-drill-content";
 import { PILAR_NEGARA_DRILL_QUESTIONS } from "./pilar-negara-drill-content";
 import { PROFESIONALISME_DRILL_QUESTIONS } from "./profesionalisme-drill-content";
 import { SOSIAL_BUDAYA_DRILL_QUESTIONS } from "./sosial-budaya-drill-content";
@@ -339,7 +340,7 @@ export const ALL_TRYOUT_PACKAGES = [...EXAM_PACKAGES, ...MINI_TRYOUT_PACKAGES];
 
 const DRILL_TOPICS: Record<Category, string[]> = {
   TWK: ["Pancasila", "UUD 1945", "NKRI & Bhinneka", "Pilar Negara", "Nasionalisme", "Integritas", "Bela Negara", "Bahasa Indonesia"],
-  TIU: ["Kemampuan Verbal", "Kemampuan Numerik", "Deret & Pola", "Logika Analitis", "Aritmatika Sosial"],
+  TIU: ["Kemampuan Verbal", "Kemampuan Numerik", "Deret & Pola", "Logika Analitis", "Aritmatika Sosial", "Perbandingan"],
   TKP: ["Pelayanan Publik", "Profesionalisme", "Jejaring Kerja", "Teknologi Informasi", "Sosial Budaya"],
 };
 
@@ -350,6 +351,7 @@ const DRILL_PACKAGE_COUNTS: Record<string, number> = {
   "TWK:Integritas": 5,
   "TWK:Bela Negara": 5,
   "TIU:Aritmatika Sosial": 5,
+  "TIU:Perbandingan": 5,
   "TKP:Pelayanan Publik": 5,
   "TKP:Profesionalisme": 5,
   "TKP:Jejaring Kerja": 5,
@@ -368,6 +370,7 @@ const drillSource: Question[] = [
   ...BELA_NEGARA_DRILL_QUESTIONS,
   ...[3, 4, 5, 6].flatMap((variant) => makeTiu(`d${variant}`, variant)),
   ...ARITMATIKA_SOSIAL_DRILL_QUESTIONS,
+  ...PERBANDINGAN_DRILL_QUESTIONS,
   ...PELAYANAN_PUBLIK_DRILL_QUESTIONS,
   ...PROFESIONALISME_DRILL_QUESTIONS,
   ...JEJARING_KERJA_DRILL_QUESTIONS,

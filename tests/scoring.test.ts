@@ -19,7 +19,7 @@ test("seluruh bank soal memenuhi kontrak konten", () => {
 });
 
 test("topik drill lama memiliki dua paket sementara topik khusus memiliki jumlah paket terspesifikasi", () => {
-  assert.equal(DRILL_PACKAGES.length, 67);
+  assert.equal(DRILL_PACKAGES.length, 72);
   const groups = new Map<string, typeof DRILL_PACKAGES>();
   for (const drillPackage of DRILL_PACKAGES) {
     assert.equal(drillPackage.questions.length, 10);
@@ -27,13 +27,14 @@ test("topik drill lama memiliki dua paket sementara topik khusus memiliki jumlah
     const key = `${drillPackage.category}:${drillPackage.topic}`;
     groups.set(key, [...(groups.get(key) ?? []), drillPackage]);
   }
-  assert.equal(groups.size, 18);
+  assert.equal(groups.size, 19);
   assert.equal(groups.get("TWK:Pilar Negara")?.length, 4);
   assert.equal(groups.get("TWK:Bahasa Indonesia")?.length, 4);
   assert.equal(groups.get("TWK:Nasionalisme")?.length, 5);
   assert.equal(groups.get("TWK:Integritas")?.length, 5);
   assert.equal(groups.get("TWK:Bela Negara")?.length, 5);
   assert.equal(groups.get("TIU:Aritmatika Sosial")?.length, 5);
+  assert.equal(groups.get("TIU:Perbandingan")?.length, 5);
   assert.equal(groups.get("TKP:Pelayanan Publik")?.length, 5);
   assert.equal(groups.get("TKP:Profesionalisme")?.length, 5);
   assert.equal(groups.get("TKP:Jejaring Kerja")?.length, 5);
@@ -41,47 +42,49 @@ test("topik drill lama memiliki dua paket sementara topik khusus memiliki jumlah
   assert.equal(groups.get("TKP:Sosial Budaya")?.length, 5);
   assert.ok([...groups.entries()].every(([topic, packages]) => {
     if (["TWK:Pilar Negara", "TWK:Bahasa Indonesia"].includes(topic)) return packages.length === 4;
-    if (["TWK:Nasionalisme", "TWK:Integritas", "TWK:Bela Negara", "TIU:Aritmatika Sosial", "TKP:Pelayanan Publik", "TKP:Profesionalisme", "TKP:Jejaring Kerja", "TKP:Teknologi Informasi", "TKP:Sosial Budaya"].includes(topic)) return packages.length === 5;
+    if (["TWK:Nasionalisme", "TWK:Integritas", "TWK:Bela Negara", "TIU:Aritmatika Sosial", "TIU:Perbandingan", "TKP:Pelayanan Publik", "TKP:Profesionalisme", "TKP:Jejaring Kerja", "TKP:Teknologi Informasi", "TKP:Sosial Budaya"].includes(topic)) return packages.length === 5;
     return packages.length === 2;
   }));
-  assert.equal(new Set(DRILL_PACKAGES.flatMap((item) => item.questions.map((question) => question.id))).size, 670);
+  assert.equal(new Set(DRILL_PACKAGES.flatMap((item) => item.questions.map((question) => question.id))).size, 720);
 });
 
-test("lima paket Aritmatika Sosial memuat 50 soal TIU berurutan dengan kunci merata A-E", () => {
-  const packages = DRILL_PACKAGES
-    .filter((item) => item.category === "TIU" && item.topic === "Aritmatika Sosial")
-    .sort((left, right) => left.sequence - right.sequence);
-  assert.deepEqual(packages.map((item) => item.sequence), [1, 2, 3, 4, 5]);
-  assert.deepEqual(packages.map((item) => item.id), [
-    "tiu-aritmatika-sosial-1",
-    "tiu-aritmatika-sosial-2",
-    "tiu-aritmatika-sosial-3",
-    "tiu-aritmatika-sosial-4",
-    "tiu-aritmatika-sosial-5",
-  ]);
+for (const { topic, slug } of [
+  { topic: "Aritmatika Sosial", slug: "aritmatika-sosial" },
+  { topic: "Perbandingan", slug: "perbandingan" },
+]) {
+  test(`lima paket ${topic} memuat 50 soal TIU berurutan dengan kunci merata A-E`, () => {
+    const packages = DRILL_PACKAGES
+      .filter((item) => item.category === "TIU" && item.topic === topic)
+      .sort((left, right) => left.sequence - right.sequence);
+    assert.deepEqual(packages.map((item) => item.sequence), [1, 2, 3, 4, 5]);
+    assert.deepEqual(
+      packages.map((item) => item.id),
+      [1, 2, 3, 4, 5].map((n) => `tiu-${slug}-${n}`),
+    );
 
-  for (const pkg of packages) {
-    const counts: Record<string, number> = { a: 0, b: 0, c: 0, d: 0, e: 0 };
-    for (const q of pkg.questions) {
-      const correctId = answerWithScore(q, 5);
-      assert.ok(correctId);
-      counts[correctId] = (counts[correctId] ?? 0) + 1;
+    for (const pkg of packages) {
+      const counts: Record<string, number> = { a: 0, b: 0, c: 0, d: 0, e: 0 };
+      for (const q of pkg.questions) {
+        const correctId = answerWithScore(q, 5);
+        assert.ok(correctId);
+        counts[correctId] = (counts[correctId] ?? 0) + 1;
+      }
+      assert.deepEqual(counts, { a: 2, b: 2, c: 2, d: 2, e: 2 });
     }
-    assert.deepEqual(counts, { a: 2, b: 2, c: 2, d: 2, e: 2 });
-  }
 
-  const questions = packages.flatMap((item) => item.questions);
-  assert.equal(questions.length, 50);
-  assert.equal(new Set(questions.map((question) => question.prompt)).size, 50);
-  assert.deepEqual(
-    questions.map((question) => question.id),
-    Array.from({ length: 50 }, (_, index) => `tiu-aritmatika-sosial-${String(index + 1).padStart(3, "0")}`),
-  );
-  assert.ok(questions.every((question) => question.choices.length === 5));
-  assert.ok(questions.every((question) => question.choices.filter((choice) => choice.score === 5).length === 1));
-  assert.ok(questions.every((question) => question.choices.filter((choice) => choice.score === 0).length === 4));
-  assert.ok(questions.every((question) => question.explanation.trim().length > 0));
-});
+    const questions = packages.flatMap((item) => item.questions);
+    assert.equal(questions.length, 50);
+    assert.equal(new Set(questions.map((question) => question.prompt)).size, 50);
+    assert.deepEqual(
+      questions.map((question) => question.id),
+      Array.from({ length: 50 }, (_, index) => `tiu-${slug}-${String(index + 1).padStart(3, "0")}`),
+    );
+    assert.ok(questions.every((question) => question.choices.length === 5));
+    assert.ok(questions.every((question) => question.choices.filter((choice) => choice.score === 5).length === 1));
+    assert.ok(questions.every((question) => question.choices.filter((choice) => choice.score === 0).length === 4));
+    assert.ok(questions.every((question) => question.explanation.trim().length > 0));
+  });
+}
 
 test("empat paket Bahasa Indonesia memuat 40 soal sumber secara berurutan", () => {
   const packages = DRILL_PACKAGES
