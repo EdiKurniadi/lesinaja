@@ -1,0 +1,19 @@
+{
+  "name": "Ujian LesinAja",
+  "short_name": "Ujian LesinAja",
+  "description": "Aplikasi Ujian Terkunci LesinAja",
+  "start_url": "/ujian",
+  "scope": "/ujian",
+  "display": "fullscreen",
+  "orientation": "portrait",
+  "background_color": "#f6f2e8",
+  "theme_color": "#10100f",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

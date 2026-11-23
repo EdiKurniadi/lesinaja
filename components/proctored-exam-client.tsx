@@ -18,22 +18,12 @@ import {
   RefreshCw,
   ShieldAlert,
   ShieldCheck,
+  Smartphone,
   Volume2,
   Wifi,
   WifiOff,
   X,
 } from "lucide-react";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { extractQuestionImageUrls, preloadQuestionAssets } from "@/lib/asset-preload";
 import { UJIAN_PACKAGES } from "@/lib/content";
@@ -64,8 +54,12 @@ import {
 import { toStaticPath } from "@/lib/static-path";
 import type { Question } from "@/lib/types";
 import { ExamShell, useExamKeyboard } from "./exam-shell";
-import { PageFrame } from "./page-frame";
 import { QuestionCard } from "./question-card";
+
+interface BeforeInstallPromptEvent extends Event {
+  prompt: () => Promise<void>;
+  userChoice: Promise<{ outcome: "accepted" | "dismissed"; platform: string }>;
+}
 
 const STAGE_1_MS = 120_000; // 2 menit waktu normal minta kode
 const STAGE_2_MS = 240_000; // +2 menit tambahan dengan alarm (total 4 menit)
@@ -185,6 +179,12 @@ export function ProctoredExamClient() {
   const [unlockError, setUnlockError] = useState<string | null>(null);
   const [copiedTag, setCopiedTag] = useState<string | null>(null);
 
+  // Modal & PWA install states
+  const [showFinishConfirm, setShowFinishConfirm] = useState(false);
+  const [showResetConfirm, setShowResetConfirm] = useState(false);
+  const [installPromptEvent, setInstallPromptEvent] =
+    useState<BeforeInstallPromptEvent | null>(null);
+
   // Encrypted submission export state
   const [submissionBackup, setSubmissionBackup] =
     useState<StoredSubmissionBackup | null>(null);
@@ -196,6 +196,34 @@ export function ProctoredExamClient() {
   useEffect(() => {
     sessionRef.current = session;
   }, [session]);
+
+  // Capture Android/Chrome PWA install prompt when available
+  useEffect(() => {
+    const handleBeforeInstallPrompt = (event: Event) => {
+      event.preventDefault();
+      setInstallPromptEvent(event as BeforeInstallPromptEvent);
+    };
+    const handleAppInstalled = () => {
+      setInstallPromptEvent(null);
+    };
+    window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
+    window.addEventListener("appinstalled", handleAppInstalled);
+    return () => {
+      window.removeEventListener(
+        "beforeinstallprompt",
+        handleBeforeInstallPrompt
+      );
+      window.removeEventListener("appinstalled", handleAppInstalled);
+    };
+  }, []);
+
+  // Ensure no stale scroll/pointer locks remain outside active/locked phases
+  useEffect(() => {
+    if (session?.phase === "active" || session?.phase === "locked") return;
+    document.body.style.pointerEvents = "";
+    document.body.style.overflow = "";
+    document.documentElement.style.overflow = "";
+  }, [session?.phase]);
 
   // Initial client hydration
   useEffect(() => {
@@ -310,7 +338,8 @@ export function ProctoredExamClient() {
     async (
       completedSession: ProctoredExamSession,
       pkgTitle: string,
-      orderedQuestions: Question[]
+      orderedQuestions: Question[],
+      autoDownload = false
     ) => {
       setIsEncrypting(true);
       setEncryptionError(null);
@@ -352,6 +381,9 @@ export function ProctoredExamClient() {
         writeLastEncryptedSubmission(backup);
         setSubmissionBackup(backup);
         setLastBackup(backup);
+        if (autoDownload) {
+          downloadJsonFile(filename, envelope);
+        }
       } catch (err) {
         setEncryptionError(
           err instanceof Error
@@ -370,6 +402,7 @@ export function ProctoredExamClient() {
       const current = sessionRef.current;
       if (!current || current.phase === "completed") return;
 
+      setShowFinishConfirm(false);
       stopExamAlarm();
       if (document.fullscreenElement) {
         document.exitFullscreen().catch(() => {});
@@ -390,7 +423,8 @@ export function ProctoredExamClient() {
         void generateEncryptedExport(
           finished,
           activePackage.title,
-          shuffledQuestions
+          shuffledQuestions,
+          true
         );
       }
     },
@@ -777,17 +811,29 @@ export function ProctoredExamClient() {
     setSubmissionBackup(null);
     setStartCodeInput("");
     setStartError(null);
+    setShowFinishConfirm(false);
+    setShowResetConfirm(false);
+  }
+
+  async function handleInstallApp() {
+    if (!installPromptEvent) return;
+    try {
+      await installPromptEvent.prompt();
+      await installPromptEvent.userChoice;
+    } catch {
+      // safe ignore
+    } finally {
+      setInstallPromptEvent(null);
+    }
   }
 
   if (!hydrated) {
     return (
-      <PageFrame
-        eyebrow="06 / Ujian"
-        title="UJIAN TERKUNCI."
-        description="Memuat perangkat dan memeriksa status sesi ujian..."
-      >
-        <div className="p-8 font-mono text-sm">Mempersiapkan halaman ujian...</div>
-      </PageFrame>
+      <main className="flex min-h-dvh items-center justify-center bg-background p-6 text-foreground">
+        <div className="border-2 border-black bg-warm-white p-6 font-mono text-sm">
+          Mempersiapkan halaman ujian...
+        </div>
+      </main>
     );
   }
 
@@ -797,14 +843,8 @@ export function ProctoredExamClient() {
   if (session && activePackage && session.phase === "rules") {
     const canStartExam = assetsReady && isFullscreen && isOffline;
     return (
-      <PageFrame
-        eyebrow="06 / Aturan Ujian"
-        title="PERSIAPAN & ATURAN UJIAN."
-        description={`${activePackage.title} · Peserta: ${session.participantName}`}
-        showHeader={false}
-      >
-        <section className="p-5 sm:p-8 lg:p-10">
-          <div className="mx-auto max-w-4xl space-y-6">
+      <main className="min-h-dvh bg-background p-4 text-foreground sm:p-8 lg:p-10">
+        <div className="mx-auto max-w-4xl space-y-6">
             <div className="flex flex-wrap items-center justify-between gap-3 border-2 border-black bg-warm-white p-5">
               <div>
                 <p className="font-mono text-xs font-bold uppercase tracking-[.14em] text-brand-blue">
@@ -975,8 +1015,7 @@ export function ProctoredExamClient() {
               </Button>
             </div>
           </div>
-        </section>
-      </PageFrame>
+      </main>
     );
   }
 
@@ -986,132 +1025,138 @@ export function ProctoredExamClient() {
   if (session && activePackage && session.phase === "completed") {
     const answeredCount = Object.keys(session.answers).length;
     return (
-      <PageFrame
-        eyebrow="06 / Ujian Selesai"
-        title="UJIAN TELAH SELESAI."
-        description="Jawaban kamu telah dikunci dan dienkripsi. Unduh file jawaban di bawah dan serahkan kepada pengawas."
-        showHeader={false}
-      >
-        <section className="p-5 sm:p-8 lg:p-12">
-          <div className="mx-auto max-w-2xl border-2 border-black bg-warm-white p-6 sm:p-8 shadow-[6px_6px_0_0_#10100f]">
-            <div className="inline-flex items-center gap-2 border border-black bg-signal px-3 py-1 font-mono text-xs font-bold uppercase">
-              <ShieldCheck className="size-4" /> Jawaban Terenkripsi AES-256-GCM
+      <main className="flex min-h-dvh items-center justify-center bg-background p-4 text-foreground sm:p-8 lg:p-10">
+        <div className="w-full max-w-2xl border-2 border-black bg-warm-white p-6 shadow-[6px_6px_0_0_#10100f] sm:p-8">
+          <div className="inline-flex items-center gap-2 border border-black bg-signal px-3 py-1 font-mono text-xs font-bold uppercase">
+            <ShieldCheck className="size-4" /> Jawaban Terenkripsi AES-256-GCM
+          </div>
+          <h1 className="mt-4 text-3xl font-black uppercase tracking-tight sm:text-4xl">
+            Sesi Ujian Selesai
+          </h1>
+          <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+            Nilai ujian hanya dapat dibaca dan dihitung melalui sistem pengawas.
+            Silakan unduh file jawaban terenkripsi di bawah ini, lalu nyalakan
+            kembali internet untuk mengirim file ke pengawas.
+          </p>
+
+          <div className="mt-6 grid gap-3 border-2 border-black bg-background p-4 font-mono text-xs sm:grid-cols-2">
+            <div>
+              <span className="block text-muted-foreground uppercase">Peserta</span>
+              <strong className="text-sm">{session.participantName}</strong>
             </div>
-            <h1 className="mt-4 text-3xl font-black uppercase tracking-tight sm:text-4xl">
-              Sesi Ujian Selesai
-            </h1>
-            <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-              Nilai ujian hanya dapat dibaca dan dihitung melalui sistem pengawas.
-              Silakan unduh file jawaban terenkripsi di bawah ini, lalu nyalakan
-              kembali internet untuk mengirim file ke pengawas.
-            </p>
-
-            <div className="mt-6 grid gap-3 border-2 border-black bg-background p-4 font-mono text-xs sm:grid-cols-2">
-              <div>
-                <span className="block text-muted-foreground uppercase">Peserta</span>
-                <strong className="text-sm">{session.participantName}</strong>
-              </div>
-              <div>
-                <span className="block text-muted-foreground uppercase">Device ID</span>
-                <strong className="text-sm">{session.deviceId}</strong>
-              </div>
-              <div>
-                <span className="block text-muted-foreground uppercase">Paket Ujian</span>
-                <strong className="text-sm">{activePackage.title}</strong>
-              </div>
-              <div>
-                <span className="block text-muted-foreground uppercase">Terjawab</span>
-                <strong className="text-sm">
-                  {answeredCount} / {shuffledQuestions.length} Soal
-                </strong>
-              </div>
+            <div>
+              <span className="block text-muted-foreground uppercase">Device ID</span>
+              <strong className="text-sm">{session.deviceId}</strong>
             </div>
-
-            {encryptionError && (
-              <div className="mt-4 border-2 border-brand-red bg-brand-red-soft p-3 text-sm font-bold text-brand-red">
-                {encryptionError}
-              </div>
-            )}
-
-            <div className="mt-6 space-y-3">
-              {submissionBackup ? (
-                <>
-                  <Button
-                    type="button"
-                    onClick={() =>
-                      downloadJsonFile(
-                        submissionBackup.filename,
-                        submissionBackup.envelope
-                      )
-                    }
-                    className="h-14 w-full rounded-none bg-brand-blue text-base font-black uppercase text-white hover:bg-brand-blue-hover"
-                  >
-                    <Download className="size-5" /> Unduh Jawaban Terenkripsi (.json)
-                  </Button>
-                  <p className="break-all border border-black bg-secondary p-2.5 font-mono text-[11px]">
-                    Nama file: <strong>{submissionBackup.filename}</strong>
-                  </p>
-                </>
-              ) : (
-                <Button
-                  type="button"
-                  disabled={isEncrypting}
-                  onClick={() =>
-                    void generateEncryptedExport(
-                      session,
-                      activePackage.title,
-                      shuffledQuestions
-                    )
-                  }
-                  className="h-14 w-full rounded-none bg-brand-blue text-base font-black uppercase text-white"
-                >
-                  {isEncrypting
-                    ? "Mengenkripsi Jawaban..."
-                    : "Siapkan File Jawaban Terenkripsi"}
-                </Button>
-              )}
+            <div>
+              <span className="block text-muted-foreground uppercase">Paket Ujian</span>
+              <strong className="text-sm">{activePackage.title}</strong>
             </div>
-
-            <div className="mt-8 flex flex-wrap items-center justify-between gap-3 border-t border-black pt-5">
-              <p className="text-xs text-muted-foreground">
-                Cadangan file terakhir otomatis tersimpan di perangkat ini.
-              </p>
-              <AlertDialog>
-                <AlertDialogTrigger asChild>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    className="rounded-none border-black font-mono text-xs uppercase"
-                  >
-                    Ujian Baru / Keluar
-                  </Button>
-                </AlertDialogTrigger>
-                <AlertDialogContent className="rounded-none border-black">
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>Pastikan File Sudah Terunduh</AlertDialogTitle>
-                    <AlertDialogDescription>
-                      Apakah file jawaban terenkripsi sudah berhasil diunduh dan
-                      disimpan? Membuka sesi baru akan membersihkan sesi selesai
-                      saat ini (cadangan unduh ulang file terakhir tetap disimpan).
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel className="rounded-none border-black">
-                      Batal
-                    </AlertDialogCancel>
-                    <AlertDialogAction
-                      className="rounded-none"
-                      onClick={handleResetForNewExam}
-                    >
-                      Ya, Tutup Sesi
-                    </AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
+            <div>
+              <span className="block text-muted-foreground uppercase">Terjawab</span>
+              <strong className="text-sm">
+                {answeredCount} / {shuffledQuestions.length} Soal
+              </strong>
             </div>
           </div>
-        </section>
-      </PageFrame>
+
+          {encryptionError && (
+            <div className="mt-4 border-2 border-brand-red bg-brand-red-soft p-3 text-sm font-bold text-brand-red">
+              {encryptionError}
+            </div>
+          )}
+
+          <div className="mt-6 space-y-3">
+            {submissionBackup ? (
+              <>
+                <Button
+                  type="button"
+                  onClick={() =>
+                    downloadJsonFile(
+                      submissionBackup.filename,
+                      submissionBackup.envelope
+                    )
+                  }
+                  className="h-14 w-full rounded-none bg-brand-blue text-base font-black uppercase text-white hover:bg-brand-blue-hover"
+                >
+                  <Download className="size-5" /> Unduh Jawaban Terenkripsi (.json)
+                </Button>
+                <p className="break-all border border-black bg-secondary p-2.5 font-mono text-[11px]">
+                  Nama file: <strong>{submissionBackup.filename}</strong>
+                </p>
+              </>
+            ) : (
+              <Button
+                type="button"
+                disabled={isEncrypting}
+                onClick={() =>
+                  void generateEncryptedExport(
+                    session,
+                    activePackage.title,
+                    shuffledQuestions
+                  )
+                }
+                className="h-14 w-full rounded-none bg-brand-blue text-base font-black uppercase text-white"
+              >
+                {isEncrypting
+                  ? "Mengenkripsi Jawaban..."
+                  : "Siapkan File Jawaban Terenkripsi"}
+              </Button>
+            )}
+          </div>
+
+          <div className="mt-8 flex flex-wrap items-center justify-between gap-3 border-t border-black pt-5">
+            <p className="text-xs text-muted-foreground">
+              Cadangan file terakhir otomatis tersimpan di perangkat ini.
+            </p>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setShowResetConfirm(true)}
+              className="rounded-none border-black font-mono text-xs uppercase"
+            >
+              Ujian Baru / Keluar
+            </Button>
+          </div>
+        </div>
+
+        {showResetConfirm && (
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-label="Pastikan file jawaban sudah terunduh"
+            className="fixed inset-0 z-[110] flex items-center justify-center bg-black/60 p-4"
+          >
+            <div className="w-full max-w-md border-2 border-black bg-background p-6 shadow-[6px_6px_0_0_#10100f]">
+              <h2 className="text-lg font-black uppercase">
+                Pastikan File Sudah Terunduh
+              </h2>
+              <p className="mt-2 text-sm text-muted-foreground">
+                Apakah file jawaban terenkripsi sudah berhasil diunduh dan
+                disimpan? Membuka sesi baru akan membersihkan sesi selesai saat
+                ini (cadangan unduh ulang file terakhir tetap disimpan).
+              </p>
+              <div className="mt-5 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setShowResetConfirm(false)}
+                  className="rounded-none border-black"
+                >
+                  Batal
+                </Button>
+                <Button
+                  type="button"
+                  onClick={handleResetForNewExam}
+                  className="rounded-none"
+                >
+                  Ya, Tutup Sesi
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
+      </main>
     );
   }
 
@@ -1162,7 +1207,7 @@ export function ProctoredExamClient() {
           flagged={session.flagged.length}
           onMove={moveQuestion}
           groupedPalette={false}
-          onExit={() => lockExam("Mencoba keluar dari lembar ujian.")}
+          hideExitButton
           headerMetric={
             <div className="flex h-8 shrink-0 items-center gap-1.5 bg-brand-blue px-2.5 font-mono text-xs font-bold text-white">
               <Clock3 className="size-3.5 shrink-0 text-signal" />
@@ -1170,38 +1215,15 @@ export function ProctoredExamClient() {
             </div>
           }
           headerAction={
-            <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <Button
-                  className="h-8 shrink-0 gap-1 rounded-none border border-black bg-signal/90 px-2.5 text-xs font-bold text-black shadow-none hover:bg-signal"
-                  aria-label="Kumpulkan ujian"
-                >
-                  <Check className="size-3.5 stroke-2" />
-                  <span>Selesai</span>
-                </Button>
-              </AlertDialogTrigger>
-              <AlertDialogContent className="z-[90] rounded-none border-black">
-                <AlertDialogHeader>
-                  <AlertDialogTitle>Kumpulkan ujian sekarang?</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    {shuffledQuestions.length - answered} soal masih belum dijawab
-                    dan {session.flagged.length} soal ditandai ragu-ragu. Setelah
-                    dikumpulkan, jawaban akan dienkripsi dan tidak dapat diubah.
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel className="rounded-none border-black">
-                    Lanjut mengerjakan
-                  </AlertDialogCancel>
-                  <AlertDialogAction
-                    className="rounded-none"
-                    onClick={() => completeExam("manual")}
-                  >
-                    Ya, Selesai &amp; Unduh Jawaban
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
+            <Button
+              type="button"
+              onClick={() => setShowFinishConfirm(true)}
+              className="h-8 shrink-0 gap-1 rounded-none border border-black bg-signal/90 px-2.5 text-xs font-bold text-black shadow-none hover:bg-signal"
+              aria-label="Kumpulkan ujian"
+            >
+              <Check className="size-3.5 stroke-2" />
+              <span>Selesai</span>
+            </Button>
           }
           footer={
             <div className="mx-auto flex max-w-5xl items-center justify-between gap-2">
@@ -1475,6 +1497,43 @@ export function ProctoredExamClient() {
             </div>
           </div>
         )}
+
+        {showFinishConfirm && session.phase === "active" && (
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-label="Kumpulkan ujian sekarang?"
+            className="fixed inset-0 z-[110] flex items-center justify-center bg-black/60 p-4"
+          >
+            <div className="w-full max-w-md border-2 border-black bg-background p-6 shadow-[6px_6px_0_0_#10100f]">
+              <h2 className="text-lg font-black uppercase">
+                Kumpulkan ujian sekarang?
+              </h2>
+              <p className="mt-2 text-sm text-muted-foreground">
+                {shuffledQuestions.length - answered} soal masih belum dijawab
+                dan {session.flagged.length} soal ditandai ragu-ragu. Setelah
+                dikumpulkan, jawaban akan dienkripsi dan tidak dapat diubah.
+              </p>
+              <div className="mt-5 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setShowFinishConfirm(false)}
+                  className="rounded-none border-black"
+                >
+                  Lanjut mengerjakan
+                </Button>
+                <Button
+                  type="button"
+                  onClick={() => completeExam("manual")}
+                  className="rounded-none bg-brand-blue text-white hover:bg-brand-blue-hover"
+                >
+                  Ya, Selesai &amp; Unduh Jawaban
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
       </>
     );
   }
@@ -1483,139 +1542,150 @@ export function ProctoredExamClient() {
   // PHASE: ENTRY GATE (NO ACTIVE SESSION)
   // =========================================================================
   return (
-    <PageFrame
-      eyebrow="06 / Ujian Terkunci"
-      title="UJIAN RESMI."
-      description="Mode ujian ketat dengan pengacakan soal & opsi unik per siswa, layar penuh wajib, pemantauan offline, serta pengumpulan jawaban JSON terenkripsi."
-    >
-      <section className="grid lg:grid-cols-[1.2fr_0.8fr]">
-        <div className="border-b border-black p-5 sm:p-8 lg:border-b-0 lg:border-r lg:p-10">
-          <div className="flex flex-wrap items-center justify-between gap-2">
-            <span className="inline-flex items-center gap-1.5 border border-black bg-signal px-2.5 py-1 font-mono text-xs font-bold uppercase">
-              <Lock className="size-3.5" /> Gerbang Masuk Ujian
-            </span>
-            <span className="font-mono text-xs">
-              Device ID:{" "}
-              <strong className="border border-black bg-secondary px-1.5 py-0.5">
-                {deviceId}
-              </strong>
-            </span>
-          </div>
-
-          <form onSubmit={handleEnterRules} className="mt-6 space-y-5">
-            <div>
-              <label
-                htmlFor="exam-participant-name"
-                className="block font-mono text-xs font-bold uppercase tracking-[.1em]"
-              >
-                1. Nama Lengkap Peserta
-              </label>
-              <input
-                id="exam-participant-name"
-                type="text"
-                value={participantName}
-                onChange={(e) => {
-                  setParticipantName(e.target.value);
-                  if (startError) setStartError(null);
-                }}
-                placeholder="Masukkan nama lengkap sesuai absensi"
-                className="mt-2 h-12 w-full border-2 border-black bg-warm-white px-3 text-base font-medium focus:outline-none focus:ring-2 focus:ring-brand-blue"
-              />
+    <main className="flex min-h-dvh items-center justify-center bg-background p-4 text-foreground sm:p-6 lg:p-10">
+      <div className="w-full max-w-5xl border-2 border-black bg-warm-white shadow-[6px_6px_0_0_#10100f]">
+        <section className="grid lg:grid-cols-[1.2fr_0.8fr]">
+          <div className="border-b border-black p-5 sm:p-8 lg:border-b-0 lg:border-r lg:p-10">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <span className="inline-flex items-center gap-1.5 border border-black bg-signal px-2.5 py-1 font-mono text-xs font-bold uppercase">
+                <Lock className="size-3.5" /> Gerbang Masuk Ujian
+              </span>
+              <span className="font-mono text-xs">
+                Device ID:{" "}
+                <strong className="border border-black bg-secondary px-1.5 py-0.5">
+                  {deviceId}
+                </strong>
+              </span>
             </div>
 
-            <div>
-              <label
-                htmlFor="exam-start-code"
-                className="block font-mono text-xs font-bold uppercase tracking-[.1em]"
-              >
-                2. Kode Mulai Ujian
-              </label>
-              <input
-                id="exam-start-code"
-                type="text"
-                value={startCodeInput}
-                onChange={(e) => {
-                  setStartCodeInput(e.target.value.toUpperCase());
-                  if (startError) setStartError(null);
-                }}
-                autoComplete="off"
-                autoCapitalize="characters"
-                spellCheck={false}
-                placeholder="Masukkan kode mulai ujian dari pengawas"
-                className="mt-2 h-12 w-full border-2 border-black bg-warm-white px-3 font-mono text-base font-bold uppercase tracking-wider focus:outline-none focus:ring-2 focus:ring-brand-blue"
-              />
-              <p className="mt-1.5 text-xs text-muted-foreground">
-                Kode paket dihasilkan otomatis oleh sistem dan berganti setiap 5 menit.
-              </p>
-            </div>
+            <form onSubmit={handleEnterRules} className="mt-6 space-y-5">
+              <div>
+                <label
+                  htmlFor="exam-participant-name"
+                  className="block font-mono text-xs font-bold uppercase tracking-[.1em]"
+                >
+                  1. Nama Lengkap Peserta
+                </label>
+                <input
+                  id="exam-participant-name"
+                  type="text"
+                  value={participantName}
+                  onChange={(e) => {
+                    setParticipantName(e.target.value);
+                    if (startError) setStartError(null);
+                  }}
+                  placeholder="Masukkan nama lengkap sesuai absensi"
+                  className="mt-2 h-12 w-full border-2 border-black bg-background px-3 text-base font-medium focus:outline-none focus:ring-2 focus:ring-brand-blue"
+                />
+              </div>
 
-            {startError && (
-              <p className="flex items-center gap-1.5 border border-brand-red bg-brand-red-soft p-3 font-mono text-xs font-bold text-brand-red">
-                <X className="size-4 shrink-0" />
-                {startError}
-              </p>
-            )}
+              <div>
+                <label
+                  htmlFor="exam-start-code"
+                  className="block font-mono text-xs font-bold uppercase tracking-[.1em]"
+                >
+                  2. Kode Mulai Ujian
+                </label>
+                <input
+                  id="exam-start-code"
+                  type="text"
+                  value={startCodeInput}
+                  onChange={(e) => {
+                    setStartCodeInput(e.target.value.toUpperCase());
+                    if (startError) setStartError(null);
+                  }}
+                  autoComplete="off"
+                  autoCapitalize="characters"
+                  spellCheck={false}
+                  placeholder="Masukkan kode mulai ujian dari pengawas"
+                  className="mt-2 h-12 w-full border-2 border-black bg-background px-3 font-mono text-base font-bold uppercase tracking-wider focus:outline-none focus:ring-2 focus:ring-brand-blue"
+                />
+                <p className="mt-1.5 text-xs text-muted-foreground">
+                  Kode paket dihasilkan otomatis oleh sistem dan berganti setiap 5 menit.
+                </p>
+              </div>
 
-            <Button
-              type="submit"
-              className="h-12 w-full rounded-none bg-brand-blue text-base font-black uppercase text-white hover:bg-brand-blue-hover"
-            >
-              <Key className="size-4" /> Verifikasi &amp; Unduh Soal Ujian
-            </Button>
-          </form>
-        </div>
+              {startError && (
+                <p className="flex items-center gap-1.5 border border-brand-red bg-brand-red-soft p-3 font-mono text-xs font-bold text-brand-red">
+                  <X className="size-4 shrink-0" />
+                  {startError}
+                </p>
+              )}
 
-        <aside className="flex flex-col justify-between gap-6 bg-secondary p-5 sm:p-8 lg:p-10">
-          <div className="space-y-4">
-            <p className="font-mono text-xs font-bold uppercase tracking-[.14em] text-brand-red">
-              Prosedur Ujian Terkunci
-            </p>
-            <h2 className="text-2xl font-black uppercase">
-              Cara Mengikuti Ujian
-            </h2>
-            <ol className="list-decimal space-y-2.5 pl-5 text-sm leading-relaxed">
-              <li>
-                Pastikan internet <strong>masih menyala</strong> saat memasukkan kode agar seluruh soal dan gambar terunduh penuh.
-              </li>
-              <li>
-                Di layar aturan, aktifkan <strong>Fullscreen &amp; Audio</strong>, lalu{" "}
-                <strong>matikan internet (Wi-Fi &amp; Data)</strong> untuk mulai.
-              </li>
-              <li>
-                Selama mengerjakan, dilarang berpindah tab, keluar fullscreen, atau menyalakan internet.
-              </li>
-              <li>
-                Setelah selesai, unduh file{" "}
-                <code className="border border-black bg-warm-white px-1 font-mono text-xs">
-                  .lesinaja.json
-                </code>{" "}
-                terenkripsi dan serahkan ke pengawas.
-              </li>
-            </ol>
-          </div>
-
-          {lastBackup && (
-            <div className="border-2 border-black bg-warm-white p-4">
-              <p className="font-mono text-[10px] font-bold uppercase tracking-[.12em] text-brand-blue">
-                Cadangan File Terakhir Tersimpan
-              </p>
-              <p className="mt-1 break-all font-mono text-xs font-bold">
-                {lastBackup.filename}
-              </p>
               <Button
-                type="button"
-                variant="outline"
-                onClick={() =>
-                  downloadJsonFile(lastBackup.filename, lastBackup.envelope)
-                }
-                className="mt-3 h-10 w-full rounded-none border-black font-mono text-xs font-bold uppercase"
+                type="submit"
+                className="h-12 w-full rounded-none bg-brand-blue text-base font-black uppercase text-white hover:bg-brand-blue-hover"
               >
-                <Download className="size-3.5" /> Unduh Ulang File Jawaban Terakhir
+                <Key className="size-4" /> Verifikasi &amp; Unduh Soal Ujian
               </Button>
+            </form>
+          </div>
+
+          <aside className="flex flex-col justify-between gap-6 bg-secondary p-5 sm:p-8 lg:p-10">
+            <div className="space-y-4">
+              <p className="font-mono text-xs font-bold uppercase tracking-[.14em] text-brand-red">
+                Prosedur Ujian Terkunci
+              </p>
+              <h1 className="text-2xl font-black uppercase">
+                Cara Mengikuti Ujian
+              </h1>
+              <ol className="list-decimal space-y-2.5 pl-5 text-sm leading-relaxed">
+                <li>
+                  Pastikan internet <strong>masih menyala</strong> saat memasukkan kode agar seluruh soal dan gambar terunduh penuh.
+                </li>
+                <li>
+                  Di layar aturan, aktifkan <strong>Fullscreen &amp; Audio</strong>, lalu{" "}
+                  <strong>matikan internet (Wi-Fi &amp; Data)</strong> untuk mulai.
+                </li>
+                <li>
+                  Selama mengerjakan, dilarang berpindah tab, keluar fullscreen, atau menyalakan internet.
+                </li>
+                <li>
+                  Setelah selesai, unduh file{" "}
+                  <code className="border border-black bg-warm-white px-1 font-mono text-xs">
+                    .lesinaja.json
+                  </code>{" "}
+                  terenkripsi dan serahkan ke pengawas.
+                </li>
+              </ol>
             </div>
-          )}
-        </aside>
-      </section>
-    </PageFrame>
+
+            <div className="space-y-4">
+              {installPromptEvent && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => void handleInstallApp()}
+                  className="h-11 w-full rounded-none border-2 border-black bg-signal font-mono text-xs font-bold uppercase text-black hover:bg-signal/80"
+                >
+                  <Smartphone className="size-4" /> Instal Aplikasi Ujian
+                </Button>
+              )}
+
+              {lastBackup && (
+                <div className="border-2 border-black bg-warm-white p-4">
+                  <p className="font-mono text-[10px] font-bold uppercase tracking-[.12em] text-brand-blue">
+                    Cadangan File Terakhir Tersimpan
+                  </p>
+                  <p className="mt-1 break-all font-mono text-xs font-bold">
+                    {lastBackup.filename}
+                  </p>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() =>
+                      downloadJsonFile(lastBackup.filename, lastBackup.envelope)
+                    }
+                    className="mt-3 h-10 w-full rounded-none border-black font-mono text-xs font-bold uppercase"
+                  >
+                    <Download className="size-3.5" /> Unduh Ulang File Jawaban Terakhir
+                  </Button>
+                </div>
+              )}
+            </div>
+          </aside>
+        </section>
+      </div>
+    </main>
   );
 }

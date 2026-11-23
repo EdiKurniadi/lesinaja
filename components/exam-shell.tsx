@@ -130,6 +130,7 @@ export function ExamShell({
   flagged = 0,
   onMove,
   groupedPalette = false,
+  hideExitButton = false,
   navigationMode = "free",
   headerMetric,
   headerAction,
@@ -145,6 +146,7 @@ export function ExamShell({
   flagged?: number;
   onMove: (index: number) => void;
   groupedPalette?: boolean;
+  hideExitButton?: boolean;
   navigationMode?: "free" | "sequential";
   headerMetric?: ReactNode;
   headerAction?: ReactNode;
@@ -225,33 +227,35 @@ export function ExamShell({
     <section className="fixed inset-0 z-[60] flex h-dvh min-h-0 w-screen flex-col overflow-hidden bg-background text-foreground">
       <header className="shrink-0 border-b border-black bg-warm-white">
         <div className="flex min-h-14 items-center gap-1.5 px-2 sm:gap-4 sm:px-4 lg:px-6">
-          <AlertDialog>
-            <AlertDialogTrigger asChild>
-              <Button type="button" variant="outline" size="icon" className="size-8 shrink-0 rounded-none border-black sm:h-9 sm:w-auto sm:px-3" aria-label="Keluar sementara"><LogOut className="size-3.5 sm:size-4" /><span className="hidden sm:inline">Keluar sementara</span></Button>
-            </AlertDialogTrigger>
-            <AlertDialogContent className="rounded-none border-black">
-              <AlertDialogHeader>
-                <AlertDialogTitle>Keluar dari mode ujian?</AlertDialogTitle>
-                <AlertDialogDescription>Jawaban dan waktu sesi tetap tersimpan. Kamu dapat melanjutkannya nanti dari halaman pilihan.</AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel className="rounded-none border-black">Tetap di sini</AlertDialogCancel>
-                <AlertDialogAction
-                  className="rounded-none"
-                  onClick={() => {
-                    clearSessionOpen();
-                    if (onExit) {
-                      onExit();
-                    } else {
-                      window.location.assign("/");
-                    }
-                  }}
-                >
-                  Ya, keluar
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
+          {!hideExitButton && (
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button type="button" variant="outline" size="icon" className="size-8 shrink-0 rounded-none border-black sm:h-9 sm:w-auto sm:px-3" aria-label="Keluar sementara"><LogOut className="size-3.5 sm:size-4" /><span className="hidden sm:inline">Keluar sementara</span></Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent className="rounded-none border-black">
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Keluar dari mode ujian?</AlertDialogTitle>
+                  <AlertDialogDescription>Jawaban dan waktu sesi tetap tersimpan. Kamu dapat melanjutkannya nanti dari halaman pilihan.</AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel className="rounded-none border-black">Tetap di sini</AlertDialogCancel>
+                  <AlertDialogAction
+                    className="rounded-none"
+                    onClick={() => {
+                      clearSessionOpen();
+                      if (onExit) {
+                        onExit();
+                      } else {
+                        window.location.assign("/");
+                      }
+                    }}
+                  >
+                    Ya, keluar
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          )}
           <div className="min-w-0 flex-1">
             {eyebrow ? (
               <p className="font-mono text-[9px] font-bold uppercase tracking-[.12em] text-muted-foreground sm:text-[10px]">{eyebrow}</p>

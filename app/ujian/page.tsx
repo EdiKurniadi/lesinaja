@@ -5,6 +5,12 @@ export const metadata: Metadata = {
   title: "Ujian Terkunci",
   description:
     "Portal ujian terkunci dengan pengawasan layar penuh, mode offline wajib, pengacakan soal per peserta, dan pengumpulan jawaban JSON terenkripsi.",
+  manifest: "/ujian.webmanifest",
+  appleWebApp: {
+    capable: true,
+    title: "Ujian LesinAja",
+    statusBarStyle: "black-translucent",
+  },
 };
 export const dynamic = "force-static";
 
