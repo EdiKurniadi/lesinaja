@@ -11,14 +11,15 @@
 
     <application
         android:allowBackup="false"
-        android:icon="@drawable/ic_launcher"
+        android:hardwareAccelerated="true"
+        android:icon="@mipmap/ic_launcher"
         android:label="Ujian LesinAja"
-        android:theme="@android:style/Theme.NoTitleBar.Fullscreen"
+        android:theme="@style/AppTheme"
         android:usesCleartextTraffic="false">
 
         <activity
             android:name=".MainActivity"
-            android:configChanges="orientation|screenSize|keyboardHidden"
+            android:configChanges="orientation|screenSize|keyboardHidden|smallestScreenSize|screenLayout|uiMode"
             android:exported="true"
             android:launchMode="singleTask"
             android:resizeableActivity="false"

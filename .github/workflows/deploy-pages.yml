@@ -48,6 +48,13 @@ jobs:
       - name: Build Android ExamBro APK
         run: gradle -p android-exambro assembleRelease --no-daemon
 
+      - name: Verify Android APK
+        run: |
+          SDK_DIR="${ANDROID_HOME:-/usr/local/lib/android/sdk}"
+          BUILD_TOOLS="$(ls -d "$SDK_DIR"/build-tools/* | sort -V | tail -n 1)"
+          "$BUILD_TOOLS/apksigner" verify --verbose android-exambro/app/build/outputs/apk/release/app-release.apk
+          "$BUILD_TOOLS/aapt2" dump badging android-exambro/app/build/outputs/apk/release/app-release.apk
+
       - name: Bundle APK into static site output
         run: cp android-exambro/app/build/outputs/apk/release/app-release.apk dist/client/UjianLesinAja.apk
 
