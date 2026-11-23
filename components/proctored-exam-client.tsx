@@ -64,6 +64,28 @@ interface BeforeInstallPromptEvent extends Event {
 const STAGE_1_MS = 120_000; // 2 menit waktu normal minta kode
 const STAGE_2_MS = 240_000; // +2 menit tambahan dengan alarm (total 4 menit)
 
+interface LesinAjaExamBroBridge {
+  isExamBro?: () => boolean;
+  enterKioskMode?: () => void;
+  exitKioskMode?: () => void;
+  setAlarmActive?: (active: boolean) => void;
+  saveEncryptedSubmission?: (filename: string, jsonContent: string) => boolean;
+}
+
+function getExamBroBridge(): LesinAjaExamBroBridge | undefined {
+  if (typeof window === "undefined") return undefined;
+  return (window as unknown as { LesinAjaExamBro?: LesinAjaExamBroBridge })
+    .LesinAjaExamBro;
+}
+
+function isRunningInExamBro(): boolean {
+  try {
+    return Boolean(getExamBroBridge()?.isExamBro?.());
+  } catch {
+    return false;
+  }
+}
+
 function formatClock(ms: number): string {
   const totalSec = Math.max(0, Math.ceil(ms / 1000));
   const hours = Math.floor(totalSec / 3600);
@@ -79,6 +101,13 @@ function formatClock(ms: number): string {
 
 function downloadJsonFile(filename: string, data: unknown): void {
   const jsonText = JSON.stringify(data, null, 2);
+  try {
+    const savedByNative =
+      getExamBroBridge()?.saveEncryptedSubmission?.(filename, jsonText);
+    if (savedByNative) return;
+  } catch {
+    // fallback ke unduhan browser standar
+  }
   const blob = new Blob([jsonText], { type: "application/json;charset=utf-8" });
   const url = URL.createObjectURL(blob);
   const anchor = document.createElement("a");
@@ -238,7 +267,7 @@ export function ProctoredExamClient() {
       if (savedSession?.phase === "completed" && savedSubmission) {
         setSubmissionBackup(savedSubmission);
       }
-      setIsFullscreen(Boolean(document.fullscreenElement));
+      setIsFullscreen(Boolean(document.fullscreenElement) || isRunningInExamBro());
       setIsOffline(!navigator.onLine);
       setNowMs(Date.now());
       setHydrated(true);
@@ -256,7 +285,7 @@ export function ProctoredExamClient() {
   // Keep offline & fullscreen status synced continuously
   useEffect(() => {
     const syncEnv = () => {
-      setIsFullscreen(Boolean(document.fullscreenElement));
+      setIsFullscreen(Boolean(document.fullscreenElement) || isRunningInExamBro());
       setIsOffline(!navigator.onLine);
     };
     window.addEventListener("online", syncEnv);
@@ -404,6 +433,7 @@ export function ProctoredExamClient() {
 
       setShowFinishConfirm(false);
       stopExamAlarm();
+      getExamBroBridge()?.exitKioskMode?.();
       if (document.fullscreenElement) {
         document.exitFullscreen().catch(() => {});
       }
@@ -507,7 +537,7 @@ export function ProctoredExamClient() {
     }
 
     const handleFullscreenChange = () => {
-      if (!document.fullscreenElement) {
+      if (!document.fullscreenElement && !isRunningInExamBro()) {
         lockExam("Keluar dari mode layar penuh (Fullscreen).");
       }
     };
@@ -664,6 +694,11 @@ export function ProctoredExamClient() {
   async function requestFullscreenAndAudio() {
     unlockExamAlarmAudio();
     setAudioUnlocked(true);
+    if (isRunningInExamBro()) {
+      getExamBroBridge()?.enterKioskMode?.();
+      setIsFullscreen(true);
+      return;
+    }
     try {
       if (!document.fullscreenElement) {
         await document.documentElement.requestFullscreen();
@@ -720,7 +755,9 @@ export function ProctoredExamClient() {
     unlockExamAlarmAudio();
     setAudioUnlocked(true);
 
-    if (!document.fullscreenElement) {
+    if (isRunningInExamBro()) {
+      getExamBroBridge()?.enterKioskMode?.();
+    } else if (!document.fullscreenElement) {
       try {
         await document.documentElement.requestFullscreen();
       } catch {
@@ -770,7 +807,9 @@ export function ProctoredExamClient() {
       return;
     }
 
-    if (!document.fullscreenElement) {
+    if (isRunningInExamBro()) {
+      getExamBroBridge()?.enterKioskMode?.();
+    } else if (!document.fullscreenElement) {
       try {
         await document.documentElement.requestFullscreen();
       } catch {

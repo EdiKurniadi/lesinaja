@@ -9,6 +9,26 @@ interface AndroidExamBridge {
   setForceVolume?: (percent: number) => void;
 }
 
+interface LesinAjaExamBroAlarmBridge {
+  setAlarmActive?: (active: boolean) => void;
+}
+
+function notifyNativeAlarm(active: boolean): void {
+  if (typeof window === "undefined") return;
+  try {
+    const win = window as unknown as {
+      AndroidExamBridge?: AndroidExamBridge;
+      LesinAjaExamBro?: LesinAjaExamBroAlarmBridge;
+    };
+    win.LesinAjaExamBro?.setAlarmActive?.(active);
+    if (active) {
+      win.AndroidExamBridge?.setForceVolume?.(90);
+    }
+  } catch {
+    // bridge opsional
+  }
+}
+
 let audioCtx: AudioContext | null = null;
 let alarmOscillator: OscillatorNode | null = null;
 let alarmGain: GainNode | null = null;
@@ -134,13 +154,7 @@ function blockMuteKeys(event: KeyboardEvent): void {
 }
 
 function enforceForceVolume90(): void {
-  if (typeof window === "undefined") return;
-  try {
-    (window as unknown as { AndroidExamBridge?: AndroidExamBridge })
-      .AndroidExamBridge?.setForceVolume?.(90);
-  } catch {
-    // bridge opsional
-  }
+  notifyNativeAlarm(true);
 
   if (alarmAudioEl) {
     if (alarmAudioEl.muted) alarmAudioEl.muted = false;
@@ -303,6 +317,7 @@ export function startExamAlarm(): void {
 
 export function stopExamAlarm(): void {
   isAlarmRunning = false;
+  notifyNativeAlarm(false);
 
   if (typeof window !== "undefined" && keyBlockerAttached) {
     window.removeEventListener("keydown", blockMuteKeys, true);

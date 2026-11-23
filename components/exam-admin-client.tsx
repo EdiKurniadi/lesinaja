@@ -31,6 +31,7 @@ import {
   type ExamSubmissionPayload,
 } from "@/lib/exam-security";
 import { bestScore, choiceScore, scoreAttempt } from "@/lib/scoring";
+import { toStaticPath } from "@/lib/static-path";
 import type { AttemptResult, Question } from "@/lib/types";
 import { PageFrame } from "./page-frame";
 import { StaticLink } from "./static-link";
@@ -349,7 +350,14 @@ export function ExamAdminClient() {
         <div className="flex items-center gap-2 font-mono text-xs font-bold uppercase text-brand-blue">
           <ShieldCheck className="size-4" /> Sesi Pengawas Aktif
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
+          <a
+            href={toStaticPath("/UjianLesinAja.apk")}
+            download="UjianLesinAja.apk"
+            className="inline-flex h-8 items-center gap-1.5 border border-black bg-signal px-3 font-mono text-[11px] font-bold uppercase text-black hover:bg-signal/80"
+          >
+            <Download className="size-3.5" /> Unduh APK Android
+          </a>
           <StaticLink
             href="/ujian"
             className="inline-flex h-8 items-center border border-black bg-warm-white px-3 font-mono text-[11px] font-bold uppercase hover:bg-signal"
