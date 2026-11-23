@@ -13,19 +13,23 @@ function QuestionCardComponent({
   onSelect,
   locked = false,
   reveal = false,
+  hideCategoryTag = false,
 }: {
   question: Question;
   selectedId?: string;
   onSelect: (choiceId: string) => void;
   locked?: boolean;
   reveal?: boolean;
+  hideCategoryTag?: boolean;
 }) {
   const selectedScore = choiceScore(question, selectedId);
   const maximum = bestScore(question);
   return (
     <article className="mx-auto max-w-3xl">
       <div className="mb-2 flex flex-wrap items-center gap-1.5 font-mono text-[10px] font-bold uppercase tracking-[.12em] sm:mb-3 sm:text-xs">
-        <span className="bg-brand-blue px-2 py-0.5 text-white">{question.category}</span>
+        {!hideCategoryTag && (
+          <span className="bg-brand-blue px-2 py-0.5 text-white">{question.category}</span>
+        )}
         <span>{question.topic}</span>
       </div>
       <div

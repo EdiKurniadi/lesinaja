@@ -1,44 +1,54 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import {
+  EXAM_PACKAGE_CODE_WINDOW_MS,
   buildSubmissionFilename,
+  createDeviceId,
   decryptExamSubmission,
   encryptExamSubmission,
   generateEmergencyOverrideCode,
   generateLockPin,
   generateNormalUnlockCode,
+  generateRotatingPackageCode,
+  getExamPackageCodeRemainingMs,
   normalizeDeviceId,
+  resolveExamPackageByStartCode,
   shuffleExamQuestions,
   validateExamUnlockCode,
   type ExamSubmissionPayload,
 } from "../lib/exam-security";
-import { getPackageAccessCode, validatePackageAccessCode } from "../lib/access-codes";
 import { UJIAN_PACKAGES, getPackage, getPackageForReview } from "../lib/content";
 import { bestScore, scoreAttempt } from "../lib/scoring";
 
-test("device ID berbeda menghasilkan kode pembuka dan override yang berbeda", () => {
-  const devA = "LSN-7F4A-92C1";
-  const devB = "LSN-8B2D-44K9";
+test("device ID 4 karakter berbeda menghasilkan kode pembuka & override 5 karakter yang berbeda", () => {
+  const randomDev = createDeviceId();
+  assert.match(randomDev, /^[A-Z0-9]{4}$/);
+
+  const devA = "7F4A";
+  const devB = "8B2D";
 
   const normalA = generateNormalUnlockCode(devA, "K7P2");
   const normalB = generateNormalUnlockCode(devB, "K7P2");
   assert.notEqual(normalA, normalB);
-  assert.match(normalA, /^[A-Z0-9]{8}$/);
-  assert.match(normalB, /^[A-Z0-9]{8}$/);
+  assert.match(normalA, /^[A-Z0-9]{5}$/);
+  assert.match(normalB, /^[A-Z0-9]{5}$/);
 
   const emergencyA = generateEmergencyOverrideCode(devA, "K7P2");
   const emergencyB = generateEmergencyOverrideCode(devB, "K7P2");
   assert.notEqual(emergencyA, emergencyB);
   assert.notEqual(normalA, emergencyA);
+  assert.match(emergencyA, /^[A-Z0-9]{5}$/);
 
-  // Normalisasi format tanpa tanda strip atau huruf kecil menghasilkan kode identik
-  assert.equal(normalizeDeviceId(" lsn 7f4a 92c1 "), "LSN-7F4A-92C1");
-  assert.equal(generateNormalUnlockCode("lsn7f4a92c1", "k7p2"), normalA);
+  // Normalisasi spasi atau huruf kecil menghasilkan kode identik
+  assert.equal(normalizeDeviceId(" 7f4a "), "7F4A");
+  assert.equal(generateNormalUnlockCode("7f4a", "k7p2"), normalA);
 });
 
-test("PIN kunci berbeda mencegah penggunaan ulang kode pembuka lama", () => {
-  const dev = "LSN-7F4A-92C1";
+test("PIN kunci sesi 4 karakter berbeda mencegah penggunaan ulang kode pembuka lama", () => {
+  const dev = "7F4A";
   const pin1 = generateLockPin();
+  assert.match(pin1, /^[A-Z0-9]{4}$/);
+
   let pin2 = generateLockPin();
   if (pin2 === pin1) pin2 = "Z9X8";
 
@@ -53,7 +63,7 @@ test("PIN kunci berbeda mencegah penggunaan ulang kode pembuka lama", () => {
 });
 
 test("validasi kode normal vs kode override darurat sebelum dan sesudah 4 menit", () => {
-  const dev = "LSN-4C8E-23M5";
+  const dev = "4C8E";
   const pin = "M4N9";
   const normalCode = generateNormalUnlockCode(dev, pin);
   const emergencyCode = generateEmergencyOverrideCode(dev, pin);
@@ -113,17 +123,17 @@ test("shuffleExamQuestions mengacak soal & opsi antar siswa namun mempertahankan
 
   const studentA1 = shuffleExamQuestions(
     pkg.questions,
-    "LSN-AAAA-1111::SEED1",
+    "AAAA::SEED1",
     pkg.kind
   );
   const studentA2 = shuffleExamQuestions(
     pkg.questions,
-    "LSN-AAAA-1111::SEED1",
+    "AAAA::SEED1",
     pkg.kind
   );
   const studentB = shuffleExamQuestions(
     pkg.questions,
-    "LSN-BBBB-2222::SEED2",
+    "BBBB::SEED2",
     pkg.kind
   );
 
@@ -168,24 +178,24 @@ test("enkripsi dan dekripsi AES-256-GCM jawaban ujian serta deteksi modifikasi f
   const payload: ExamSubmissionPayload = {
     formatVersion: 1,
     sessionId: "ujian-1795400000000",
-    packageId: "mini-tiu-new-casn",
-    packageTitle: "Mini Try Out New TIU CASN",
+    packageId: "ujian-ipa-ekosistem-tata-surya",
+    packageTitle: "IPAS Kelas 10",
     participantName: "Budi Santoso",
-    deviceId: "LSN-7F4A-92C1",
-    shuffleSeed: "LSN-7F4A-92C1::123",
+    deviceId: "7F4A",
+    shuffleSeed: "7F4A::123",
     startedAt: 1795400000000,
     completedAt: 1795401200000,
     durationSeconds: 1200,
     finishTrigger: "manual",
-    answers: { "tiu-new-casn-01": "c", "tiu-new-casn-02": "a" },
-    flagged: ["tiu-new-casn-02"],
-    questionOrder: ["tiu-new-casn-01", "tiu-new-casn-02"],
+    answers: { "ujian-ipa-01": "d", "ujian-ipa-02": "e" },
+    flagged: ["ujian-ipa-02"],
+    questionOrder: ["ujian-ipa-01", "ujian-ipa-02"],
     alarmTriggeredDuringExam: false,
   };
 
   const envelope = await encryptExamSubmission(payload);
   assert.equal(envelope.format, "LESINAJA_ENCRYPTED_EXAM_V1");
-  assert.equal(envelope.deviceId, "LSN-7F4A-92C1");
+  assert.equal(envelope.deviceId, "7F4A");
   assert.equal(JSON.stringify(envelope).includes("Budi Santoso"), false);
 
   const decrypted = await decryptExamSubmission(JSON.stringify(envelope));
@@ -207,23 +217,23 @@ test("enkripsi dan dekripsi AES-256-GCM jawaban ujian serta deteksi modifikasi f
 test("buildSubmissionFilename menghasilkan format nama file sesuai spesifikasi", () => {
   const name = buildSubmissionFilename(
     "Andi Pratama Putra",
-    "mini-tiu-new-casn",
-    "LSN-7F4A-92C1"
+    "ujian-ipa-ekosistem-tata-surya",
+    "7F4A"
   );
   assert.equal(
     name,
-    "JAWABAN_ANDI-PRATAMA-PUTRA_MINI-TIU-NEW-CASN_LSN-7F4A-92C1.lesinaja.json"
+    "JAWABAN_ANDI-PRATAMA-PUTRA_UJIAN-IPA-EKOSISTEM-TATA-SURYA_7F4A.lesinaja.json"
   );
 });
 
-test("paket ujian IPA ekosistem & tata surya terdaftar dengan 40 soal, kode akses, dan penilaian skala 100", () => {
+test("paket ujian IPAS Kelas 10 memakai kode mulai rotasi 5 menit tanpa pilihan paket", () => {
+  assert.equal(UJIAN_PACKAGES.length, 1);
   const pkgId = "ujian-ipa-ekosistem-tata-surya";
-  assert.equal(UJIAN_PACKAGES.some((p) => p.id === pkgId), true);
-
   const pkg = getPackage(pkgId);
   const reviewPkg = getPackageForReview(pkgId);
   assert.ok(pkg);
   assert.ok(reviewPkg);
+  assert.equal(pkg.title, "IPAS Kelas 10");
   assert.equal(pkg.questions.length, 40);
   assert.equal(pkg.durationMinutes, 60);
 
@@ -235,13 +245,26 @@ test("paket ujian IPA ekosistem & tata surya terdaftar dengan 40 soal, kode akse
     assert.equal(scores.filter((s) => s === 0).length, 4, `Soal ${q.id} pengecoh harus 0`);
   }
 
-  // Kode akses khusus ujian
-  assert.equal(getPackageAccessCode(pkgId), "UJIANIPA2026");
-  assert.equal(validatePackageAccessCode(pkgId, "ujianipa2026"), true);
-  assert.equal(validatePackageAccessCode(pkgId, "SALAH"), false);
+  // Kode rotasi otomatis tiap 5 menit menyelesaikan paket IPAS Kelas 10 tanpa pilihan paket manual
+  const t0 = 1_795_400_000_000;
+  const tSameSlot = t0 + 10_000;
+  const tNextSlot = t0 + EXAM_PACKAGE_CODE_WINDOW_MS;
 
-  // Acak dan hitung skor sempurna -> 40 benar, skala 100
-  const shuffled = shuffleExamQuestions(pkg.questions, "LSN-1234-ABCD::IPA", pkg.kind);
+  const code0 = generateRotatingPackageCode(pkgId, t0);
+  const codeSame = generateRotatingPackageCode(pkgId, tSameSlot);
+  const codeNext = generateRotatingPackageCode(pkgId, tNextSlot);
+  assert.match(code0, /^[A-Z0-9]{6}$/);
+  assert.equal(code0, codeSame);
+  assert.notEqual(code0, codeNext);
+  assert.ok(getExamPackageCodeRemainingMs(t0) <= EXAM_PACKAGE_CODE_WINDOW_MS);
+
+  const resolved = resolveExamPackageByStartCode(UJIAN_PACKAGES, code0.toLowerCase(), t0);
+  assert.equal(resolved?.id, pkgId);
+  assert.equal(resolveExamPackageByStartCode(UJIAN_PACKAGES, code0, tNextSlot), undefined);
+  assert.equal(resolveExamPackageByStartCode(UJIAN_PACKAGES, "SALAH", t0), undefined);
+
+  // Acak dan hitung skor sempurna -> 40 benar, nilai total 200 (skala 100 = 100)
+  const shuffled = shuffleExamQuestions(pkg.questions, "1234::IPA", pkg.kind);
   const allCorrect: Record<string, string> = {};
   for (const q of shuffled) {
     const max = bestScore(q);

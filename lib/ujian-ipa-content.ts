@@ -627,9 +627,9 @@ export const UJIAN_IPA_QUESTIONS: Question[] = IPA_SEEDS.map((item, idx) => ({
 export const UJIAN_IPA_PACKAGE: ExamPackage = {
   id: "ujian-ipa-ekosistem-tata-surya",
   kind: "mini",
-  title: "Ujian IPA — Ekosistem, Makhluk Hidup & Tata Surya",
+  title: "IPAS Kelas 10",
   description:
-    "40 soal IPA terpadu mencakup ekosistem, ciri dan adaptasi makhluk hidup, pencemaran lingkungan, serta tata surya.",
+    "40 soal IPAS Kelas 10 mencakup ekosistem, ciri dan adaptasi makhluk hidup, pencemaran lingkungan, serta tata surya.",
   questions: UJIAN_IPA_QUESTIONS,
   durationMinutes: 60,
 };

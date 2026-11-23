@@ -43,7 +43,7 @@ export function QuestionPalette({ session, questions, onMove, grouped = false, c
   const indexed = questions.map((question, index) => ({ question, index }));
   const groups = grouped
     ? CATEGORIES.map((category) => ({ label: category, items: indexed.filter(({ question }) => question.category === category) }))
-    : [{ label: questions[0]?.category ?? "Soal", items: indexed }];
+    : [{ label: "Daftar Soal", items: indexed }];
 
   return (
     <div className="grid gap-5">

@@ -33,9 +33,12 @@ export interface EncryptedExamEnvelope {
   ciphertext: string;
 }
 
+export const EXAM_PACKAGE_CODE_WINDOW_MS = 5 * 60 * 1000;
+
 const CODE_ALPHABET = "23456789ABCDEFGHJKLMNPQRSTUVWXYZ";
 const NORMAL_SECRET = "LSN-PROCTOR-NORMAL-KEY-2026-V1";
 const EMERGENCY_SECRET = "LSN-PROCTOR-EMERGENCY-OVERRIDE-2026-V1";
+const PACKAGE_START_SECRET = "LSN-PROCTOR-PKG-START-5M-2026-V1";
 const ENCRYPTION_PASSPHRASE =
   "LESINAJA::AES256GCM::EXAM_VAULT::SKD_2026::9f8a7c6e5d4b3a29";
 
@@ -65,13 +68,7 @@ function randomChars(length: number): string {
 }
 
 export function normalizeDeviceId(input: string): string {
-  const compact = input.toUpperCase().replace(/[^A-Z0-9]/g, "");
-  if (!compact) return "";
-  const match = compact.match(/^LSN([A-Z0-9]{4})([A-Z0-9]{4})$/);
-  if (match) {
-    return `LSN-${match[1]}-${match[2]}`;
-  }
-  return input.trim().toUpperCase().replace(/\s+/g, "");
+  return input.toUpperCase().replace(/[^A-Z0-9]/g, "");
 }
 
 export function normalizeLockPin(input?: string): string {
@@ -80,7 +77,7 @@ export function normalizeLockPin(input?: string): string {
 }
 
 export function createDeviceId(): string {
-  return `LSN-${randomChars(4)}-${randomChars(4)}`;
+  return randomChars(4);
 }
 
 export function getOrCreateDeviceId(): string {
@@ -91,7 +88,7 @@ export function getOrCreateDeviceId(): string {
     const existing = window.localStorage.getItem(DEVICE_ID_STORAGE_KEY);
     if (existing) {
       const normalized = normalizeDeviceId(existing);
-      if (normalized) return normalized;
+      if (/^[A-Z0-9]{4}$/.test(normalized)) return normalized;
     }
     const created = createDeviceId();
     window.localStorage.setItem(DEVICE_ID_STORAGE_KEY, created);
@@ -106,10 +103,10 @@ export function generateLockPin(): string {
 }
 
 /**
- * Menghasilkan 8 karakter kode deterministik berbasis hash 2x32-bit FNV-1a + Murmur mix
+ * Menghasilkan kode deterministik berbasis hash 2x32-bit FNV-1a + Murmur mix
  * agar berjalan sinkron baik di client maupun Node.js test tanpa tergantung lingkungan.
  */
-function deriveCode8(seedMaterial: string): string {
+function deriveCode(seedMaterial: string, length: number): string {
   let h1 = 0x811c9dc5;
   let h2 = 0x9e3779b9;
   for (let i = 0; i < seedMaterial.length; i++) {
@@ -124,7 +121,7 @@ function deriveCode8(seedMaterial: string): string {
 
   let state = (h1 ^ h2) >>> 0;
   let result = "";
-  for (let i = 0; i < 8; i++) {
+  for (let i = 0; i < length; i++) {
     state = (state + 0x6d2b79f5) >>> 0;
     let t = Math.imul(state ^ (state >>> 15), 1 | state);
     t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
@@ -138,7 +135,7 @@ export function generateNormalUnlockCode(deviceId: string, lockPin?: string): st
   const cleanDevice = normalizeDeviceId(deviceId);
   const cleanPin = normalizeLockPin(lockPin);
   const key = cleanPin ? `${cleanDevice}::${cleanPin}` : cleanDevice;
-  return deriveCode8(`${NORMAL_SECRET}::${key}`);
+  return deriveCode(`${NORMAL_SECRET}::${key}`, 5);
 }
 
 export function generateEmergencyOverrideCode(
@@ -148,7 +145,38 @@ export function generateEmergencyOverrideCode(
   const cleanDevice = normalizeDeviceId(deviceId);
   const cleanPin = normalizeLockPin(lockPin);
   const key = cleanPin ? `${cleanDevice}::${cleanPin}` : cleanDevice;
-  return deriveCode8(`${EMERGENCY_SECRET}::${key}`);
+  return deriveCode(`${EMERGENCY_SECRET}::${key}`, 5);
+}
+
+export function getExamPackageTimeSlot(timestampMs = Date.now()): number {
+  return Math.floor(timestampMs / EXAM_PACKAGE_CODE_WINDOW_MS);
+}
+
+export function getExamPackageCodeRemainingMs(timestampMs = Date.now()): number {
+  const mod =
+    ((timestampMs % EXAM_PACKAGE_CODE_WINDOW_MS) + EXAM_PACKAGE_CODE_WINDOW_MS) %
+    EXAM_PACKAGE_CODE_WINDOW_MS;
+  return EXAM_PACKAGE_CODE_WINDOW_MS - mod;
+}
+
+export function generateRotatingPackageCode(
+  packageId: string,
+  timestampMs = Date.now()
+): string {
+  const slot = getExamPackageTimeSlot(timestampMs);
+  return deriveCode(`${PACKAGE_START_SECRET}::${packageId}::${slot}`, 6);
+}
+
+export function resolveExamPackageByStartCode<T extends { id: string }>(
+  packages: readonly T[],
+  inputCode: string,
+  timestampMs = Date.now()
+): T | undefined {
+  const normalized = normalizeAccessCode(inputCode).replace(/-/g, "");
+  if (!normalized) return undefined;
+  return packages.find(
+    (pkg) => generateRotatingPackageCode(pkg.id, timestampMs) === normalized
+  );
 }
 
 export function validateExamUnlockCode({

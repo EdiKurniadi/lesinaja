@@ -35,9 +35,8 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
-import { validatePackageAccessCode } from "@/lib/access-codes";
 import { extractQuestionImageUrls, preloadQuestionAssets } from "@/lib/asset-preload";
-import { ALL_TRYOUT_PACKAGES, UJIAN_PACKAGES, getPackage } from "@/lib/content";
+import { UJIAN_PACKAGES } from "@/lib/content";
 import {
   startExamAlarm,
   stopExamAlarm,
@@ -48,6 +47,7 @@ import {
   encryptExamSubmission,
   generateLockPin,
   getOrCreateDeviceId,
+  resolveExamPackageByStartCode,
   shuffleExamQuestions,
   validateExamUnlockCode,
   type ExamSubmissionPayload,
@@ -66,7 +66,6 @@ import type { Question } from "@/lib/types";
 import { ExamShell, useExamKeyboard } from "./exam-shell";
 import { PageFrame } from "./page-frame";
 import { QuestionCard } from "./question-card";
-import { StaticLink } from "./static-link";
 
 const STAGE_1_MS = 120_000; // 2 menit waktu normal minta kode
 const STAGE_2_MS = 240_000; // +2 menit tambahan dengan alarm (total 4 menit)
@@ -167,9 +166,6 @@ export function ProctoredExamClient() {
 
   // Form entry states
   const [participantName, setParticipantName] = useState("");
-  const [selectedPackageId, setSelectedPackageId] = useState(
-    UJIAN_PACKAGES[0]?.id ?? ALL_TRYOUT_PACKAGES[0]?.id ?? "tryout-new-casn-1"
-  );
   const [startCodeInput, setStartCodeInput] = useState("");
   const [startError, setStartError] = useState<string | null>(null);
 
@@ -247,9 +243,12 @@ export function ProctoredExamClient() {
     };
   }, []);
 
-  // Selected package and deterministically shuffled questions + options
+  // Active package resolved solely from dedicated UJIAN_PACKAGES
   const activePackage = useMemo(
-    () => (session ? getPackage(session.packageId) : undefined),
+    () =>
+      session
+        ? UJIAN_PACKAGES.find((item) => item.id === session.packageId)
+        : undefined,
     [session]
   );
 
@@ -648,13 +647,11 @@ export function ProctoredExamClient() {
       setStartError("Masukkan nama lengkap peserta terlebih dahulu.");
       return;
     }
-    const pkg = getPackage(selectedPackageId);
+    const pkg = resolveExamPackageByStartCode(UJIAN_PACKAGES, startCodeInput);
     if (!pkg) {
-      setStartError("Paket ujian tidak ditemukan.");
-      return;
-    }
-    if (!validatePackageAccessCode(pkg.id, startCodeInput)) {
-      setStartError("Kode mulai ujian tidak valid. Periksa kembali dari pengawas.");
+      setStartError(
+        "Kode mulai ujian tidak valid atau sudah kedaluwarsa (kode berganti setiap 5 menit). Minta kode terbaru dari pengawas."
+      );
       return;
     }
 
@@ -830,7 +827,7 @@ export function ProctoredExamClient() {
                 onClick={handleResetForNewExam}
                 className="rounded-none border-black font-mono text-xs uppercase"
               >
-                Ganti Peserta / Paket
+                Ganti Peserta / Kode
               </Button>
             </div>
 
@@ -1164,7 +1161,7 @@ export function ProctoredExamClient() {
           answered={answered}
           flagged={session.flagged.length}
           onMove={moveQuestion}
-          groupedPalette={activePackage.kind === "full"}
+          groupedPalette={false}
           onExit={() => lockExam("Mencoba keluar dari lembar ujian.")}
           headerMetric={
             <div className="flex h-8 shrink-0 items-center gap-1.5 bg-brand-blue px-2.5 font-mono text-xs font-bold text-white">
@@ -1254,6 +1251,7 @@ export function ProctoredExamClient() {
             question={currentQuestion}
             selectedId={session.answers[currentQuestion.id]}
             onSelect={selectChoice}
+            hideCategoryTag
           />
         </ExamShell>
 
@@ -1453,8 +1451,8 @@ export function ProctoredExamClient() {
                     spellCheck={false}
                     placeholder={
                       inStage3Emergency
-                        ? "Contoh: Kode Override 8 karakter"
-                        : "Contoh: Kode Pembuka 8 karakter"
+                        ? "Contoh: Kode Override 5 karakter"
+                        : "Contoh: Kode Pembuka 5 karakter"
                     }
                     className="mt-1.5 h-12 w-full border-2 border-black bg-background px-3 font-mono text-base font-bold uppercase tracking-widest focus:outline-none focus:ring-2 focus:ring-brand-blue"
                   />
@@ -1484,8 +1482,6 @@ export function ProctoredExamClient() {
   // =========================================================================
   // PHASE: ENTRY GATE (NO ACTIVE SESSION)
   // =========================================================================
-  const selectedPkg = getPackage(selectedPackageId);
-
   return (
     <PageFrame
       eyebrow="06 / Ujian Terkunci"
@@ -1529,50 +1525,10 @@ export function ProctoredExamClient() {
 
             <div>
               <label
-                htmlFor="exam-package-select"
-                className="block font-mono text-xs font-bold uppercase tracking-[.1em]"
-              >
-                2. Pilih Paket Ujian
-              </label>
-              <select
-                id="exam-package-select"
-                value={selectedPackageId}
-                onChange={(e) => {
-                  setSelectedPackageId(e.target.value);
-                  if (startError) setStartError(null);
-                }}
-                className="mt-2 h-12 w-full border-2 border-black bg-warm-white px-3 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-brand-blue"
-              >
-                <optgroup label="Paket Ujian Khusus">
-                  {UJIAN_PACKAGES.map((pkg) => (
-                    <option key={pkg.id} value={pkg.id}>
-                      {pkg.title} ({pkg.questions.length} soal ·{" "}
-                      {pkg.durationMinutes} menit)
-                    </option>
-                  ))}
-                </optgroup>
-                <optgroup label="Paket Try Out & Mini TO">
-                  {ALL_TRYOUT_PACKAGES.map((pkg) => (
-                    <option key={pkg.id} value={pkg.id}>
-                      {pkg.title} ({pkg.questions.length} soal ·{" "}
-                      {pkg.durationMinutes} menit)
-                    </option>
-                  ))}
-                </optgroup>
-              </select>
-              {selectedPkg && (
-                <p className="mt-1.5 text-xs text-muted-foreground">
-                  {selectedPkg.description}
-                </p>
-              )}
-            </div>
-
-            <div>
-              <label
                 htmlFor="exam-start-code"
                 className="block font-mono text-xs font-bold uppercase tracking-[.1em]"
               >
-                3. Kode Mulai Ujian
+                2. Kode Mulai Ujian
               </label>
               <input
                 id="exam-start-code"
@@ -1585,9 +1541,12 @@ export function ProctoredExamClient() {
                 autoComplete="off"
                 autoCapitalize="characters"
                 spellCheck={false}
-                placeholder="Masukkan kode paket dari pengawas"
+                placeholder="Masukkan kode mulai ujian dari pengawas"
                 className="mt-2 h-12 w-full border-2 border-black bg-warm-white px-3 font-mono text-base font-bold uppercase tracking-wider focus:outline-none focus:ring-2 focus:ring-brand-blue"
               />
+              <p className="mt-1.5 text-xs text-muted-foreground">
+                Kode paket dihasilkan otomatis oleh sistem dan berganti setiap 5 menit.
+              </p>
             </div>
 
             {startError && (
@@ -1635,40 +1594,26 @@ export function ProctoredExamClient() {
             </ol>
           </div>
 
-          <div className="space-y-4">
-            {lastBackup && (
-              <div className="border-2 border-black bg-warm-white p-4">
-                <p className="font-mono text-[10px] font-bold uppercase tracking-[.12em] text-brand-blue">
-                  Cadangan File Terakhir Tersimpan
-                </p>
-                <p className="mt-1 break-all font-mono text-xs font-bold">
-                  {lastBackup.filename}
-                </p>
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() =>
-                    downloadJsonFile(lastBackup.filename, lastBackup.envelope)
-                  }
-                  className="mt-3 h-10 w-full rounded-none border-black font-mono text-xs font-bold uppercase"
-                >
-                  <Download className="size-3.5" /> Unduh Ulang File Jawaban Terakhir
-                </Button>
-              </div>
-            )}
-
-            <div className="border-t border-black pt-4">
-              <p className="font-mono text-[11px] uppercase text-muted-foreground">
-                Khusus Pengawas / Guru
+          {lastBackup && (
+            <div className="border-2 border-black bg-warm-white p-4">
+              <p className="font-mono text-[10px] font-bold uppercase tracking-[.12em] text-brand-blue">
+                Cadangan File Terakhir Tersimpan
               </p>
-              <StaticLink
-                href="/ujian/admin"
-                className="mt-2 inline-flex h-10 w-full items-center justify-center gap-2 border-2 border-black bg-warm-white px-4 font-mono text-xs font-bold uppercase hover:bg-signal"
+              <p className="mt-1 break-all font-mono text-xs font-bold">
+                {lastBackup.filename}
+              </p>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() =>
+                  downloadJsonFile(lastBackup.filename, lastBackup.envelope)
+                }
+                className="mt-3 h-10 w-full rounded-none border-black font-mono text-xs font-bold uppercase"
               >
-                <ShieldCheck className="size-4" /> Buka Panel Pengawas &amp; Penilai
-              </StaticLink>
+                <Download className="size-3.5" /> Unduh Ulang File Jawaban Terakhir
+              </Button>
             </div>
-          </div>
+          )}
         </aside>
       </section>
     </PageFrame>

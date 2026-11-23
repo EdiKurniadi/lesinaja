@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import {
   AlertTriangle,
   Check,
-  CheckCircle2,
+  Clock3,
   Copy,
   Download,
   Eye,
@@ -19,11 +19,13 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { isMasterAccessCode } from "@/lib/access-codes";
-import { getPackageForReview } from "@/lib/content";
+import { UJIAN_PACKAGES, getPackageForReview } from "@/lib/content";
 import {
   decryptExamSubmission,
   generateEmergencyOverrideCode,
   generateNormalUnlockCode,
+  generateRotatingPackageCode,
+  getExamPackageCodeRemainingMs,
   normalizeDeviceId,
   normalizeLockPin,
   type ExamSubmissionPayload,
@@ -70,6 +72,13 @@ function formatDuration(seconds: number): string {
   return `${m}m ${String(s).padStart(2, "0")}d`;
 }
 
+function formatCountdownMs(ms: number): string {
+  const totalSec = Math.max(0, Math.ceil(ms / 1000));
+  const m = Math.floor(totalSec / 60);
+  const s = totalSec % 60;
+  return `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+}
+
 function escapeCsvCell(value: string | number): string {
   const str = String(value);
   if (/[",\n]/.test(str)) {
@@ -82,6 +91,7 @@ export function ExamAdminClient() {
   const [authorized, setAuthorized] = useState(false);
   const [authInput, setAuthInput] = useState("");
   const [authError, setAuthError] = useState<string | null>(null);
+  const [nowMs, setNowMs] = useState(Date.now);
 
   // Code generator states
   const [deviceIdInput, setDeviceIdInput] = useState("");
@@ -105,6 +115,16 @@ export function ExamAdminClient() {
       // safe ignore
     }
   }, []);
+
+  useEffect(() => {
+    if (!authorized) return;
+    const t = window.setTimeout(() => setNowMs(Date.now()), 0);
+    const id = window.setInterval(() => setNowMs(Date.now()), 1000);
+    return () => {
+      window.clearTimeout(t);
+      window.clearInterval(id);
+    };
+  }, [authorized]);
 
   function handleAdminLogin(e: React.FormEvent) {
     e.preventDefault();
@@ -209,12 +229,8 @@ export function ExamAdminClient() {
       "Jumlah Benar",
       "Total Soal",
       "Nilai Skala 100",
-      "TWK",
-      "TIU",
-      "TKP",
       "Total Skor",
       "Skor Maksimal",
-      "Status Passing Grade",
       "Durasi (detik)",
       "Alarm Sempat Bunyi",
       "Waktu Selesai",
@@ -227,12 +243,8 @@ export function ExamAdminClient() {
         correctCount,
         questions.length,
         scale100,
-        result.scores.TWK.total > 0 ? result.scores.TWK.score : "-",
-        result.scores.TIU.total > 0 ? result.scores.TIU.score : "-",
-        result.scores.TKP.total > 0 ? result.scores.TKP.score : "-",
         result.totalScore,
         maxScore,
-        result.passed ? "LULUS" : "TIDAK LULUS",
         payload.durationSeconds,
         payload.alarmTriggeredDuringExam ? "YA" : "TIDAK",
         new Date(payload.completedAt).toLocaleString("id-ID"),
@@ -325,12 +337,13 @@ export function ExamAdminClient() {
 
   const activeDetail =
     selectedDetailIndex !== null ? submissions[selectedDetailIndex] : null;
+  const codeRemainingMs = getExamPackageCodeRemainingMs(nowMs);
 
   return (
     <PageFrame
       eyebrow="06 / Admin Pengawas"
       title="PENGAWAS & PENILAI."
-      description="Hasilkan kode pembuka unik berdasarkan Device ID peserta, serta dekripsi & hitung nilai file jawaban .lesinaja.json."
+      description="Pantau kode mulai ujian yang berganti tiap 5 menit, hasilkan kode pembuka unik 5 karakter berdasarkan Device ID 4 karakter, serta dekripsi & hitung nilai file jawaban .lesinaja.json."
     >
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-black bg-secondary px-5 py-3">
         <div className="flex items-center gap-2 font-mono text-xs font-bold uppercase text-brand-blue">
@@ -354,6 +367,72 @@ export function ExamAdminClient() {
         </div>
       </div>
 
+      {/* SECTION 0: KODE MULAI UJIAN OTOMATIS (ROTASI 5 MENIT) */}
+      <section className="border-b border-black bg-warm-white p-5 sm:p-8">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <span className="inline-flex items-center gap-1.5 bg-black px-2.5 py-1 font-mono text-xs font-bold uppercase text-signal">
+              <Key className="size-3.5" /> Kode Mulai Ujian Siswa (Otomatis Tiap 5 Menit)
+            </span>
+            <h2 className="mt-2 text-2xl font-black uppercase">
+              Kode Masuk Aktif Saat Ini
+            </h2>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Siswa tidak perlu memilih paket ujian secara manual. Sistem
+              otomatis mendeteksi paket dari kode ini.
+            </p>
+          </div>
+          <div className="inline-flex items-center gap-2 border-2 border-black bg-signal px-4 py-2 font-mono text-xs font-bold uppercase">
+            <Clock3 className="size-4" />
+            <span>
+              Berganti dalam{" "}
+              <strong className="text-sm">
+                {formatCountdownMs(codeRemainingMs)}
+              </strong>
+            </span>
+          </div>
+        </div>
+
+        <div className="mt-4 grid gap-4 md:grid-cols-2">
+          {UJIAN_PACKAGES.map((pkg) => {
+            const liveCode = generateRotatingPackageCode(pkg.id, nowMs);
+            const copyKey = `pkg-${pkg.id}`;
+            return (
+              <div
+                key={pkg.id}
+                className="flex flex-wrap items-center justify-between gap-3 border-2 border-black bg-background p-4 shadow-[4px_4px_0_0_#10100f]"
+              >
+                <div>
+                  <p className="font-mono text-[11px] font-bold uppercase text-brand-blue">
+                    {pkg.questions.length} Soal · {pkg.durationMinutes} Menit
+                  </p>
+                  <h3 className="text-lg font-black uppercase">{pkg.title}</h3>
+                  <strong className="mt-1 block font-mono text-3xl font-black tracking-[0.22em] text-black">
+                    {liveCode}
+                  </strong>
+                </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => copyValue(liveCode, copyKey)}
+                  className="h-10 rounded-none border-2 border-black bg-warm-white font-mono text-xs font-bold uppercase hover:bg-signal"
+                >
+                  {copiedKey === copyKey ? (
+                    <>
+                      <Check className="size-3.5" /> Tersalin
+                    </>
+                  ) : (
+                    <>
+                      <Copy className="size-3.5" /> Salin Kode
+                    </>
+                  )}
+                </Button>
+              </div>
+            );
+          })}
+        </div>
+      </section>
+
       {/* SECTION 1: GENERATOR KODE PEMBUKA PER-DEVICE */}
       <section className="grid border-b border-black lg:grid-cols-2">
         <div className="border-b border-black p-5 sm:p-8 lg:border-b-0 lg:border-r">
@@ -364,9 +443,10 @@ export function ExamAdminClient() {
             Buka Kunci Peserta
           </h2>
           <p className="mt-1 text-sm text-muted-foreground">
-            Setiap perangkat memiliki <strong>Device ID</strong> berbeda sehingga
-            kode pembuka yang dihasilkan selalu unik dan tidak dapat dipakai di
-            perangkat lain.
+            Setiap perangkat memiliki <strong>Device ID (4 karakter)</strong> dan{" "}
+            <strong>PIN Sesi (4 karakter)</strong> sehingga menghasilkan{" "}
+            <strong>Kode Pembuka / Override 5 karakter</strong> yang unik per
+            perangkat.
           </p>
 
           <div className="mt-5 grid gap-4 sm:grid-cols-[1.4fr_0.6fr]">
@@ -375,14 +455,15 @@ export function ExamAdminClient() {
                 htmlFor="admin-device-id"
                 className="block font-mono text-xs font-bold uppercase"
               >
-                Device ID Siswa
+                Device ID Siswa (4 Karakter)
               </label>
               <input
                 id="admin-device-id"
                 type="text"
                 value={deviceIdInput}
                 onChange={(e) => setDeviceIdInput(e.target.value.toUpperCase())}
-                placeholder="Contoh: LSN-7F4A-92C1"
+                placeholder="Contoh: 7F4A"
+                maxLength={4}
                 className="mt-1.5 h-11 w-full border-2 border-black bg-warm-white px-3 font-mono text-sm font-bold uppercase tracking-wider focus:outline-none focus:ring-2 focus:ring-brand-blue"
               />
             </div>
@@ -391,7 +472,7 @@ export function ExamAdminClient() {
                 htmlFor="admin-lock-pin"
                 className="block font-mono text-xs font-bold uppercase"
               >
-                PIN Kunci (Opsional)
+                PIN Sesi (4 Karakter)
               </label>
               <input
                 id="admin-lock-pin"
@@ -399,16 +480,15 @@ export function ExamAdminClient() {
                 value={lockPinInput}
                 onChange={(e) => setLockPinInput(e.target.value.toUpperCase())}
                 placeholder="Mis. K7P2"
-                maxLength={6}
+                maxLength={4}
                 className="mt-1.5 h-11 w-full border-2 border-black bg-warm-white px-3 font-mono text-sm font-bold uppercase tracking-widest focus:outline-none focus:ring-2 focus:ring-brand-blue"
               />
             </div>
           </div>
 
           <p className="mt-2 font-mono text-[11px] text-muted-foreground">
-            Tips: Memasukkan PIN Kunci membuat kode hanya berlaku satu kali untuk
-            pelanggaran tersebut. Mengosongkan PIN menghasilkan kode induk khusus
-            untuk Device ID tersebut.
+            Tips: Memasukkan PIN Sesi 4 karakter membuat kode 5 karakter hanya
+            berlaku satu kali untuk pelanggaran tersebut.
           </p>
         </div>
 
@@ -573,11 +653,7 @@ export function ExamAdminClient() {
                   <th className="border-r border-black p-3">Paket</th>
                   <th className="border-r border-black p-3 text-center">Benar</th>
                   <th className="border-r border-black p-3 text-center">Nilai (0–100)</th>
-                  <th className="border-r border-black p-3 text-center">TWK</th>
-                  <th className="border-r border-black p-3 text-center">TIU</th>
-                  <th className="border-r border-black p-3 text-center">TKP</th>
-                  <th className="border-r border-black p-3 text-center">Total</th>
-                  <th className="border-r border-black p-3 text-center">Status</th>
+                  <th className="border-r border-black p-3 text-center">Total Skor</th>
                   <th className="border-r border-black p-3">Durasi &amp; Info</th>
                   <th className="p-3 text-center">Rincian</th>
                 </tr>
@@ -611,34 +687,8 @@ export function ExamAdminClient() {
                       <td className="border-r border-black p-3 text-center font-mono text-base font-black text-black bg-signal/35">
                         {scale100}
                       </td>
-                      <td className="border-r border-black p-3 text-center font-mono font-bold">
-                        {result.scores.TWK.total > 0
-                          ? result.scores.TWK.score
-                          : "-"}
-                      </td>
-                      <td className="border-r border-black p-3 text-center font-mono font-bold">
-                        {result.scores.TIU.total > 0
-                          ? result.scores.TIU.score
-                          : "-"}
-                      </td>
-                      <td className="border-r border-black p-3 text-center font-mono font-bold">
-                        {result.scores.TKP.total > 0
-                          ? result.scores.TKP.score
-                          : "-"}
-                      </td>
                       <td className="border-r border-black p-3 text-center font-mono text-base font-black text-brand-blue">
                         {result.totalScore}
-                      </td>
-                      <td className="border-r border-black p-3 text-center">
-                        {result.passed ? (
-                          <span className="inline-flex items-center gap-1 border border-black bg-signal px-2 py-0.5 font-mono text-[10px] font-bold uppercase">
-                            <CheckCircle2 className="size-3" /> Lulus
-                          </span>
-                        ) : (
-                          <span className="inline-flex items-center gap-1 border border-black bg-brand-red-soft px-2 py-0.5 font-mono text-[10px] font-bold uppercase text-brand-red">
-                            <X className="size-3" /> Belum Lulus
-                          </span>
-                        )}
                       </td>
                       <td className="border-r border-black p-3 font-mono text-[11px]">
                         <div>{formatDuration(payload.durationSeconds)}</div>
@@ -680,8 +730,9 @@ export function ExamAdminClient() {
                 </h3>
                 <p className="font-mono text-xs text-muted-foreground">
                   {activeDetail.payload.packageTitle} · Device{" "}
-                  {activeDetail.payload.deviceId} · Total Skor:{" "}
-                  <strong>{activeDetail.result.totalScore}</strong>
+                  {activeDetail.payload.deviceId} · Nilai:{" "}
+                  <strong>{activeDetail.scale100}</strong> ({activeDetail.correctCount}/
+                  {activeDetail.questions.length} benar)
                 </p>
               </div>
               <Button
@@ -700,7 +751,7 @@ export function ExamAdminClient() {
                   <tr>
                     <th className="border-r border-black p-2">No Urut Soal</th>
                     <th className="border-r border-black p-2">ID Soal</th>
-                    <th className="border-r border-black p-2">Subtes / Topik</th>
+                    <th className="border-r border-black p-2">Topik</th>
                     <th className="border-r border-black p-2 text-center">
                       Pilihan Siswa
                     </th>
@@ -720,10 +771,7 @@ export function ExamAdminClient() {
                         <td className="border-r border-black p-2 font-mono">
                           {q.id}
                         </td>
-                        <td className="border-r border-black p-2">
-                          <span className="font-bold">{q.category}</span> ·{" "}
-                          {q.topic}
-                        </td>
+                        <td className="border-r border-black p-2">{q.topic}</td>
                         <td className="border-r border-black p-2 text-center font-mono font-bold uppercase">
                           {chosenId ?? "-"}
                         </td>
