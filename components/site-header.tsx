@@ -16,6 +16,7 @@ import {
 const nav = [
   ["/drill", "Drill"],
   ["/tryout", "Try out"],
+  ["/ujian", "Ujian"],
   ["/materi", "Materi"],
   ["/les-privat", "Les Privat"],
   ["/game", "Game"],

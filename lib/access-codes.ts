@@ -104,6 +104,10 @@ export const PACKAGE_ACCESS_CODES: Record<string, string> = {
   "tkp-sosial-budaya-5": "TKPSOSIALBUDAYA5MN69",
 };
 
+export const UJIAN_PACKAGE_ACCESS_CODES: Record<string, string> = {
+  "ujian-ipa-ekosistem-tata-surya": "UJIANIPA2026",
+};
+
 export function normalizeAccessCode(input: string): string {
   return input.trim().replace(/\s+/g, "").toUpperCase();
 }
@@ -114,13 +118,15 @@ export function isMasterAccessCode(input: string): boolean {
 }
 
 export function getPackageAccessCode(packageId: string): string | undefined {
-  return PACKAGE_ACCESS_CODES[packageId];
+  return (
+    PACKAGE_ACCESS_CODES[packageId] ?? UJIAN_PACKAGE_ACCESS_CODES[packageId]
+  );
 }
 
 export function validatePackageAccessCode(packageId: string, input: string): boolean {
   const normalized = normalizeAccessCode(input);
   if (!normalized) return false;
   if (isMasterAccessCode(normalized)) return true;
-  const expected = PACKAGE_ACCESS_CODES[packageId];
+  const expected = getPackageAccessCode(packageId);
   return Boolean(expected && normalized === expected);
 }

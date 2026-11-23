@@ -29,6 +29,7 @@ import { PILAR_NEGARA_DRILL_QUESTIONS } from "./pilar-negara-drill-content";
 import { PROFESIONALISME_DRILL_QUESTIONS } from "./profesionalisme-drill-content";
 import { SOSIAL_BUDAYA_DRILL_QUESTIONS } from "./sosial-budaya-drill-content";
 import { TEKNOLOGI_INFORMASI_DRILL_QUESTIONS } from "./teknologi-informasi-drill-content";
+import { UJIAN_IPA_PACKAGE } from "./ujian-ipa-content";
 import type { Category, Choice, DrillPackage, ExamPackage, Question } from "./types";
 
 type TwkSeed = [string, string, string[], string, string];
@@ -338,6 +339,13 @@ export const MINI_TRYOUT_PACKAGES: ExamPackage[] = [
 
 export const ALL_TRYOUT_PACKAGES = [...EXAM_PACKAGES, ...MINI_TRYOUT_PACKAGES];
 
+export const UJIAN_PACKAGES: ExamPackage[] = [UJIAN_IPA_PACKAGE];
+
+export const ALL_EXAM_AND_TRYOUT_PACKAGES: ExamPackage[] = [
+  ...UJIAN_PACKAGES,
+  ...ALL_TRYOUT_PACKAGES,
+];
+
 const DRILL_TOPICS: Record<Category, string[]> = {
   TWK: ["Pancasila", "UUD 1945", "NKRI & Bhinneka", "Pilar Negara", "Nasionalisme", "Integritas", "Bela Negara", "Bahasa Indonesia"],
   TIU: ["Kemampuan Verbal", "Kemampuan Numerik", "Deret & Pola", "Logika Analitis", "Aritmatika Sosial", "Perbandingan"],
@@ -412,12 +420,16 @@ export function getQuestion(questionId: string): Question | undefined {
 }
 
 export function getPackage(packageId: string): ExamPackage | undefined {
-  return ALL_TRYOUT_PACKAGES.find((item) => item.id === packageId);
+  return (
+    UJIAN_PACKAGES.find((item) => item.id === packageId) ??
+    ALL_TRYOUT_PACKAGES.find((item) => item.id === packageId)
+  );
 }
 
 // Retired packages remain readable for saved results and sessions only.
 export function getPackageForReview(packageId: string): ExamPackage | undefined {
-  const current = getPackage(packageId) ?? retiredFullPackages.find((item) => item.id === packageId);
+  const current =
+    getPackage(packageId) ?? retiredFullPackages.find((item) => item.id === packageId);
   if (current) return current;
   const retiredPackages: Record<string, Pick<ExamPackage, "title" | "questions">> = {
     "mini-tiu-new-casn-2": { title: "Mini Try Out New TIU CASN Paket 2", questions: MINI_TIU_9_QUESTIONS },
