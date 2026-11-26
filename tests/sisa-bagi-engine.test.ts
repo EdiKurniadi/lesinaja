@@ -5,6 +5,7 @@ import {
   explainMod9Number,
   generateHitungSisaQuestion,
   generatePasanganSetaraQuestion,
+  getSisaBagiSurvivalTimeLimitSec,
   mod11ZeroToTen,
   mod9OneToNine,
 } from "../lib/sisa-bagi-engine";
@@ -122,3 +123,18 @@ test("generatePasanganSetaraQuestion memiliki 5 opsi, 1 jawaban setara, 1-2 dist
     }
   }
 });
+
+test("getSisaBagiSurvivalTimeLimitSec sesuai aturan waktu per mode tantangan", () => {
+  // Pasangan setara: mulai 150 detik (2m30d), turun bertahap, minimal 60 detik (1m)
+  assert.equal(getSisaBagiSurvivalTimeLimitSec(1, "pasangan-setara"), 150);
+  assert.ok(getSisaBagiSurvivalTimeLimitSec(10, "pasangan-setara") < 150);
+  assert.equal(getSisaBagiSurvivalTimeLimitSec(30, "pasangan-setara"), 60);
+  assert.equal(getSisaBagiSurvivalTimeLimitSec(100, "pasangan-setara"), 60);
+
+  // Cari sisa bagi: mulai 45 detik, turun bertahap, minimal 5 detik
+  assert.equal(getSisaBagiSurvivalTimeLimitSec(1, "hitung-sisa"), 45);
+  assert.ok(getSisaBagiSurvivalTimeLimitSec(10, "hitung-sisa") < 45);
+  assert.equal(getSisaBagiSurvivalTimeLimitSec(30, "hitung-sisa"), 5);
+  assert.equal(getSisaBagiSurvivalTimeLimitSec(100, "hitung-sisa"), 5);
+});
+

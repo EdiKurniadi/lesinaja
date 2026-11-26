@@ -721,7 +721,7 @@ export function getSisaBagiSurvivalTimeLimitSec(
   challengeMode: "hitung-sisa" | "pasangan-setara"
 ): number {
   if (challengeMode === "pasangan-setara") {
-    return Math.max(20, 65 - (questionNumber - 1) * 3);
+    return Math.max(60, 150 - (questionNumber - 1) * 5);
   }
-  return Math.max(12, 45 - (questionNumber - 1) * 2);
+  return Math.max(5, 45 - (questionNumber - 1) * 2);
 }

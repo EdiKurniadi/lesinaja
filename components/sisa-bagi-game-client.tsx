@@ -1239,7 +1239,11 @@ export function SisaBagiGameClient({
                 }`}
               >
                 <Clock className="size-3.5 shrink-0" />
-                <span>{survivalSecondsLeft}d</span>
+                <span>
+                  {survivalSecondsLeft >= 60
+                    ? formatTime(survivalRemainingMs)
+                    : `${survivalSecondsLeft}d`}
+                </span>
               </span>
             ) : (
               fixedTimeLimitMinutes > 0 && (
