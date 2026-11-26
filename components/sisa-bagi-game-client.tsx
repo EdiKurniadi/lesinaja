@@ -155,19 +155,22 @@ export function SisaBagiGameClient({
     if (autoAdvanceTimeoutRef.current) clearTimeout(autoAdvanceTimeoutRef.current);
     if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
 
+    const effectiveDivisorFilter: SisaBagiDivisorFilter =
+      challengeMode === "pasangan-setara" ? "mixed" : divisorFilter;
+
     let initialQuestions: SisaBagiQuestion[] = [];
     if (modeType === "fixed") {
       initialQuestions = generateSisaBagiSet(
         challengeMode,
-        divisorFilter,
+        effectiveDivisorFilter,
         digitLevel,
         fixedCount
       );
     } else {
       initialQuestions = [
-        generateSisaBagiQuestion(challengeMode, divisorFilter, digitLevel, 1),
-        generateSisaBagiQuestion(challengeMode, divisorFilter, digitLevel, 2),
-        generateSisaBagiQuestion(challengeMode, divisorFilter, digitLevel, 3),
+        generateSisaBagiQuestion(challengeMode, effectiveDivisorFilter, digitLevel, 1),
+        generateSisaBagiQuestion(challengeMode, effectiveDivisorFilter, digitLevel, 2),
+        generateSisaBagiQuestion(challengeMode, effectiveDivisorFilter, digitLevel, 3),
       ];
     }
 
@@ -259,9 +262,11 @@ export function SisaBagiGameClient({
         questionStartTimeRef.current = Date.now();
       } else {
         const nextIdx = currentIndex + 1;
+        const effectiveDivisorFilter: SisaBagiDivisorFilter =
+          challengeMode === "pasangan-setara" ? "mixed" : divisorFilter;
         const upcoming = generateSisaBagiQuestion(
           challengeMode,
-          divisorFilter,
+          effectiveDivisorFilter,
           digitLevel,
           nextIdx + 1
         );
@@ -647,56 +652,59 @@ export function SisaBagiGameClient({
                 </div>
               </div>
 
-              {/* 2. Fokus Pembagi */}
-              <div className="space-y-2.5">
-                <label className="font-mono text-xs font-bold uppercase tracking-wider">
-                  2. Fokus Pembagi (Modulo)
-                </label>
-                <div className="grid grid-cols-3 gap-2">
-                  {(
-                    [
-                      {
-                        id: "mod9",
-                        label: "Sisa Bagi 9",
-                        sub: "Hasil 1–9",
-                      },
-                      {
-                        id: "mod11",
-                        label: "Sisa Bagi 11",
-                        sub: "Hasil 0–10",
-                      },
-                      {
-                        id: "mixed",
-                        label: "Campuran 9 & 11",
-                        sub: "HOTS Lengkap",
-                      },
-                    ] as const
-                  ).map((item) => (
-                    <button
-                      key={item.id}
-                      type="button"
-                      onClick={() => setDivisorFilter(item.id)}
-                      className={`p-3 border-2 border-black text-left transition-all ${
-                        divisorFilter === item.id
-                          ? "bg-signal text-black shadow-[3px_3px_0_#10100f]"
-                          : "bg-warm-white hover:bg-secondary text-foreground"
-                      }`}
-                    >
-                      <div className="font-bold text-xs uppercase">
-                        {item.label}
-                      </div>
-                      <div className="text-[11px] text-muted-foreground mt-0.5">
-                        {item.sub}
-                      </div>
-                    </button>
-                  ))}
+              {/* 2. Fokus Pembagi (disembunyikan saat mode Pasangan Setara) */}
+              {challengeMode !== "pasangan-setara" && (
+                <div className="space-y-2.5">
+                  <label className="font-mono text-xs font-bold uppercase tracking-wider">
+                    2. Fokus Pembagi (Modulo)
+                  </label>
+                  <div className="grid grid-cols-3 gap-2">
+                    {(
+                      [
+                        {
+                          id: "mod9",
+                          label: "Sisa Bagi 9",
+                          sub: "Hasil 1–9",
+                        },
+                        {
+                          id: "mod11",
+                          label: "Sisa Bagi 11",
+                          sub: "Hasil 0–10",
+                        },
+                        {
+                          id: "mixed",
+                          label: "Campuran 9 & 11",
+                          sub: "HOTS Lengkap",
+                        },
+                      ] as const
+                    ).map((item) => (
+                      <button
+                        key={item.id}
+                        type="button"
+                        onClick={() => setDivisorFilter(item.id)}
+                        className={`p-3 border-2 border-black text-left transition-all ${
+                          divisorFilter === item.id
+                            ? "bg-signal text-black shadow-[3px_3px_0_#10100f]"
+                            : "bg-warm-white hover:bg-secondary text-foreground"
+                        }`}
+                      >
+                        <div className="font-bold text-xs uppercase">
+                          {item.label}
+                        </div>
+                        <div className="text-[11px] text-muted-foreground mt-0.5">
+                          {item.sub}
+                        </div>
+                      </button>
+                    ))}
+                  </div>
                 </div>
-              </div>
+              )}
 
-              {/* 3. Besaran Digit */}
+              {/* Besaran Digit */}
               <div className="space-y-2.5">
                 <label className="font-mono text-xs font-bold uppercase tracking-wider">
-                  3. Besaran Bilangan
+                  {challengeMode === "pasangan-setara" ? "2." : "3."} Besaran
+                  Bilangan
                 </label>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                   {(
@@ -734,7 +742,7 @@ export function SisaBagiGameClient({
                 </div>
               </div>
 
-              {/* 4. Mode Input untuk Hitung Sisa */}
+              {/* Mode Input untuk Hitung Sisa */}
               {challengeMode !== "pasangan-setara" && (
                 <div className="space-y-2">
                   <label className="font-mono text-xs font-bold uppercase tracking-wider">
@@ -789,10 +797,10 @@ export function SisaBagiGameClient({
                 </div>
               )}
 
-              {/* 5. Mode Sesi */}
+              {/* Format Sesi */}
               <div className="space-y-2.5">
                 <label className="font-mono text-xs font-bold uppercase tracking-wider">
-                  {challengeMode !== "pasangan-setara" ? "5." : "4."} Format
+                  {challengeMode === "pasangan-setara" ? "3." : "5."} Format
                   Sesi
                 </label>
                 <div className="grid grid-cols-2 gap-2.5">
@@ -1129,7 +1137,7 @@ export function SisaBagiGameClient({
   }
 
   // =========================================================================
-  // PLAYING
+  // PLAYING (SINGLE-VIEWPORT NO-SCROLL LAYOUT FOR DESKTOP & MOBILE)
   // =========================================================================
   const survivalPct =
     survivalTotalMs > 0
@@ -1141,27 +1149,48 @@ export function SisaBagiGameClient({
     currentQuestion?.divisor === 9
       ? [1, 2, 3, 4, 5, 6, 7, 8, 9]
       : [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+  const survivalSecondsLeft = Math.max(0, Math.ceil(survivalRemainingMs / 1000));
+
+  const formatInlineElimination = (
+    item: NonNullable<SisaBagiQuestion["pairAnalyses"]>[number]
+  ): { label: string; className: string } => {
+    if (item.eliminationReason === "correct") {
+      return ELIMINATION_BADGE.correct;
+    }
+    if (item.eliminationReason === "last_digit") {
+      return {
+        label: `Ekor ${item.lastDigitLeft}≠${item.lastDigitRight}`,
+        className: ELIMINATION_BADGE.last_digit.className,
+      };
+    }
+    if (item.eliminationReason === "mod9") {
+      return {
+        label: `Mod 9: ${item.mod9Left}≠${item.mod9Right}`,
+        className: ELIMINATION_BADGE.mod9.className,
+      };
+    }
+    return {
+      label: `Mod 11: ${item.mod11Left}≠${item.mod11Right}`,
+      className: ELIMINATION_BADGE.mod11.className,
+    };
+  };
 
   return (
-    <PageFrame
-      eyebrow="TIU / Sisa Bagi 9 & 11"
-      title="ARENA SISA BAGI."
-      description=""
-      showHeader={false}
-    >
-      <div className="p-3 sm:p-6 lg:p-8 max-w-4xl mx-auto space-y-4">
-        {/* Top HUD */}
-        <div className="border-2 border-black bg-warm-white p-3 sm:p-4 flex flex-wrap items-center justify-between gap-3 shadow-[4px_4px_0_#10100f]">
-          <div className="flex items-center gap-2">
+    <div className="fixed inset-0 z-50 flex h-dvh w-full flex-col overflow-hidden bg-background text-foreground">
+      {/* Integrated Compact Top HUD + Timer Strip */}
+      <header className="shrink-0 border-b-2 border-black bg-warm-white">
+        <div className="mx-auto flex max-w-4xl items-center justify-between gap-1.5 px-2.5 py-2 sm:gap-3 sm:px-4 sm:py-2.5">
+          <div className="flex items-center gap-1.5 shrink-0">
             <button
               type="button"
               onClick={() => {
                 stopBackgroundMusic();
                 setGameState("lobby");
               }}
-              className="inline-flex items-center gap-1 border-2 border-black bg-background px-2.5 py-1.5 font-mono text-xs font-bold uppercase hover:bg-secondary"
+              className="inline-flex h-8 items-center gap-1 border-2 border-black bg-background px-2 font-mono text-[11px] font-bold uppercase hover:bg-secondary sm:px-2.5"
             >
-              <ArrowLeft className="size-3.5" /> Keluar
+              <ArrowLeft className="size-3.5" />
+              <span className="hidden min-[380px]:inline">Keluar</span>
             </button>
             <Button
               variant="outline"
@@ -1178,74 +1207,86 @@ export function SisaBagiGameClient({
             </Button>
           </div>
 
-          <div className="flex flex-wrap items-center gap-3 font-mono text-xs font-black">
+          <div className="flex items-center gap-1.5 sm:gap-2 font-mono text-[11px] sm:text-xs font-black">
             {modeType === "survival" ? (
-              <span className="inline-flex items-center gap-1 border border-black bg-rose-100 px-2.5 py-1 text-brand-red">
+              <span
+                aria-label={`${lives} nyawa tersisa`}
+                className="inline-flex h-8 items-center gap-0.5 sm:gap-1 border border-black bg-rose-100 px-2 text-brand-red"
+              >
                 {Array.from({ length: 3 }, (_, idx) => (
                   <Heart
                     key={idx}
                     className={`size-3.5 ${
-                      idx < lives ? "fill-brand-red text-brand-red" : "text-neutral-300"
+                      idx < lives
+                        ? "fill-brand-red text-brand-red"
+                        : "text-neutral-300"
                     }`}
                   />
                 ))}
               </span>
             ) : (
-              <span className="border border-black bg-background px-2.5 py-1">
-                Soal {currentIndex + 1} / {questions.length}
+              <span className="inline-flex h-8 items-center border border-black bg-background px-2">
+                {currentIndex + 1}/{questions.length}
               </span>
             )}
 
-            {modeType === "fixed" && fixedTimeLimitMinutes > 0 && (
-              <span className="inline-flex items-center gap-1 border border-black bg-background px-2.5 py-1">
-                <Clock className="size-3.5" /> {formatTime(fixedRemainingMs)}
+            {modeType === "survival" ? (
+              <span
+                className={`inline-flex h-8 items-center gap-1 border border-black px-2 ${
+                  survivalSecondsLeft <= 6
+                    ? "bg-brand-red text-white animate-pulse"
+                    : "bg-background text-foreground"
+                }`}
+              >
+                <Clock className="size-3.5 shrink-0" />
+                <span>{survivalSecondsLeft}d</span>
               </span>
+            ) : (
+              fixedTimeLimitMinutes > 0 && (
+                <span className="inline-flex h-8 items-center gap-1 border border-black bg-background px-2">
+                  <Clock className="size-3.5 shrink-0" />
+                  <span>{formatTime(fixedRemainingMs)}</span>
+                </span>
+              )
             )}
 
-            <span className="inline-flex items-center gap-1 border border-black bg-signal px-2.5 py-1">
-              <Flame className="size-3.5 text-brand-red" /> {streak}x
+            <span className="inline-flex h-8 items-center gap-1 border border-black bg-signal px-2">
+              <Flame className="size-3.5 text-brand-red" />
+              <span>{streak}x</span>
             </span>
 
-            <span className="border border-black bg-violet-600 text-white px-2.5 py-1">
-              {score} PTS
+            <span className="inline-flex h-8 items-center border border-black bg-violet-600 px-2 text-white">
+              {score}
+              <span className="hidden min-[420px]:inline ml-1">PTS</span>
             </span>
           </div>
         </div>
 
-        {/* Survival Dynamic Timer Bar */}
+        {/* Dynamic Timer Progress Bar attached directly under HUD */}
         {modeType === "survival" && (
-          <div className="border-2 border-black bg-warm-white p-2.5 space-y-1">
-            <div className="flex justify-between font-mono text-[11px] font-bold uppercase">
-              <span>Sisa Waktu Soal #{currentIndex + 1}</span>
-              <span
-                className={
-                  survivalRemainingMs <= 6000 ? "text-brand-red animate-pulse" : ""
-                }
-              >
-                {Math.max(0, Math.ceil(survivalRemainingMs / 1000))} detik
-              </span>
-            </div>
-            <div className="h-2.5 border border-black bg-background overflow-hidden">
-              <div
-                className={`h-full transition-all duration-100 ${
-                  survivalPct > 45
-                    ? "bg-violet-600"
-                    : survivalPct > 20
-                      ? "bg-amber-500"
-                      : "bg-brand-red"
-                }`}
-                style={{ width: `${survivalPct}%` }}
-              />
-            </div>
+          <div className="h-1.5 w-full border-t border-black/30 bg-background overflow-hidden">
+            <div
+              className={`h-full transition-all duration-100 ${
+                survivalPct > 45
+                  ? "bg-violet-600"
+                  : survivalPct > 20
+                    ? "bg-amber-500"
+                    : "bg-brand-red"
+              }`}
+              style={{ width: `${survivalPct}%` }}
+            />
           </div>
         )}
+      </header>
 
-        {/* Question Card */}
-        {currentQuestion && (
-          <div className="border-2 border-black bg-card p-4 sm:p-7 shadow-[6px_6px_0_#10100f] space-y-5">
-            <div className="flex flex-wrap items-center justify-between gap-2">
+      {/* Main Arena Body: Always fits remaining viewport height without scrolling */}
+      {currentQuestion && (
+        <main className="mx-auto flex min-h-0 w-full max-w-3xl flex-1 flex-col justify-between gap-2 overflow-hidden p-2.5 sm:gap-3 sm:p-4">
+          {/* Question Badge + Prompt */}
+          <div className="shrink-0 space-y-1.5 sm:space-y-2">
+            <div className="flex items-center justify-between gap-2">
               <span
-                className={`border border-black px-3 py-1 font-mono text-xs font-black uppercase ${
+                className={`border border-black px-2.5 py-0.5 font-mono text-[10px] sm:text-xs font-black uppercase ${
                   isPairMode
                     ? "bg-signal text-black"
                     : currentQuestion.divisor === 9
@@ -1254,60 +1295,56 @@ export function SisaBagiGameClient({
                 }`}
               >
                 {isPairMode
-                  ? currentQuestion.divisorFilter === "mod9"
-                    ? "PASANGAN SETARA · UJI MOD 9 (1–9)"
-                    : currentQuestion.divisorFilter === "mod11"
-                      ? "PASANGAN SETARA · UJI MOD 11 (0–10)"
-                      : "PASANGAN SETARA · EKOR, MOD 9 & 11"
+                  ? "PASANGAN SETARA · EKOR, MOD 9 & 11"
                   : currentQuestion.divisor === 9
                     ? "SISA BAGI 9 (HASIL 1–9)"
                     : "SISA BAGI 11 (HASIL 0–10)"}
               </span>
 
-              <span className="border border-black bg-secondary px-2.5 py-1 font-mono text-[11px] font-bold uppercase">
-                Level: {currentQuestion.digitLevel}
+              <span className="border border-black bg-secondary px-2 py-0.5 font-mono text-[10px] sm:text-[11px] font-bold uppercase">
+                {currentQuestion.digitLevel}
               </span>
             </div>
 
-            <div className="space-y-1.5">
-              {isPairMode ? (
-                <>
-                  <h2 className="text-xl sm:text-2xl font-black tracking-tight">
+            {isPairMode ? (
+              <div>
+                <h2 className="text-base sm:text-xl font-black leading-tight tracking-tight">
+                  {currentQuestion.prompt}
+                </h2>
+                <p className="mt-0.5 flex items-center gap-1 text-[11px] sm:text-xs text-muted-foreground">
+                  <HelpCircle className="size-3.5 shrink-0" />
+                  <span className="truncate">{currentQuestion.subPrompt}</span>
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-1.5">
+                <p className="text-[11px] sm:text-xs text-muted-foreground">
+                  {currentQuestion.subPrompt}
+                </p>
+                <div className="border-2 border-black bg-warm-white py-2.5 px-3 sm:py-4 sm:px-5 text-center shadow-[3px_3px_0_#10100f]">
+                  <div className="font-mono text-2xl sm:text-4xl font-black tracking-tight text-foreground">
                     {currentQuestion.prompt}
-                  </h2>
-                  <p className="text-xs sm:text-sm text-muted-foreground flex items-center gap-1.5">
-                    <HelpCircle className="size-3.5 shrink-0" />
-                    {currentQuestion.subPrompt}
-                  </p>
-                </>
-              ) : (
-                <>
-                  <p className="text-xs sm:text-sm text-muted-foreground">
-                    {currentQuestion.subPrompt}
-                  </p>
-                  <div className="border-2 border-black bg-warm-white p-5 sm:p-7 text-center">
-                    <div className="font-mono text-3xl sm:text-5xl font-black tracking-tight text-foreground">
-                      {currentQuestion.prompt}
-                    </div>
                   </div>
-                </>
-              )}
-            </div>
+                </div>
+              </div>
+            )}
+          </div>
 
-            {/* Answer Controls */}
+          {/* Options or Keypad */}
+          <div className="flex min-h-0 flex-1 flex-col justify-center">
             {isPairMode || hitungInputStyle === "options" ? (
-              <div className="grid gap-2.5">
+              <div className="grid h-full max-h-[340px] sm:max-h-[390px] grid-rows-5 gap-1.5 sm:gap-2">
                 {currentQuestion.options.map((opt, idx) => {
                   const isSelected = selectedOption === opt;
                   const isRight = opt === currentQuestion.correctAnswer;
                   const analysis = currentQuestion.pairAnalyses?.[idx];
                   const badge =
                     analysis && isAnswerRevealed
-                      ? ELIMINATION_BADGE[analysis.eliminationReason]
+                      ? formatInlineElimination(analysis)
                       : null;
 
                   let cardCls =
-                    "border-2 border-black bg-warm-white hover:bg-secondary text-foreground";
+                    "border-2 border-black bg-warm-white hover:bg-secondary text-foreground shadow-[2px_2px_0_#10100f]";
                   if (isAnswerRevealed) {
                     if (isRight) {
                       cardCls =
@@ -1326,30 +1363,30 @@ export function SisaBagiGameClient({
                       type="button"
                       disabled={isAnswerRevealed}
                       onClick={() => handleAnswer(opt)}
-                      className={`w-full p-3.5 sm:p-4 text-left transition-all flex flex-wrap items-center justify-between gap-2 ${cardCls}`}
+                      className={`flex h-full min-h-0 w-full items-center justify-between gap-2 px-2.5 py-1 text-left transition-all sm:px-3.5 sm:py-1.5 ${cardCls}`}
                     >
-                      <div className="flex items-center gap-3">
-                        <span className="inline-flex size-8 shrink-0 items-center justify-center border-2 border-black bg-background font-mono text-xs font-black text-black">
+                      <div className="flex min-w-0 items-center gap-2 sm:gap-3">
+                        <span className="inline-flex size-6 sm:size-7 shrink-0 items-center justify-center border-2 border-black bg-background font-mono text-[11px] sm:text-xs font-black text-black">
                           {optionLetters[idx]}
                         </span>
-                        <span className="font-mono text-base sm:text-xl font-black tracking-tight">
+                        <span className="truncate font-mono text-sm sm:text-lg font-black tracking-tight">
                           {opt}
                         </span>
                       </div>
 
-                      <div className="flex items-center gap-2">
+                      <div className="flex shrink-0 items-center gap-1.5">
                         {badge && (
                           <span
-                            className={`border px-2 py-0.5 font-mono text-[10px] font-bold uppercase ${badge.className}`}
+                            className={`border px-1.5 py-0.5 font-mono text-[9px] sm:text-[10px] font-bold uppercase ${badge.className}`}
                           >
                             {badge.label}
                           </span>
                         )}
                         {isAnswerRevealed && isRight && (
-                          <CheckCircle2 className="size-5 shrink-0" />
+                          <CheckCircle2 className="size-4 sm:size-5 shrink-0" />
                         )}
                         {isAnswerRevealed && isSelected && !isRight && (
-                          <X className="size-5 shrink-0" />
+                          <X className="size-4 sm:size-5 shrink-0" />
                         )}
                       </div>
                     </button>
@@ -1357,8 +1394,13 @@ export function SisaBagiGameClient({
                 })}
               </div>
             ) : (
-              /* Direct Keypad: 1-9 for Mod 9, 0-10 for Mod 11 */
-              <div className="grid grid-cols-3 sm:grid-cols-5 gap-2.5">
+              <div
+                className={`grid gap-2 sm:gap-2.5 ${
+                  currentQuestion.divisor === 9
+                    ? "grid-cols-3"
+                    : "grid-cols-4 sm:grid-cols-6"
+                }`}
+              >
                 {keypadNumbers.map((num) => {
                   const val = String(num);
                   const isSelected = selectedOption === val;
@@ -1384,7 +1426,11 @@ export function SisaBagiGameClient({
                       type="button"
                       disabled={isAnswerRevealed}
                       onClick={() => handleAnswer(val)}
-                      className={`h-14 font-mono text-2xl font-black transition-all ${btnCls}`}
+                      className={`font-mono text-xl sm:text-2xl font-black transition-all ${
+                        currentQuestion.divisor === 9
+                          ? "h-12 sm:h-16"
+                          : "h-11 sm:h-14"
+                      } ${btnCls}`}
                     >
                       {val}
                     </button>
@@ -1392,13 +1438,20 @@ export function SisaBagiGameClient({
                 })}
               </div>
             )}
+          </div>
 
-            {/* Reveal Explanation Box */}
-            {isAnswerRevealed && (
-              <div className="border-2 border-black bg-secondary p-4 sm:p-5 space-y-3">
-                <div className="flex flex-wrap items-center justify-between gap-2">
-                  <span
-                    className={`inline-flex items-center gap-1.5 font-mono text-xs font-black uppercase ${
+          {/* Fixed Bottom Strip: Swaps in-place without expanding viewport */}
+          <div className="shrink-0 min-h-[48px] sm:min-h-[54px] border-2 border-black bg-secondary px-2.5 py-1.5 sm:px-3.5 sm:py-2 flex items-center justify-between gap-2">
+            {!isAnswerRevealed ? (
+              <p className="flex items-center gap-1.5 font-mono text-[10px] sm:text-xs text-muted-foreground">
+                <Lightbulb className="size-3.5 shrink-0 text-brand-red" />
+                <span className="line-clamp-2">{currentQuestion.tip}</span>
+              </p>
+            ) : (
+              <>
+                <div className="min-w-0 flex-1">
+                  <div
+                    className={`flex items-center gap-1 font-mono text-[11px] sm:text-xs font-black uppercase ${
                       selectedOption === currentQuestion.correctAnswer
                         ? "text-emerald-700"
                         : "text-brand-red"
@@ -1406,48 +1459,42 @@ export function SisaBagiGameClient({
                   >
                     {selectedOption === currentQuestion.correctAnswer ? (
                       <>
-                        <CheckCircle2 className="size-4" /> Tepat!
+                        <CheckCircle2 className="size-3.5 shrink-0" />
+                        <span>Tepat!</span>
                       </>
                     ) : (
                       <>
-                        <X className="size-4" /> Kurang Tepat — Jawaban:{" "}
-                        {currentQuestion.correctAnswer}
+                        <X className="size-3.5 shrink-0" />
+                        <span className="truncate">
+                          Salah · Jawaban: {currentQuestion.correctAnswer}
+                        </span>
                       </>
                     )}
-                  </span>
-
-                  <Button
-                    type="button"
-                    size="sm"
-                    onClick={() => advanceToNext()}
-                    className="h-9 border-2 border-black bg-black text-signal hover:bg-brand-blue hover:text-white font-mono text-xs font-black uppercase rounded-none"
-                  >
-                    {modeType === "fixed" &&
-                    currentIndex + 1 >= questions.length
-                      ? "Lihat Hasil"
-                      : "Soal Berikutnya"}{" "}
-                    <ArrowRight className="size-3.5 ml-1" />
-                  </Button>
+                  </div>
+                  {!isPairMode && currentQuestion.steps[2] && (
+                    <p className="truncate font-mono text-[10px] sm:text-[11px] text-foreground/85">
+                      {currentQuestion.steps[2]}
+                    </p>
+                  )}
                 </div>
 
-                <div className="space-y-1.5 font-mono text-xs leading-relaxed">
-                  {currentQuestion.steps.map((step, idx) => (
-                    <div
-                      key={idx}
-                      className="border border-black/20 bg-warm-white px-3 py-1.5"
-                    >
-                      {step}
-                    </div>
-                  ))}
-                </div>
-                <p className="text-xs text-muted-foreground italic">
-                  Tips: {currentQuestion.tip}
-                </p>
-              </div>
+                <Button
+                  type="button"
+                  size="sm"
+                  onClick={() => advanceToNext()}
+                  className="h-8 sm:h-9 shrink-0 border-2 border-black bg-black px-2.5 sm:px-3 font-mono text-[11px] font-black uppercase text-signal hover:bg-brand-blue hover:text-white rounded-none"
+                >
+                  {modeType === "fixed" &&
+                  currentIndex + 1 >= questions.length
+                    ? "Hasil"
+                    : "Lanjut"}{" "}
+                  <ArrowRight className="size-3.5 ml-1" />
+                </Button>
+              </>
             )}
           </div>
-        )}
-      </div>
-    </PageFrame>
+        </main>
+      )}
+    </div>
   );
 }
