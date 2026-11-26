@@ -9,7 +9,6 @@ import {
   Clock,
   Flame,
   Heart,
-  HelpCircle,
   Lightbulb,
   Play,
   RotateCcw,
@@ -1311,24 +1310,13 @@ export function SisaBagiGameClient({
             </div>
 
             {isPairMode ? (
-              <div>
-                <h2 className="text-base sm:text-xl font-black leading-tight tracking-tight">
-                  {currentQuestion.prompt}
-                </h2>
-                <p className="mt-0.5 flex items-center gap-1 text-[11px] sm:text-xs text-muted-foreground">
-                  <HelpCircle className="size-3.5 shrink-0" />
-                  <span className="truncate">{currentQuestion.subPrompt}</span>
-                </p>
-              </div>
+              <h2 className="text-base sm:text-xl font-black leading-tight tracking-tight">
+                {currentQuestion.prompt}
+              </h2>
             ) : (
-              <div className="space-y-1.5">
-                <p className="text-[11px] sm:text-xs text-muted-foreground">
-                  {currentQuestion.subPrompt}
-                </p>
-                <div className="border-2 border-black bg-warm-white py-2.5 px-3 sm:py-4 sm:px-5 text-center shadow-[3px_3px_0_#10100f]">
-                  <div className="font-mono text-2xl sm:text-4xl font-black tracking-tight text-foreground">
-                    {currentQuestion.prompt}
-                  </div>
+              <div className="border-2 border-black bg-warm-white py-2.5 px-3 sm:py-4 sm:px-5 text-center shadow-[3px_3px_0_#10100f]">
+                <div className="font-mono text-2xl sm:text-4xl font-black tracking-tight text-foreground">
+                  {currentQuestion.prompt}
                 </div>
               </div>
             )}
@@ -1444,59 +1432,52 @@ export function SisaBagiGameClient({
             )}
           </div>
 
-          {/* Fixed Bottom Strip: Swaps in-place without expanding viewport */}
-          <div className="shrink-0 min-h-[48px] sm:min-h-[54px] border-2 border-black bg-secondary px-2.5 py-1.5 sm:px-3.5 sm:py-2 flex items-center justify-between gap-2">
-            {!isAnswerRevealed ? (
-              <p className="flex items-center gap-1.5 font-mono text-[10px] sm:text-xs text-muted-foreground">
-                <Lightbulb className="size-3.5 shrink-0 text-brand-red" />
-                <span className="line-clamp-2">{currentQuestion.tip}</span>
-              </p>
-            ) : (
-              <>
-                <div className="min-w-0 flex-1">
-                  <div
-                    className={`flex items-center gap-1 font-mono text-[11px] sm:text-xs font-black uppercase ${
-                      selectedOption === currentQuestion.correctAnswer
-                        ? "text-emerald-700"
-                        : "text-brand-red"
-                    }`}
-                  >
-                    {selectedOption === currentQuestion.correctAnswer ? (
-                      <>
-                        <CheckCircle2 className="size-3.5 shrink-0" />
-                        <span>Tepat!</span>
-                      </>
-                    ) : (
-                      <>
-                        <X className="size-3.5 shrink-0" />
-                        <span className="truncate">
-                          Salah · Jawaban: {currentQuestion.correctAnswer}
-                        </span>
-                      </>
-                    )}
-                  </div>
-                  {!isPairMode && currentQuestion.steps[2] && (
-                    <p className="truncate font-mono text-[10px] sm:text-[11px] text-foreground/85">
-                      {currentQuestion.steps[2]}
-                    </p>
+          {/* Bottom Feedback & Next Strip (shown after answering) */}
+          {isAnswerRevealed && (
+            <div className="shrink-0 min-h-[48px] sm:min-h-[54px] border-2 border-black bg-secondary px-2.5 py-1.5 sm:px-3.5 sm:py-2 flex items-center justify-between gap-2">
+              <div className="min-w-0 flex-1">
+                <div
+                  className={`flex items-center gap-1 font-mono text-[11px] sm:text-xs font-black uppercase ${
+                    selectedOption === currentQuestion.correctAnswer
+                      ? "text-emerald-700"
+                      : "text-brand-red"
+                  }`}
+                >
+                  {selectedOption === currentQuestion.correctAnswer ? (
+                    <>
+                      <CheckCircle2 className="size-3.5 shrink-0" />
+                      <span>Tepat!</span>
+                    </>
+                  ) : (
+                    <>
+                      <X className="size-3.5 shrink-0" />
+                      <span className="truncate">
+                        Salah · Jawaban: {currentQuestion.correctAnswer}
+                      </span>
+                    </>
                   )}
                 </div>
+                {!isPairMode && currentQuestion.steps[2] && (
+                  <p className="truncate font-mono text-[10px] sm:text-[11px] text-foreground/85">
+                    {currentQuestion.steps[2]}
+                  </p>
+                )}
+              </div>
 
-                <Button
-                  type="button"
-                  size="sm"
-                  onClick={() => advanceToNext()}
-                  className="h-8 sm:h-9 shrink-0 border-2 border-black bg-black px-2.5 sm:px-3 font-mono text-[11px] font-black uppercase text-signal hover:bg-brand-blue hover:text-white rounded-none"
-                >
-                  {modeType === "fixed" &&
-                  currentIndex + 1 >= questions.length
-                    ? "Hasil"
-                    : "Lanjut"}{" "}
-                  <ArrowRight className="size-3.5 ml-1" />
-                </Button>
-              </>
-            )}
-          </div>
+              <Button
+                type="button"
+                size="sm"
+                onClick={() => advanceToNext()}
+                className="h-8 sm:h-9 shrink-0 border-2 border-black bg-black px-2.5 sm:px-3 font-mono text-[11px] font-black uppercase text-signal hover:bg-brand-blue hover:text-white rounded-none"
+              >
+                {modeType === "fixed" &&
+                currentIndex + 1 >= questions.length
+                  ? "Hasil"
+                  : "Lanjut"}{" "}
+                <ArrowRight className="size-3.5 ml-1" />
+              </Button>
+            </div>
+          )}
         </main>
       )}
     </div>
