@@ -44,15 +44,18 @@ import {
   createDefaultAritmatikaStats,
   createDefaultGameStats,
   createDefaultPerbandinganStats,
+  createDefaultSisaBagiStats,
   readAritmatikaStats,
   readGameStats,
   readPerbandinganStats,
+  readSisaBagiStats,
   updateGameStats,
   type GameStats,
 } from "@/lib/game-storage";
 import { AritmatikaGameClient } from "@/components/aritmatika-game-client";
 import { PerbandinganGameClient } from "@/components/perbandingan-game-client";
 import { SilogismeGameClient } from "@/components/silogisme-game-client";
+import { SisaBagiGameClient } from "@/components/sisa-bagi-game-client";
 
 interface AnswerHistoryItem {
   question: GameQuestion;
@@ -63,8 +66,8 @@ interface AnswerHistoryItem {
 
 export function GameClient() {
   // --- Game Selection State ---
-  // null = Menampilkan Daftar Game (Katalog); "arena-hitung" = Arena Hitung Cepat; "aritmatika-sosial" = Arena Aritmatika Sosial; "perbandingan" = Arena Perbandingan
-  const [activeGame, setActiveGame] = useState<"arena-hitung" | "aritmatika-sosial" | "perbandingan" | "silogisme" | null>(null);
+  // null = Menampilkan Daftar Game (Katalog); "arena-hitung" = Arena Hitung Cepat; "aritmatika-sosial" = Arena Aritmatika Sosial; "perbandingan" = Arena Perbandingan; "sisa-bagi" = Arena Sisa Bagi 9 & 11
+  const [activeGame, setActiveGame] = useState<"arena-hitung" | "aritmatika-sosial" | "perbandingan" | "silogisme" | "sisa-bagi" | null>(null);
 
   // --- Arena Hitung Cepat State ---
   const [category, setCategory] = useState<GameCategory>("mixed");
@@ -78,6 +81,7 @@ export function GameClient() {
   const [stats, setStats] = useState<GameStats>(createDefaultGameStats);
   const [aritmStats, setAritmStats] = useState<GameStats>(createDefaultAritmatikaStats);
   const [propStats, setPropStats] = useState<GameStats>(createDefaultPerbandinganStats);
+  const [sisaBagiStats, setSisaBagiStats] = useState<GameStats>(createDefaultSisaBagiStats);
 
   // Active match data
   const [questions, setQuestions] = useState<GameQuestion[]>([]);
@@ -105,7 +109,7 @@ export function GameClient() {
     const syncFromUrl = () => {
       const params = new URLSearchParams(window.location.search);
       const play = params.get("play");
-      if (play === "arena-hitung" || play === "aritmatika-sosial" || play === "perbandingan" || play === "silogisme") {
+      if (play === "arena-hitung" || play === "aritmatika-sosial" || play === "perbandingan" || play === "silogisme" || play === "sisa-bagi") {
         setActiveGame(play);
       } else {
         setActiveGame(null);
@@ -117,6 +121,7 @@ export function GameClient() {
       setStats(readGameStats());
       setAritmStats(readAritmatikaStats());
       setPropStats(readPerbandinganStats());
+      setSisaBagiStats(readSisaBagiStats());
       setSoundOn(isSoundEnabled());
     }, 0);
 
@@ -127,7 +132,7 @@ export function GameClient() {
     };
   }, []);
 
-  const openGame = (gameId: "arena-hitung" | "aritmatika-sosial" | "perbandingan" | "silogisme") => {
+  const openGame = (gameId: "arena-hitung" | "aritmatika-sosial" | "perbandingan" | "silogisme" | "sisa-bagi") => {
     setActiveGame(gameId);
     if (typeof window !== "undefined") {
       const url = new URL(window.location.href);
@@ -142,6 +147,7 @@ export function GameClient() {
     setStats(readGameStats());
     setAritmStats(readAritmatikaStats());
     setPropStats(readPerbandinganStats());
+    setSisaBagiStats(readSisaBagiStats());
     if (typeof window !== "undefined") {
       const url = new URL(window.location.href);
       url.searchParams.delete("play");
@@ -480,7 +486,7 @@ export function GameClient() {
             <div className="flex items-center gap-2">
               <Gamepad2 className="size-5 text-brand-blue" />
               <span className="font-mono text-xs sm:text-sm font-bold uppercase tracking-wider">
-                4 Game Tersedia · 1 Game Segera Hadir
+                5 Game Tersedia · 1 Game Segera Hadir
               </span>
             </div>
             <div className="flex flex-wrap items-center gap-4 font-mono text-xs">
@@ -492,6 +498,9 @@ export function GameClient() {
               </span>
               <span className="text-muted-foreground">
                 Perbandingan: <strong className="text-cyan-800" suppressHydrationWarning>{propStats.survivalHighScore} PTS</strong>
+              </span>
+              <span className="text-muted-foreground">
+                Sisa Bagi: <strong className="text-violet-700" suppressHydrationWarning>{sisaBagiStats.survivalHighScore} PTS</strong>
               </span>
             </div>
           </div>
@@ -642,7 +651,53 @@ export function GameClient() {
               </div>
               <div className="flex flex-wrap items-center justify-between gap-3 border-t-2 border-black/20 pt-4"><span className="font-mono text-xs">Mulai dari fakta, ikuti panah.</span><Button onClick={() => openGame("silogisme")} className="h-11 border-2 border-black bg-brand-blue px-5 font-mono text-xs font-black uppercase text-white hover:bg-brand-blue-hover">Mainkan <ArrowRight className="ml-1 size-3.5" /></Button></div>
             </div>
-            {/* GAME 5: POLA ANGKA RAHASIA (COMING SOON) */}
+
+            {/* GAME 5: ARENA SISA BAGI 9 & 11 (ACTIVE) */}
+            <div className="border-2 border-black bg-card p-6 sm:p-7 shadow-[6px_6px_0_#10100f] flex flex-col justify-between space-y-6 relative overflow-hidden group hover:translate-x-0.5 hover:translate-y-0.5 transition-transform">
+              <div className="space-y-4">
+                <div className="flex items-center justify-between gap-2 border-b-2 border-black pb-3">
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1 font-mono text-xs font-black uppercase border border-black bg-violet-300 text-black">
+                    <Zap className="size-3.5 fill-current text-violet-950" /> Siap Dimainkan
+                  </span>
+                  <span className="font-mono text-xs font-bold text-violet-700 uppercase">
+                    TIU Uji Bilangan
+                  </span>
+                </div>
+
+                <div className="space-y-2">
+                  <h3 className="text-2xl font-black uppercase tracking-tight flex items-center gap-2">
+                    Arena Sisa Bagi 9 &amp; 11
+                  </h3>
+                  <p className="font-mono text-xs font-bold text-muted-foreground">
+                    Mod 9 (1–9), Mod 11 (0–10) &amp; Pasangan Setara
+                  </p>
+                  <p className="text-sm text-foreground/90 leading-relaxed">
+                    Latih kecepatan menghitung <strong>sisa bagi 9 (1–9)</strong> dan <strong>sisa bagi 11 (0–10)</strong> dari perkalian puluhan–ribuan, serta cari pasangan <strong>A × B = C × D</strong> dari 5 opsi memakai teknik digit terakhir &amp; sisa bagi!
+                  </p>
+                </div>
+              </div>
+
+              <div className="pt-4 border-t-2 border-black/20 flex flex-wrap items-center justify-between gap-3">
+                <div className="font-mono text-xs">
+                  <span className="text-muted-foreground">Rekor: </span>
+                  <span className="font-black text-violet-700" suppressHydrationWarning>{sisaBagiStats.survivalHighScore} PTS</span>
+                  {sisaBagiStats.survivalBestStreak > 0 && (
+                    <span className="text-amber-600 ml-1 font-bold" suppressHydrationWarning>
+                      ({sisaBagiStats.survivalBestStreak}x 🔥)
+                    </span>
+                  )}
+                </div>
+
+                <Button
+                  onClick={() => openGame("sisa-bagi")}
+                  className="h-11 px-5 border-2 border-black bg-violet-600 hover:bg-violet-700 text-white font-mono text-xs font-black uppercase tracking-wider shadow-[3px_3px_0_#10100f]"
+                >
+                  Mainkan <ArrowRight className="size-3.5 ml-1" />
+                </Button>
+              </div>
+            </div>
+
+            {/* GAME 6: POLA ANGKA RAHASIA (COMING SOON) */}
             <div className="border-2 border-black bg-warm-white/60 p-6 sm:p-7 shadow-[4px_4px_0_#10100f] flex flex-col justify-between space-y-6 opacity-85">
               <div className="space-y-4">
                 <div className="flex items-center justify-between gap-2 border-b-2 border-black/30 pb-3">
@@ -684,6 +739,16 @@ export function GameClient() {
   // VIEW 2: ARENA ARITMATIKA SOSIAL (GAMEPLAY)
   // =========================================================================
   if (activeGame === "silogisme") return <SilogismeGameClient onBack={closeGame} />;
+
+  if (activeGame === "sisa-bagi") {
+    return (
+      <SisaBagiGameClient
+        onBack={closeGame}
+        soundOn={soundOn}
+        onToggleSound={toggleSound}
+      />
+    );
+  }
 
   if (activeGame === "aritmatika-sosial") {
     return (
